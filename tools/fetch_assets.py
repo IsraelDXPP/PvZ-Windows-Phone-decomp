@@ -94,10 +94,24 @@ def extract_assets(zip_path, dest_dir):
     print(f"extracted {count} asset files -> {dest_dir}")
 
 
+def pick_vorbis_encoder(ffmpeg):
+    try:
+        out = subprocess.run(
+            [ffmpeg, "-hide_banner", "-encoders"],
+            capture_output=True, text=True).stdout
+    except Exception:
+        return "libvorbis"
+    if "libvorbis" in out:
+        return "libvorbis"
+    return "vorbis"
+
+
 def convert_music(dest_dir):
     ffmpeg = shutil.which("ffmpeg")
     if ffmpeg is None:
         raise RuntimeError("ffmpeg not found on PATH")
+    encoder = pick_vorbis_encoder(ffmpeg)
+    print(f"using audio encoder: {encoder}")
     music = os.path.join(dest_dir, "Content", "music")
     wmas = sorted(f for f in os.listdir(music) if f.endswith(".wma"))
     for wma in wmas:
@@ -109,7 +123,7 @@ def convert_music(dest_dir):
         tmp = src + ".ogg"
         r = subprocess.run(
             [ffmpeg, "-y", "-v", "error", "-i", src,
-             "-c:a", "libvorbis", "-q:a", "4", tmp])
+             "-c:a", encoder, "-q:a", "4", tmp])
         if r.returncode != 0:
             raise RuntimeError(f"ffmpeg failed on {wma}")
         os.replace(tmp, src)
