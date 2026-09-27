@@ -20,7 +20,7 @@ project files included).
 | Linux (x64) | `LAWN.Desktop.csproj` (`-r linux-x64`) | ✅ Publishes (self-contained) |
 | macOS (arm64) | `LAWN.Desktop.csproj` (`-r osx-arm64`) | ✅ Publishes via CI (untested locally) |
 | Android | `LAWN.Android.csproj` | ✅ Builds APK (needs device test) |
-| iOS | `LAWN.iOS.csproj` | ⚠️ Built on CI only (simulator slice, needs Mac + Xcode locally) |
+| iOS | `LAWN.iOS.csproj` | ✅ Device IPA via CI (ad-hoc signed, Full AOT — install on jailbroken phones with TrollStore/Sideloadly; local build needs a Mac + Xcode 26) |
 
 Every push/PR runs all six builds on GitHub Actions
 (`.github/workflows/build.yml`: Windows, Linux, macOS, Android, iOS
@@ -90,8 +90,9 @@ dotnet publish LAWN.Desktop.csproj -c Release -r linux-x64 --self-contained
 # Android (APK in bin/Release/.../com.israeldxpp.pvzdecomp-Signed.apk)
 dotnet build LAWN.Android.csproj -c Release
 
-# iOS (on a Mac)
-dotnet build LAWN.iOS.csproj -c Release
+# iOS device IPA, ad-hoc signed for jailbreak install (TrollStore/Sideloadly).
+# Needs a Mac; CI builds it automatically (see Actions artifacts).
+dotnet publish LAWN.iOS.csproj -c Release -f net9.0-ios -r ios-arm64 -p:BuildIpa=true -p:CodesignKey=-
 ```
 
 Or open `LAWN.sln` in Visual Studio / Rider.

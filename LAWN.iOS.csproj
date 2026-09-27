@@ -3,7 +3,12 @@
     <TargetFramework>net9.0-ios</TargetFramework>
     <SupportedOSPlatformVersion>12.2</SupportedOSPlatformVersion>
     <OutputType>Exe</OutputType>
+    <ApplicationId>com.israeldxpp.pvzdecomp</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.4</ApplicationDisplayVersion>
     <CodesignKey>iPhone Developer</CodesignKey>
+    <!-- Full AOT: no JIT needed, runs on jailbroken phones (TrollStore etc.) -->
+    <RunAOTCompilation>true</RunAOTCompilation>
     <Nullable>disable</Nullable>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
