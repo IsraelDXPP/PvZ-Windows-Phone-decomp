@@ -1,0 +1,35 @@
+# .NET build outputs
+bin/
+obj/
+out/
+publish/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Game assets: extract these yourself from the WP8 XAP (copyrighted + large).
+# See README.md "Game assets" section.
+Content/
+*.xap
+*.xnb
+*.wma
+resources.xml
+todresources.xml
+LawnStrings_*.txt
+Microsoft.Xna.Framework.RuntimeProfile
+Microsoft.Xna.Framework.XlastConfiguration
+
+# Runtime / generated files
+*.log
+localboards.dat
+orig_wma_backup/
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini

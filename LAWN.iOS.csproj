@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-ios</TargetFramework>
+    <SupportedOSPlatformVersion>12.2</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CheckEolTargetFrameworks>false</CheckEolTargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Lawn\**\*.cs;Sexy\**\*.cs;Sexy.TodLib\**\*.cs;Compat\**\*.cs;AtlasResources*.cs;DataArray*.cs;GlobalMembers*.cs;PerfTimer.cs;RandomNumbers.cs;Resources.cs;StringFunctions.cs;UNPACK_INFO.cs" />
+    <Compile Include="Platforms\iOS\Main.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Lawn.Strings.resx" />
+    <BundleResource Include="Content\**\*.*" />
+    <BundleResource Include="resources.xml;todresources.xml;LawnStrings_*.txt" />
+    <InterfaceDefinition Include="Platforms\iOS\LaunchScreen.storyboard" />
+    <BundleResource Include="Platforms\iOS\Default.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.iOS" Version="3.8.1.303" />
+  </ItemGroup>
+</Project>

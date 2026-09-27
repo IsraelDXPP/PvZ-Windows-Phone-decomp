@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-android36</TargetFramework>
+    <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <ApplicationId>com.israeldxpp.pvzdecomp</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.4</ApplicationDisplayVersion>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CheckEolTargetFrameworks>false</CheckEolTargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Lawn\**\*.cs;Sexy\**\*.cs;Sexy.TodLib\**\*.cs;Compat\**\*.cs;AtlasResources*.cs;DataArray*.cs;GlobalMembers*.cs;PerfTimer.cs;RandomNumbers.cs;Resources.cs;StringFunctions.cs;UNPACK_INFO.cs" />
+    <Compile Include="Platforms\Android\MainActivity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Lawn.Strings.resx" />
+    <AndroidAsset Include="Content\**\*.*" />
+    <AndroidAsset Include="resources.xml;todresources.xml;LawnStrings_*.txt" />
+    <AndroidResource Include="Platforms\Android\Resources\**\*.xml" />
+    <AndroidManifest Include="Platforms\Android\AndroidManifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.Android" Version="3.8.1.303" />
+  </ItemGroup>
+</Project>
