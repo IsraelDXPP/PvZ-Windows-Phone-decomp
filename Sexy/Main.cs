@@ -40,40 +40,61 @@ public class Main : Game
 #if ANDROID
 	private static int drawLogCount;
 	private static int updateLogCount;
+	private static int measureLogCount;
 #endif
 
-	// Letterbox: el juego siempre piensa en 800x480; si el backbuffer real
-	// es otro (telefonos), se renderiza a un target 800x480 y se escala.
-	private RenderTarget2D letterboxTarget;
-	private float letterScale = 1f;
+	// Letterbox: el juego siempre piensa en 800x480; en pantallas mayores
+	// se centra un viewport 800x480 (el batch proyecta segun el viewport,
+	// asi sprites y texto caen en el mismo espacio). Sin escalado.
 	private int letterOffX;
 	private int letterOffY;
 
 	private void UpdateLetterbox()
 	{
-		int bbw = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferWidth;
-		int bbh = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferHeight;
+		int bbw = 0;
+		int bbh = 0;
 		try
 		{
-			var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
-			if (gd != null)
-			{
-				bbw = gd.PresentationParameters.BackBufferWidth;
-				bbh = gd.PresentationParameters.BackBufferHeight;
-			}
+			bbw = base.Window.ClientBounds.Width;
+			bbh = base.Window.ClientBounds.Height;
 		}
 		catch
 		{
 		}
+		if (bbw <= 0 || bbh <= 0)
+		{
+			try
+			{
+				var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
+				if (gd != null)
+				{
+					bbw = gd.PresentationParameters.BackBufferWidth;
+					bbh = gd.PresentationParameters.BackBufferHeight;
+				}
+			}
+			catch
+			{
+			}
+		}
 		if (bbw <= 0) bbw = Constants.BOARD_WIDTH;
 		if (bbh <= 0) bbh = Constants.BOARD_HEIGHT;
-		letterScale = Math.Min((float)bbw / Constants.BOARD_WIDTH, (float)bbh / Constants.BOARD_HEIGHT);
-		letterOffX = (int)((bbw - Constants.BOARD_WIDTH * letterScale) / 2f);
-		letterOffY = (int)((bbh - Constants.BOARD_HEIGHT * letterScale) / 2f);
+#if ANDROID
+		if (measureLogCount < 3) { try
+		{
+			float msx = 1f, msy = 1f;
+			var gg = GlobalStaticVars.g;
+			if (gg != null) { msx = gg.mScaleX; msy = gg.mScaleY; }
+			Android.Util.Log.Info("PVZ", $"letterbox win={bbw}x{bbh} off={letterOffX},{letterOffY} gscale={msx},{msy}");
+		} catch { } measureLogCount++; }
+#endif
+		letterOffX = (bbw - Constants.BOARD_WIDTH) / 2;
+		letterOffY = (bbh - Constants.BOARD_HEIGHT) / 2;
+		if (letterOffX < 0) letterOffX = 0;
+		if (letterOffY < 0) letterOffY = 0;
 	}
 
-	private float ScreenToGameX(float x) => (x - letterOffX) / letterScale;
-	private float ScreenToGameY(float y) => (y - letterOffY) / letterScale;
+	private float ScreenToGameX(float x) => x - letterOffX;
+	private float ScreenToGameY(float y) => y - letterOffY;
 
 	public static bool RunWhenLocked
 	{
@@ -340,37 +361,11 @@ public class Main : Game
 		{
 			UpdateLetterbox();
 			var gd = base.GraphicsDevice;
-			bool useLetterbox = letterScale != 1f || letterOffX != 0 || letterOffY != 0;
-			if (useLetterbox)
-			{
-				if (letterboxTarget == null || letterboxTarget.IsDisposed ||
-					letterboxTarget.Width != Constants.BOARD_WIDTH || letterboxTarget.Height != Constants.BOARD_HEIGHT)
-				{
-					letterboxTarget?.Dispose();
-					letterboxTarget = new RenderTarget2D(gd, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT,
-						false, SurfaceFormat.Color, DepthFormat.Depth24);
-				}
-				gd.SetRenderTarget(letterboxTarget);
-				gd.Clear(Color.Black);
-				GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
-				gd.SetRenderTarget(null);
-				gd.Clear(Color.Black);
-				var sb = Sexy.Graphics.gSpriteBatch;
-				if (sb != null)
-				{
-					sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque);
-					sb.Draw(letterboxTarget,
-						new Rectangle(letterOffX, letterOffY,
-							(int)(Constants.BOARD_WIDTH * letterScale), (int)(Constants.BOARD_HEIGHT * letterScale)),
-						Color.White);
-					sb.End();
-				}
-			}
-			else
-			{
-				gd.Clear(Color.Black);
-				GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
-			}
+			// Viewport 800x480 centrado: el batch usa la proyeccion del
+			// viewport, asi todo (sprites y texto) cae en espacio 800x480.
+			gd.Viewport = new Viewport(letterOffX, letterOffY, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+			gd.Clear(Color.Black);
+			GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
 			base.Draw(gameTime);
 		}
 	}

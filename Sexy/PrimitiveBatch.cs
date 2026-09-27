@@ -113,9 +113,11 @@ internal class PrimitiveBatch : IDisposable
 
 	public void SetupMatrices()
 	{
-		basicEffect.View = Matrix.CreateOrthographicOffCenter(0f, device.PresentationParameters.BackBufferWidth, device.PresentationParameters.BackBufferHeight, 0f, 0f, 1f);
-		screenWidth = device.PresentationParameters.BackBufferWidth;
-		screenHeight = device.PresentationParameters.BackBufferHeight;
+		// Viewport (no backbuffer): con letterbox el viewport es el area
+		// de juego 800x480 centrada. En escritorio coinciden.
+		basicEffect.View = Matrix.CreateOrthographicOffCenter(0f, device.Viewport.Width, device.Viewport.Height, 0f, 0f, 1f);
+		screenWidth = device.Viewport.Width;
+		screenHeight = device.Viewport.Height;
 	}
 
 	public void Draw(Image img, TRect destination, TRect source, Color colour, bool extraOffset, bool sourceOffsetsUsed)
