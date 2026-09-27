@@ -153,6 +153,11 @@ jobs:
       - name: Xcode version
         run: |
           ls /Applications | grep -i xcode || true
+          CANDIDATE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$CANDIDATE" ]; then
+            echo "Selecting $CANDIDATE"
+            sudo xcode-select -s "$CANDIDATE/Contents/Developer"
+          fi
           xcodebuild -version || true
       - name: Install ffmpeg
         run: brew list ffmpeg || brew install ffmpeg
