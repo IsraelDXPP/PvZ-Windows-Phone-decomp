@@ -1,0 +1,152 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: 10.0.x
+
+jobs:
+  assets-check:
+    # Validates the asset pipeline (Drive download + music conversion).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Fetch assets
+        run: python3 tools/fetch_assets.py --dest assets_probe
+      - name: Verify assets
+        run: |
+          test -f assets_probe/resources.xml
+          test -f assets_probe/Content/music/day.wma
+          head -c 4 assets_probe/Content/music/day.wma | grep -q OggS
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg if missing
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg -y --no-progress
+          }
+      - name: Fetch assets
+        run: python tools/fetch_assets.py --dest .
+      - name: Build
+        run: dotnet build LAWN.Desktop.csproj -c Release
+      - name: Publish (self-contained)
+        run: dotnet publish LAWN.Desktop.csproj -c Release -r win-x64 --self-contained
+      - name: Upload game
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvz-windows
+          path: bin/Release/net8.0/win-x64/publish/
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Fetch assets
+        run: python3 tools/fetch_assets.py --dest .
+      - name: Publish (self-contained)
+        run: dotnet publish LAWN.Desktop.csproj -c Release -r linux-x64 --self-contained
+      - name: Upload game
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvz-linux
+          path: bin/Release/net8.0/linux-x64/publish/
+
+  macos-desktop:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch assets
+        run: python3 tools/fetch_assets.py --dest .
+      - name: Publish (self-contained)
+        run: dotnet publish LAWN.Desktop.csproj -c Release -r osx-arm64 --self-contained
+      - name: Upload game
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvz-macos
+          path: bin/Release/net8.0/osx-arm64/publish/
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: android-actions/setup-android@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Install Android workload
+        run: dotnet workload install android
+      - name: Fetch assets
+        run: python3 tools/fetch_assets.py --dest .
+      - name: Build APK
+        run: dotnet build LAWN.Android.csproj -c Release
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvz-android
+          path: bin/Release/**/com.israeldxpp.pvzdecomp-Signed.apk
+
+  ios:
+    runs-on: macos-14
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install iOS workload
+        run: dotnet workload install ios
+      - name: Fetch assets
+        run: python3 tools/fetch_assets.py --dest .
+      - name: Build (simulator, ad-hoc signed)
+        run: dotnet build LAWN.iOS.csproj -c Release -f net9.0-ios -r iossimulator-arm64 /p:CodesignKey=-
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvz-ios-simulator
+          path: bin/Release/net9.0-ios/iossimulator-arm64/*.app

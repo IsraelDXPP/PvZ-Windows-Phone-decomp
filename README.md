@@ -1,5 +1,7 @@
 # PvZ Windows Phone — Decompilation + Desktop/Mobile Port
 
+![build](https://github.com/IsraelDXPP/PvZ-Windows-Phone-decomp/actions/workflows/build.yml/badge.svg)
+
 Decompilation of the **Plants vs. Zombies — Windows Phone 7/8 (XNA)** release
 (`LAWN.dll`, managed .NET — no obfuscation), re-targeted to modern .NET 8
 with MonoGame so it builds and runs on **Windows, Linux, Android** (and iOS
@@ -16,8 +18,15 @@ project files included).
 |---|---|---|
 | Windows (x64) | `LAWN.Desktop.csproj` | ✅ Builds, runs windowed 800×480 |
 | Linux (x64) | `LAWN.Desktop.csproj` (`-r linux-x64`) | ✅ Publishes (self-contained) |
+| macOS (arm64) | `LAWN.Desktop.csproj` (`-r osx-arm64`) | ✅ Publishes via CI (untested locally) |
 | Android | `LAWN.Android.csproj` | ✅ Builds APK (needs device test) |
-| iOS | `LAWN.iOS.csproj` | ⚠️ Files only — needs a Mac + Xcode to build |
+| iOS | `LAWN.iOS.csproj` | ⚠️ Built on CI only (simulator slice, needs Mac + Xcode locally) |
+
+Every push/PR runs all six builds on GitHub Actions
+(`.github/workflows/build.yml`: Windows, Linux, macOS, Android, iOS
+simulator + an asset-pipeline check). Release artifacts (game folders,
+APK, iOS `.app`) are uploaded per run. macOS runners bill at 10× minutes,
+so avoid re-running CI gratuitously.
 
 Port fixes vs. the original binary:
 - Windowed mode (was fullscreen-only), resizable window, mouse emulated as touch.
@@ -38,8 +47,16 @@ Port fixes vs. the original binary:
 ## Game assets
 
 The `Content/` folder, `resources.xml`, `todresources.xml` and
-`LawnStrings_*.txt` are **not** in this repo (copyrighted). Extract them
-from the XAP (it's a ZIP) next to the projects:
+`LawnStrings_*.txt` are **not** in this repo (copyrighted). Get them from
+the game bundle — manually from your `.xap` (it's a ZIP), or automatically
+with the included script (downloads the bundle from Google Drive):
+
+```powershell
+python tools/fetch_assets.py --dest .
+```
+
+It extracts `Content/`, the XML/TXT files and converts the music to OGG
+(requires `ffmpeg` on PATH). CI does exactly this on every run.
 
 ```
 LAWN.Desktop.csproj
