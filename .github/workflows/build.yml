@@ -140,7 +140,8 @@ jobs:
   ios:
     # Real device IPA (ios-arm64, Full AOT, ad-hoc signed) — installable on
     # jailbroken phones via TrollStore / Sideloadly (re-sign), no paid cert needed.
-    runs-on: macos-15
+    # NOTE: needs the newest Xcode (26.x); hence macos-latest, not macos-14/15.
+    runs-on: macos-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
