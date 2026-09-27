@@ -353,9 +353,13 @@ internal class SexyAppBase : SexyAppBaseInterface, ButtonListener, DialogListene
 
 	public static void LoadLog(string msg)
 	{
+#if ANDROID
+		try { Android.Util.Log.Info("PVZLOAD", msg); } catch { }
+#endif
 		try
 		{
-			File.AppendAllText("pvz_load.log", DateTime.Now.ToString("HH:mm:ss.fff") + " " + msg + "\r\n");
+			string path = "pvz_load.log";
+			File.AppendAllText(path, DateTime.Now.ToString("HH:mm:ss.fff") + " " + msg + "\r\n");
 		}
 		catch
 		{

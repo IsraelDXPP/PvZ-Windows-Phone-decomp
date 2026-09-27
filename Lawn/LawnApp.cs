@@ -61,6 +61,9 @@ internal class LawnApp : SexyAppBase
 	public string mMod;
 
 	public bool mRegisterResourcesLoaded;
+#if ANDROID
+	private static int updateFramesLogCount;
+#endif
 
 	public bool mTodCheatKeys;
 
@@ -1447,14 +1450,22 @@ internal class LawnApp : SexyAppBase
 		mKilledYetiAndRestarted = false;
 		base.Init();
 		ReadRestoreInfo();
-		if (!mResourceManager.ParseResourcesFile("resources.xml"))
+		bool parsed = mResourceManager.ParseResourcesFile("resources.xml");
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "Init ParseResources=" + parsed); } catch { }
+#endif
+		if (!parsed)
 		{
 			ShowResourceError(true);
 			return;
 		}
 		if (Constants.Language != Constants.LanguageIndex.de)
 		{
-			if (!TodCommon.TodLoadResources("Init"))
+			bool loaded = TodCommon.TodLoadResources("Init");
+#if ANDROID
+			try { Android.Util.Log.Info("PVZ", "Init TodLoadResources=" + loaded); } catch { }
+#endif
+			if (!loaded)
 			{
 				return;
 			}
@@ -1814,6 +1825,9 @@ internal class LawnApp : SexyAppBase
 
 	public override void UpdateFrames()
 	{
+#if ANDROID
+		if (updateFramesLogCount < 5) { try { Android.Util.Log.Info("PVZ", "LawnApp.UpdateFrames " + updateFramesLogCount + " IsLoading=" + LoadingScreen.IsLoading + " widgets=" + mWidgetManager.mWidgets.Count); } catch { } updateFramesLogCount++; }
+#endif
 		if (wantToShowUpdateMessage)
 		{
 			ShowUpdateMessage();

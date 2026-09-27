@@ -39,6 +39,9 @@ internal class TitleScreen : Widget, ButtonListener
 	public int mTitleStateCounter;
 
 	public int mTitleStateDuration;
+#if ANDROID
+	private static int updateLogCount;
+#endif
 
 	public bool mLoaderScreenIsLoaded;
 
@@ -143,6 +146,9 @@ internal class TitleScreen : Widget, ButtonListener
 
 	public override void Update()
 	{
+#if ANDROID
+		if (updateLogCount < 3) { try { Android.Util.Log.Info("PVZ", "TitleScreen.Update " + updateLogCount + " state=" + mTitleState); } catch { } updateLogCount++; }
+#endif
 		base.Update();
 		if (mApp.mShutdown)
 		{

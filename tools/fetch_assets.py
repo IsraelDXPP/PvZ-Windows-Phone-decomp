@@ -106,7 +106,40 @@ def pick_vorbis_encoder(ffmpeg):
     return "vorbis"
 
 
-def convert_music(dest_dir):
+def normalize_asset_case(dest_dir):
+    # The code requests asset files with mixed exact cases ("reanim/blover"
+    # but also "reanim/Zombie_disco", "particles/icetrail") while the XAP
+    # ships its own casing (Windows ignores case, Android APKs don't).
+    # Rename each disk file to the exact case the code requests (unambiguous).
+    import glob as globmod
+    reqs = set()
+    for pat in ["Lawn/*.cs", "Sexy/*.cs", "Sexy.TodLib/*.cs"]:
+        for f in globmod.glob(os.path.join(dest_dir, pat)):
+            t = open(f, encoding="utf-8", errors="replace").read()
+            for m in re.finditer(
+                    r'"((?:reanim|sounds|music|fonts|particles)/[A-Za-z0-9_/]+)"', t):
+                reqs.add(m.group(1) + ".xnb")
+    by_lower = {}
+    for r in reqs:
+        by_lower.setdefault(r.lower(), []).append(r)
+    count = 0
+    for sub in ["reanim", "particles", "sounds", "music", "fonts"]:
+        d = os.path.join(dest_dir, "Content", sub)
+        if not os.path.isdir(d):
+            continue
+        for root, _, files in os.walk(d):
+            for fn in sorted(files):
+                rel = os.path.relpath(os.path.join(root, fn), d)
+                key = (sub + "/" + rel).replace("\\", "/").lower()
+                cands = by_lower.get(key)
+                if cands and len(cands) == 1:
+                    want = cands[0].split("/")[-1]
+                    if fn != want:
+                        os.replace(os.path.join(root, fn),
+                                   os.path.join(root, want))
+                        count += 1
+    if count:
+        print(f"fixed case on {count} asset files")
     ffmpeg = shutil.which("ffmpeg")
     if ffmpeg is None:
         raise RuntimeError("ffmpeg not found on PATH")
@@ -148,6 +181,7 @@ def main():
         if os.path.exists(tmp_zip):
             os.remove(tmp_zip)
     convert_music(args.dest)
+    normalize_reanim_case(args.dest)
     print("assets ready")
 
 

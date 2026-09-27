@@ -37,6 +37,43 @@ public class Main : Game
 
 	private MouseState previousMouseState;
 	private bool mouseDown;
+#if ANDROID
+	private static int drawLogCount;
+	private static int updateLogCount;
+#endif
+
+	// Letterbox: el juego siempre piensa en 800x480; si el backbuffer real
+	// es otro (telefonos), se renderiza a un target 800x480 y se escala.
+	private RenderTarget2D letterboxTarget;
+	private float letterScale = 1f;
+	private int letterOffX;
+	private int letterOffY;
+
+	private void UpdateLetterbox()
+	{
+		int bbw = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferWidth;
+		int bbh = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferHeight;
+		try
+		{
+			var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
+			if (gd != null)
+			{
+				bbw = gd.PresentationParameters.BackBufferWidth;
+				bbh = gd.PresentationParameters.BackBufferHeight;
+			}
+		}
+		catch
+		{
+		}
+		if (bbw <= 0) bbw = Constants.BOARD_WIDTH;
+		if (bbh <= 0) bbh = Constants.BOARD_HEIGHT;
+		letterScale = Math.Min((float)bbw / Constants.BOARD_WIDTH, (float)bbh / Constants.BOARD_HEIGHT);
+		letterOffX = (int)((bbw - Constants.BOARD_WIDTH * letterScale) / 2f);
+		letterOffY = (int)((bbh - Constants.BOARD_HEIGHT * letterScale) / 2f);
+	}
+
+	private float ScreenToGameX(float x) => (x - letterOffX) / letterScale;
+	private float ScreenToGameY(float y) => (y - letterOffY) / letterScale;
 
 	public static bool RunWhenLocked
 	{
@@ -66,6 +103,9 @@ public class Main : Game
 
 	public Main()
 	{
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "Main.ctor"); } catch { }
+#endif
 		SetupTileSchedule();
 		graphics = Graphics.GetNew(this);
 		SetLowMem();
@@ -143,11 +183,26 @@ public class Main : Game
 
 	protected override void LoadContent()
 	{
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "LoadContent start"); } catch { }
+#endif
 		GraphicsState.Init();
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "GraphicsState.Init ok"); } catch { }
+#endif
 		SetupForResolution();
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "SetupForResolution ok"); } catch { }
+#endif
 		GlobalStaticVars.initialize(this);
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "initialize ok"); } catch { }
+#endif
 		GlobalStaticVars.mGlobalContent.LoadSplashScreen();
 		GlobalStaticVars.gSexyAppBase.StartLoadingThread();
+#if ANDROID
+		try { Android.Util.Log.Info("PVZ", "LoadContent done"); } catch { }
+#endif
 	}
 
 	protected override void UnloadContent()
@@ -167,6 +222,14 @@ public class Main : Game
 
 	protected override void Update(GameTime gameTime)
 	{
+#if ANDROID
+		if (updateLogCount < 3) { try { Android.Util.Log.Info("PVZ", "Update frame " + updateLogCount + " active=" + base.IsActive); } catch { } updateLogCount++; }
+#endif
+		mFrameCnt++;
+		if (mFrameCnt % 300 == 0)
+		{
+			SexyAppBase.LoadLog("heartbeat IsActive=" + base.IsActive);
+		}
 		if (!base.IsActive)
 		{
 			return;
@@ -266,14 +329,48 @@ public class Main : Game
 
 	protected override void Draw(GameTime gameTime)
 	{
+#if ANDROID
+		if (drawLogCount < 3) { try { Android.Util.Log.Info("PVZ", "Draw frame " + drawLogCount); } catch { } drawLogCount++; }
+#endif
 		if (newOrientation)
 		{
 			SetupOrientationMatrix(orientationUsed);
 		}
 		lock (ResourceManager.DrawLocker)
 		{
-			base.GraphicsDevice.Clear(Color.Black);
-			GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
+			UpdateLetterbox();
+			var gd = base.GraphicsDevice;
+			bool useLetterbox = letterScale != 1f || letterOffX != 0 || letterOffY != 0;
+			if (useLetterbox)
+			{
+				if (letterboxTarget == null || letterboxTarget.IsDisposed ||
+					letterboxTarget.Width != Constants.BOARD_WIDTH || letterboxTarget.Height != Constants.BOARD_HEIGHT)
+				{
+					letterboxTarget?.Dispose();
+					letterboxTarget = new RenderTarget2D(gd, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT,
+						false, SurfaceFormat.Color, DepthFormat.Depth24);
+				}
+				gd.SetRenderTarget(letterboxTarget);
+				gd.Clear(Color.Black);
+				GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
+				gd.SetRenderTarget(null);
+				gd.Clear(Color.Black);
+				var sb = Sexy.Graphics.gSpriteBatch;
+				if (sb != null)
+				{
+					sb.Begin(SpriteSortMode.Immediate, BlendState.Opaque);
+					sb.Draw(letterboxTarget,
+						new Rectangle(letterOffX, letterOffY,
+							(int)(Constants.BOARD_WIDTH * letterScale), (int)(Constants.BOARD_HEIGHT * letterScale)),
+						Color.White);
+					sb.End();
+				}
+			}
+			else
+			{
+				gd.Clear(Color.Black);
+				GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
+			}
 			base.Draw(gameTime);
 		}
 	}
@@ -295,15 +392,15 @@ public class Main : Game
 		{
 			_Touch touch = new _Touch
 			{
-				location = 
+				location =
 				{
-					mX = item.Position.X,
-					mY = item.Position.Y
+					mX = ScreenToGameX(item.Position.X),
+					mY = ScreenToGameY(item.Position.Y)
 				}
 			};
 			if (item.TryGetPreviousLocation(out var previousLocation))
 			{
-				touch.previousLocation = new CGPoint(previousLocation.Position.X, previousLocation.Position.Y);
+				touch.previousLocation = new CGPoint(ScreenToGameX(previousLocation.Position.X), ScreenToGameY(previousLocation.Position.Y));
 			}
 			else
 			{
@@ -337,14 +434,9 @@ public class Main : Game
 		try
 		{
 			MouseState mouse = Mouse.GetState();
-			int bbW = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferWidth;
-			int bbH = GraphicsState.mGraphicsDeviceManager.PreferredBackBufferHeight;
-			int winW = base.Window.ClientBounds.Width;
-			int winH = base.Window.ClientBounds.Height;
-			float sx = winW > 0 ? (float)bbW / winW : 1f;
-			float sy = winH > 0 ? (float)bbH / winH : 1f;
-			float mx = mouse.X * sx;
-			float my = mouse.Y * sy;
+			UpdateLetterbox();
+			float mx = ScreenToGameX(mouse.X);
+			float my = ScreenToGameY(mouse.Y);
 			bool pressed = mouse.LeftButton == ButtonState.Pressed;
 			bool wasPressed = previousMouseState.LeftButton == ButtonState.Pressed;
 			double ts = gameTime.TotalGameTime.TotalSeconds;
@@ -366,7 +458,7 @@ public class Main : Game
 					_Touch touch = new _Touch
 					{
 						location = new CGPoint(mx, my),
-						previousLocation = new CGPoint(previousMouseState.X * sx, previousMouseState.Y * sy),
+						previousLocation = new CGPoint(ScreenToGameX(previousMouseState.X), ScreenToGameY(previousMouseState.Y)),
 						timestamp = ts
 					};
 					GlobalStaticVars.gSexyAppBase.TouchMoved(touch);
@@ -448,6 +540,13 @@ public class Main : Game
 			Constants.Load480x800();
 			return;
 		}
-		throw new Exception("Unsupported Resolution");
+		// Cualquier otra resolucion (telefonos): se usan los assets 480x800 y
+		// el juego se dibuja con letterbox en Draw(). Antes lanzaba
+		// "Unsupported Resolution" y crasheaba al arrancar.
+		SexyAppBase.LoadLog(string.Format("SetupForResolution fallback: {0}x{1}",
+			graphics.GraphicsDevice.PresentationParameters.BackBufferWidth,
+			graphics.GraphicsDevice.PresentationParameters.BackBufferHeight));
+		AtlasResources.mAtlasResources = new AtlasResources_480x800();
+		Constants.Load480x800();
 	}
 }

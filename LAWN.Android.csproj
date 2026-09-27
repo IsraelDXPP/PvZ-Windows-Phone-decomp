@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AssemblyName>LAWN</AssemblyName>
     <TargetFramework>net9.0-android36</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <OutputType>Exe</OutputType>
@@ -14,6 +15,8 @@
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <CheckEolTargetFrameworks>false</CheckEolTargetFrameworks>
+    <!-- Debug local instalable sin trimmer (el trimmer Release solo corre bien en CI) -->
+    <EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Debug'">true</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Lawn\**\*.cs;Sexy\**\*.cs;Sexy.TodLib\**\*.cs;Compat\**\*.cs;AtlasResources*.cs;DataArray*.cs;GlobalMembers*.cs;PerfTimer.cs;RandomNumbers.cs;Resources.cs;StringFunctions.cs;UNPACK_INFO.cs" />

@@ -1271,7 +1271,7 @@ internal class ResourceManager : IDisposable
 	{
 		Texture2D texture2D = null;
 		GraphicsDevice graphicsDevice = GlobalStaticVars.g.GraphicsDevice;
-		using (Stream stream = TitleContainer.OpenStream("Content\\" + filename + "." + format))
+		using (Stream stream = TitleContainer.OpenStream(("Content/" + filename + "." + format.ToString().ToLowerInvariant()).Replace('\\', '/')))
 		{
 			texture2D = Texture2D.FromStream(graphicsDevice, stream);
 		}
@@ -1388,7 +1388,7 @@ internal class ResourceManager : IDisposable
 			fontRes.mFont = font;
 			return true;
 		}
-		XmlReader xmlReader = XmlReader.Create(TitleContainer.OpenStream(fontRes.mPath));
+		XmlReader xmlReader = XmlReader.Create(TitleContainer.OpenStream(fontRes.mPath.Replace('\\', '/')));
 		xmlReader.Read();
 		while (xmlReader.Read())
 		{

@@ -21,12 +21,15 @@ public class MainActivity : AndroidGameActivity
 
     protected override void OnCreate(Bundle bundle)
     {
+        global::Android.Util.Log.Info("PVZ", "MainActivity.OnCreate");
         base.OnCreate(bundle);
 
         _game = new Sexy.Main();
+        global::Android.Util.Log.Info("PVZ", "Game created");
         _view = _game.Services.GetService(typeof(View)) as View;
 
         SetContentView(_view);
+        global::Android.Util.Log.Info("PVZ", "Game.Run()");
         _game.Run();
     }
 }
