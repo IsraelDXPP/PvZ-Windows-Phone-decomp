@@ -121,9 +121,12 @@ def convert_music(dest_dir):
                 print(f"  skip {wma} (already OGG)")
                 continue
         tmp = src + ".ogg"
-        r = subprocess.run(
-            [ffmpeg, "-y", "-v", "error", "-i", src,
-             "-c:a", encoder, "-q:a", "4", tmp])
+        cmd = [ffmpeg, "-y", "-v", "error", "-i", src,
+               "-c:a", encoder]
+        if encoder == "vorbis":
+            cmd += ["-strict", "-2"]
+        cmd += ["-q:a", "4", tmp]
+        r = subprocess.run(cmd)
         if r.returncode != 0:
             raise RuntimeError(f"ffmpeg failed on {wma}")
         os.replace(tmp, src)
