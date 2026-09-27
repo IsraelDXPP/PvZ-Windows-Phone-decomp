@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Media;
+using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 using Sexy;
 using Sexy.TodLib;
 

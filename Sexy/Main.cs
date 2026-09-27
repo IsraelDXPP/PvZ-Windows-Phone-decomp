@@ -173,7 +173,11 @@ public class Main : Game
 		}
 		if (GlobalStaticVars.gSexyAppBase.WantsToExit)
 		{
+#if IOS
+			GlobalStaticVars.gSexyAppBase.WantsToExit = false;
+#else
 			Exit();
+#endif
 		}
 		HandleInput(gameTime);
 		GlobalStaticVars.gSexyAppBase.UpdateApp();

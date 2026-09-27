@@ -5,6 +5,7 @@ using Microsoft.Phone.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Media;
+using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 using Sexy;
 using Sexy.TodLib;
 

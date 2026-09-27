@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
+using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 
 namespace Sexy;
 
