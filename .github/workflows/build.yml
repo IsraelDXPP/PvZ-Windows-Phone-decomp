@@ -154,7 +154,15 @@ jobs:
       - name: Xcode version
         run: |
           ls /Applications | grep -i xcode || true
-          CANDIDATE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          # The .NET iOS workload demands an EXACT Xcode (currently 26.5),
+          # so prefer it over simply the newest installed one.
+          CANDIDATE=""
+          for v in /Applications/Xcode_26.5.app /Applications/Xcode_26.5.0.app; do
+            if [ -d "$v" ]; then CANDIDATE="$v"; break; fi
+          done
+          if [ -z "$CANDIDATE" ]; then
+            CANDIDATE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          fi
           if [ -n "$CANDIDATE" ]; then
             echo "Selecting $CANDIDATE"
             sudo xcode-select -s "$CANDIDATE/Contents/Developer"
