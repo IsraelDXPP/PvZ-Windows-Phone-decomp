@@ -5,7 +5,7 @@ using Microsoft.Phone.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Media;
-using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
+using XnaMediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 using Sexy;
 using Sexy.TodLib;
 
@@ -1474,9 +1474,9 @@ internal class LawnApp : SexyAppBase
 		}
 		try
 		{
-			if (MediaPlayer.GameHasControl)
+			if (XnaMediaPlayer.GameHasControl)
 			{
-				MediaPlayer.Play(mContentManager.Load<Song>(GlobalStaticVars.GetResourceDir() + "music/crazydave"));
+				XnaMediaPlayer.Play(mContentManager.Load<Song>(GlobalStaticVars.GetResourceDir() + "music/crazydave"));
 			}
 		}
 		catch (Exception)
@@ -1485,9 +1485,9 @@ internal class LawnApp : SexyAppBase
 		if (mPlayerInfo == null)
 		{
 			PlayerInfo anyProfile = mProfileMgr.GetAnyProfile();
-			if (!MediaPlayer.GameHasControl)
+			if (!XnaMediaPlayer.GameHasControl)
 			{
-				anyProfile.mMusicVolume = MediaPlayer.Volume;
+				anyProfile.mMusicVolume = XnaMediaPlayer.Volume;
 			}
 			mPlayerInfo = anyProfile;
 		}

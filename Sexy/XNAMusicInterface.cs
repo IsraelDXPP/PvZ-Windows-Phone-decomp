@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
-using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
+using XnaMediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 
 namespace Sexy;
 
@@ -27,7 +27,7 @@ internal class XNAMusicInterface : MusicInterface
 
 	public XNAMusicInterface(SexyAppBase theApp)
 	{
-		MusicInterface.USER_MUSIC_PLAYING = !MediaPlayer.GameHasControl;
+		MusicInterface.USER_MUSIC_PLAYING = !XnaMediaPlayer.GameHasControl;
 		mEnabled = false;
 		mContent = theApp.mContentManager;
 		mCurrentSong = -1;
@@ -68,7 +68,7 @@ internal class XNAMusicInterface : MusicInterface
 	{
 		try
 		{
-			if (MusicInterface.USER_MUSIC_PLAYING || (theSongid == mCurrentSong && MediaPlayer.State == MediaState.Playing))
+			if (MusicInterface.USER_MUSIC_PLAYING || (theSongid == mCurrentSong && XnaMediaPlayer.State == MediaState.Playing))
 			{
 				return;
 			}
@@ -81,13 +81,13 @@ internal class XNAMusicInterface : MusicInterface
 			Song song = mSongs[theSongid];
 			if (!(song == null))
 			{
-				MediaPlayer.Play(song);
+				XnaMediaPlayer.Play(song);
 				if (!mHasPlayed)
 				{
 					mHasPlayed = true;
 					SetVolume(mFirstPlayVolume);
 				}
-				MediaPlayer.IsRepeating = loop;
+				XnaMediaPlayer.IsRepeating = loop;
 			}
 		}
 		catch (Exception ex)
@@ -105,7 +105,7 @@ internal class XNAMusicInterface : MusicInterface
 		mCurrentSong = -1;
 		try
 		{
-			MediaPlayer.Stop();
+			XnaMediaPlayer.Stop();
 			isStopped = true;
 		}
 		catch (Exception)
@@ -119,7 +119,7 @@ internal class XNAMusicInterface : MusicInterface
 		{
 			if (!MusicInterface.USER_MUSIC_PLAYING)
 			{
-				MediaPlayer.Pause();
+				XnaMediaPlayer.Pause();
 			}
 		}
 		catch (Exception)
@@ -138,7 +138,7 @@ internal class XNAMusicInterface : MusicInterface
 		{
 			if (!isStopped)
 			{
-				MediaPlayer.Resume();
+				XnaMediaPlayer.Resume();
 			}
 		}
 		catch (Exception)
@@ -185,7 +185,7 @@ internal class XNAMusicInterface : MusicInterface
 		bool result = false;
 		try
 		{
-			result = MediaPlayer.State == MediaState.Playing || MediaPlayer.State == MediaState.Paused;
+			result = XnaMediaPlayer.State == MediaState.Playing || XnaMediaPlayer.State == MediaState.Paused;
 		}
 		catch (Exception)
 		{
@@ -206,7 +206,7 @@ internal class XNAMusicInterface : MusicInterface
 		}
 		try
 		{
-			maxVolume = (MediaPlayer.Volume = theVolume * 0.5f);
+			maxVolume = (XnaMediaPlayer.Volume = theVolume * 0.5f);
 		}
 		catch (Exception)
 		{

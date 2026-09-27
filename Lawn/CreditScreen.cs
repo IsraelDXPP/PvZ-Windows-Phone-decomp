@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Media;
-using MediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
+using XnaMediaPlayer = Microsoft.Xna.Framework.Media.MediaPlayer;
 using Sexy;
 using Sexy.TodLib;
 
@@ -353,7 +353,7 @@ internal class CreditScreen : Widget, ButtonListener
 		mMainMenuButton.SetVisible(isVisible: true);
 		if (MusicInterface.USER_MUSIC_PLAYING)
 		{
-			MediaPlayer.Resume();
+			XnaMediaPlayer.Resume();
 		}
 		else
 		{
