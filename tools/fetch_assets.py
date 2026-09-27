@@ -123,6 +123,7 @@ def main():
     args = ap.parse_args()
 
     tmp_zip = os.path.join(args.dest, ".assets_download.zip")
+    os.makedirs(args.dest, exist_ok=True)
     download_drive_file(args.id, tmp_zip)
     try:
         extract_assets(tmp_zip, args.dest)
