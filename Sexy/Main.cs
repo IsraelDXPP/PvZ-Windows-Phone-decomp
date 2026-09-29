@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Lawn;
 using Microsoft.Phone.Info;
@@ -29,6 +30,12 @@ public class Main : Game
 
 	private int mFrameCnt;
 
+	private static int letterboxLogCount;
+
+#if !ANDROID && !IOS
+	private static readonly HashSet<Keys> previousKeys = new HashSet<Keys>();
+#endif
+
 	private static bool startedProfiler;
 
 	private static bool wantToSuppressDraw;
@@ -41,40 +48,70 @@ public class Main : Game
 	private static int drawLogCount;
 	private static int updateLogCount;
 	private static int measureLogCount;
+	private static int touchLogCount;
 #endif
 
 	// Letterbox: el juego siempre piensa en 800x480; en pantallas mayores
-	// se centra un viewport 800x480 (el batch proyecta segun el viewport,
-	// asi sprites y texto caen en el mismo espacio). Sin escalado.
+	// se centra un viewport 800x480. OJO Android: MonoGame recorta
+	// ClientBounds con su propio aspect-fit (ResetClientBounds): con
+	// Preferred 800x480 en display 1600x900 deja ClientBounds=(50,0,1500,900)
+	// y ADEMAS resta ese origen (X,Y) a cada toque en
+	// AndroidTouchEventManager.UpdateTouchPosition. Por eso el touch llegaba
+	// 50px a la izquierda: hay que compensar ese origen.
 	private int letterOffX;
 	private int letterOffY;
+	private int viewOffX;
+	private int viewOffY;
 
 	private void UpdateLetterbox()
 	{
-		int bbw = 0;
-		int bbh = 0;
+		int cbX = 0, cbY = 0, cbW = 0, cbH = 0;
 		try
 		{
-			bbw = base.Window.ClientBounds.Width;
-			bbh = base.Window.ClientBounds.Height;
+			var cb = base.Window.ClientBounds;
+			cbX = cb.X; cbY = cb.Y; cbW = cb.Width; cbH = cb.Height;
 		}
 		catch
 		{
 		}
-		if (bbw <= 0 || bbh <= 0)
+		int ppw = 0;
+		int pph = 0;
+		try
 		{
-			try
+			var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
+			if (gd != null)
 			{
-				var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
-				if (gd != null)
-				{
-					bbw = gd.PresentationParameters.BackBufferWidth;
-					bbh = gd.PresentationParameters.BackBufferHeight;
-				}
+				ppw = gd.PresentationParameters.BackBufferWidth;
+				pph = gd.PresentationParameters.BackBufferHeight;
 			}
-			catch
+		}
+		catch
+		{
+		}
+		// Fuente de tamano: ClientBounds si es valido, si no backbuffer.
+		// (En Android ClientBounds trae el recorte aspect-fit de MonoGame;
+		// en Windows coinciden con el backbuffer y daba igual.)
+		int bbw = (cbW > 0) ? cbW : ppw;
+		int bbh = (cbH > 0) ? cbH : pph;
+		// Forzar el recalculo de la escala tactil de MonoGame en CADA frame.
+		// MonoGame calcula _touchScale = Display / ClientBounds solo dentro
+		// del setter de Display, y lo hace una vez (DeviceReset) cuando
+		// ClientBounds aun puede ser el tamano inicial (ej. MuMu: 1600) y
+		// luego ClientBounds se corrige al surface real (1500) sin que la
+		// escala se recalcule -> queda 1500/1600=0.9375 baked y todo toque X
+		// llega comprimido (~50px a la izquierda en 750). El setter SIEMPRE
+		// recalcula aunque el valor sea el mismo, asi que asignar sin
+		// condicion lo mantiene sincronizado (barato: 2 sets/frame).
+		try
+		{
+			if (bbw > 0 && bbh > 0)
 			{
+				TouchPanel.DisplayWidth = bbw;
+				TouchPanel.DisplayHeight = bbh;
 			}
+		}
+		catch
+		{
 		}
 		if (bbw <= 0) bbw = Constants.BOARD_WIDTH;
 		if (bbh <= 0) bbh = Constants.BOARD_HEIGHT;
@@ -84,13 +121,41 @@ public class Main : Game
 			float msx = 1f, msy = 1f;
 			var gg = GlobalStaticVars.g;
 			if (gg != null) { msx = gg.mScaleX; msy = gg.mScaleY; }
-			Android.Util.Log.Info("PVZ", $"letterbox win={bbw}x{bbh} off={letterOffX},{letterOffY} gscale={msx},{msy}");
+			int tpdw = 0, tpdh = 0;
+			try { tpdw = TouchPanel.DisplayWidth; tpdh = TouchPanel.DisplayHeight; } catch { }
+			Android.Util.Log.Info("PVZ", $"letterbox bb={bbw}x{bbh} pp={ppw}x{pph} client={cbX},{cbY},{cbW}x{cbH} off={letterOffX},{letterOffY} view={viewOffX},{viewOffY} gscale={msx},{msy} touchdisp={tpdw}x{tpdh}");
 		} catch { } measureLogCount++; }
 #endif
-		letterOffX = (bbw - Constants.BOARD_WIDTH) / 2;
-		letterOffY = (bbh - Constants.BOARD_HEIGHT) / 2;
-		if (letterOffX < 0) letterOffX = 0;
-		if (letterOffY < 0) letterOffY = 0;
+		// Offset INTERNO (tamano): el touch raw ya trae restado el origen
+		// (cbX,cbY) por MonoGame, asi que aqui solo se resta lo que sobra por
+		// centrar el 800x480 dentro del area. El viewport de Draw, en cambio,
+		// va en coords absolutas de surface (= vista): incluye el origen.
+		int innerX = (bbw - Constants.BOARD_WIDTH) / 2;
+		int innerY = (bbh - Constants.BOARD_HEIGHT) / 2;
+		if (innerX < 0) innerX = 0;
+		if (innerY < 0) innerY = 0;
+		// cbX/cbY (origen del ClientBounds) SOLO cuenta en Android, donde
+		// MonoGame recorta la surface a ese rect y ademas se lo resta a cada
+		// toque. En Windows ClientBounds.X/Y son la POSICION de la ventana en
+		// el escritorio (p.ej. 560,300), no un origen de cliente: sumarlos
+		// empujaba el viewport fuera del backbuffer y el juego salia en la
+		// esquina inferior derecha. En escritorio el viewport va en coords de
+		// backbuffer, asi que el origen es 0.
+		int baseX = 0;
+		int baseY = 0;
+#if ANDROID
+		baseX = cbX;
+		baseY = cbY;
+#endif
+		letterOffX = innerX;
+		letterOffY = innerY;
+		viewOffX = baseX + innerX;
+		viewOffY = baseY + innerY;
+		if (letterboxLogCount < 6)
+		{
+			letterboxLogCount++;
+			SexyAppBase.LoadLog(string.Format("lb bb={0}x{1} pp={2}x{3} client={4},{5},{6}x{7} inner={8},{9} base={10},{11} view={12},{13} board={14}x{15}", bbw, bbh, ppw, pph, cbX, cbY, cbW, cbH, innerX, innerY, baseX, baseY, viewOffX, viewOffY, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT));
+		}
 	}
 
 	private float ScreenToGameX(float x) => x - letterOffX;
@@ -361,9 +426,10 @@ public class Main : Game
 		{
 			UpdateLetterbox();
 			var gd = base.GraphicsDevice;
-			// Viewport 800x480 centrado: el batch usa la proyeccion del
-			// viewport, asi todo (sprites y texto) cae en espacio 800x480.
-			gd.Viewport = new Viewport(letterOffX, letterOffY, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+			// Viewport 800x480 centrado en coords absolutas de surface: el
+			// batch usa la proyeccion del viewport, asi todo (sprites y
+			// texto) cae en espacio 800x480.
+			gd.Viewport = new Viewport(viewOffX, viewOffY, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
 			gd.Clear(Color.Black);
 			GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
 			base.Draw(gameTime);
@@ -376,6 +442,10 @@ public class Main : Game
 		{
 			return;
 		}
+		// Refrescar el offset ANTES de mapear (antes solo se actualizaba en
+		// Draw, asi el touch usaba el offset del frame anterior tras
+		// rotar/redimensionar).
+		UpdateLetterbox();
 		GamePadState state = GamePad.GetState(PlayerIndex.One);
 		if (state.Buttons.Back == ButtonState.Pressed && previousGamepadState.Buttons.Back == ButtonState.Released)
 		{
@@ -404,6 +474,9 @@ public class Main : Game
 			touch.timestamp = gameTime.TotalGameTime.TotalSeconds;
 			if (item.State == TouchLocationState.Pressed && !flag)
 			{
+#if ANDROID
+				if (touchLogCount < 30) { try { Android.Util.Log.Info("PVZ", string.Format(System.Globalization.CultureInfo.InvariantCulture, "touch raw={0:F1},{1:F1} game={2:F1},{3:F1} off={4},{5}", item.Position.X, item.Position.Y, touch.location.mX, touch.location.mY, letterOffX, letterOffY)); } catch { } touchLogCount++; }
+#endif
 				GlobalStaticVars.gSexyAppBase.TouchBegan(touch);
 				flag = true;
 			}
@@ -421,17 +494,154 @@ public class Main : Game
 			}
 		}
 		HandleMouseAsTouch(gameTime);
+		HandleKeyboardInput();
 		previousGamepadState = state;
 	}
 
-	private void HandleMouseAsTouch(GameTime gameTime)
+#if !ANDROID && !IOS
+	private static Keys[] keyValues;
+
+	[System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetKeyState")]
+	private static extern short WinGetKeyState(int nVirtKey);
+
+	private static bool IsCapsLockOn()
 	{
 		try
 		{
+			return (WinGetKeyState(20) & 1) != 0;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
+	private static char? KeyToChar(Keys theKey, bool shift, bool capsLock)
+	{
+		int num = (int)theKey;
+		if (num >= (int)Keys.A && num <= (int)Keys.Z)
+		{
+			// Shift ^ BloqMayus: con caps-lock activo las letras entran en
+			// mayuscula aunque no se pulse Shift (antes se ignoraba y todo
+			// quedaba en minuscula).
+			bool upper = shift ^ capsLock;
+			return upper ? (char)num : (char)(num + 32);
+		}
+		if (num >= (int)Keys.D0 && num <= (int)Keys.D9)
+		{
+			return (char)num;
+		}
+		switch (theKey)
+		{
+		case Keys.Space:
+			return ' ';
+		case Keys.OemMinus:
+		case Keys.Subtract:
+			return '-';
+		case Keys.OemPeriod:
+		case Keys.Decimal:
+			return '.';
+		default:
+			return null;
+		}
+	}
+
+	// El port no traia NINGUNA entrada de teclado (nada llamaba a
+	// WidgetManager.KeyDown/KeyChar), asi que ningun dialogo podia
+	// escribirse. Se traduce el teclado de MonoGame a los codigos que el
+	// juego ya espera (KeyCode con valores de VK de Windows) y se enruta
+	// solo al widget con el foco.
+	private void HandleKeyboardInput()
+	{
+		if (GlobalStaticVars.gSexyAppBase == null)
+		{
+			return;
+		}
+		KeyboardState current;
+		try
+		{
+			current = Keyboard.GetState();
+		}
+		catch
+		{
+			return;
+		}
+		if (current == null)
+		{
+			return;
+		}
+		if (keyValues == null)
+		{
+			keyValues = (Keys[])Enum.GetValues(typeof(Keys));
+		}
+		bool shift = current.IsKeyDown(Keys.LeftShift) || current.IsKeyDown(Keys.RightShift);
+		bool capsLock = IsCapsLockOn();
+		foreach (Keys k in keyValues)
+		{
+			if (k == Keys.None)
+			{
+				continue;
+			}
+			bool down = current.IsKeyDown(k);
+			if (down == previousKeys.Contains(k))
+			{
+				continue;
+			}
+			int num = (int)k;
+			if (num <= 0 || num > 255)
+			{
+				previousKeys.Remove(k);
+				continue;
+			}
+			if (!down)
+			{
+				previousKeys.Remove(k);
+				GlobalStaticVars.gSexyAppBase.KeyUp((KeyCode)num);
+				continue;
+			}
+			previousKeys.Add(k);
+			char? c = KeyToChar(k, shift, capsLock);
+			if (c.HasValue)
+			{
+				GlobalStaticVars.gSexyAppBase.KeyChar(new SexyChar(c.Value));
+			}
+			GlobalStaticVars.gSexyAppBase.KeyDown((KeyCode)num);
+		}
+	}
+#endif
+
+	private void HandleMouseAsTouch(GameTime gameTime)
+	{
+#if ANDROID || IOS
+		// En movil el touch ya viene por TouchPanel.GetState (espacio de
+		// backbuffer). Mouse.GetState en Android puede espejar el ultimo touch
+		// con otra escala -> doble TouchBegan fantasma ligeramente desfazado.
+		// Solo escritorio usa el raton como touch.
+		return;
+#else
+		try
+		{
 			MouseState mouse = Mouse.GetState();
-			UpdateLetterbox();
-			float mx = ScreenToGameX(mouse.X);
-			float my = ScreenToGameY(mouse.Y);
+			// El raton viene en coords de ventana (ClientBounds), no de
+			// backbuffer: convertir antes de restar el offset del letterbox
+			// (en Windows normal coinciden, escala 1, sin cambios).
+			float scaleX = 1f, scaleY = 1f;
+			try
+			{
+				int cw = base.Window.ClientBounds.Width;
+				int ch = base.Window.ClientBounds.Height;
+				var gd = GraphicsState.mGraphicsDeviceManager.GraphicsDevice;
+				if (gd != null && cw > 0 && ch > 0)
+				{
+					scaleX = gd.PresentationParameters.BackBufferWidth / (float)cw;
+					scaleY = gd.PresentationParameters.BackBufferHeight / (float)ch;
+				}
+			}
+			catch
+			{
+			}
+			float mx = ScreenToGameX(mouse.X * scaleX);
+			float my = ScreenToGameY(mouse.Y * scaleY);
 			bool pressed = mouse.LeftButton == ButtonState.Pressed;
 			bool wasPressed = previousMouseState.LeftButton == ButtonState.Pressed;
 			double ts = gameTime.TotalGameTime.TotalSeconds;
@@ -453,7 +663,7 @@ public class Main : Game
 					_Touch touch = new _Touch
 					{
 						location = new CGPoint(mx, my),
-						previousLocation = new CGPoint(ScreenToGameX(previousMouseState.X), ScreenToGameY(previousMouseState.Y)),
+						previousLocation = new CGPoint(ScreenToGameX(previousMouseState.X * scaleX), ScreenToGameY(previousMouseState.Y * scaleY)),
 						timestamp = ts
 					};
 					GlobalStaticVars.gSexyAppBase.TouchMoved(touch);
@@ -475,6 +685,7 @@ public class Main : Game
 		catch
 		{
 		}
+#endif
 	}
 
 	protected override void OnActivated(object sender, EventArgs args)

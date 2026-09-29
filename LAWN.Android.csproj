@@ -26,6 +26,7 @@
     <AndroidAsset Include="Content\**\*.*" />
     <AndroidAsset Include="resources.xml;todresources.xml;LawnStrings_*.txt" />
     <AndroidResource Include="Platforms\Android\Resources\**\*.xml" />
+    <AndroidResource Include="Platforms\Android\Resources\**\*.png" />
     <AndroidManifest Include="Platforms\Android\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>

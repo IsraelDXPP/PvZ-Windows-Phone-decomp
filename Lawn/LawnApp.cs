@@ -649,9 +649,24 @@ internal class LawnApp : SexyAppBase
 		KillDialog(29);
 	}
 
+	private string GetSuggestedPlayerName()
+	{
+		string text = Environment.UserName;
+		int backslash = text.LastIndexOf('\\');
+		if (backslash >= 0)
+		{
+			text = text.Substring(backslash + 1);
+		}
+		return text.Trim();
+	}
+
 	public void DoCreateUserDialog(bool isOnlyUser)
 	{
-		FinishCreateUserDialog(isYes: true);
+		KillDialog(30);
+		NewUserDialog newUserDialog = new NewUserDialog(this, allowCancel: !isOnlyUser);
+		newUserDialog.Move(mWidth / 2 - newUserDialog.mWidth / 2, (int)Constants.InvertAndScale(20f));
+		newUserDialog.SetName(GetSuggestedPlayerName());
+		AddDialog(30, newUserDialog);
 	}
 
 	public void DoCheatDialog()
@@ -679,7 +694,9 @@ internal class LawnApp : SexyAppBase
 
 	public void FinishCreateUserDialog(bool isYes)
 	{
-		string text = "coolypf";
+		NewUserDialog newUserDialog = (NewUserDialog)GetDialog(30);
+		string text = (newUserDialog != null) ? newUserDialog.GetName() : string.Empty;
+		text = text.Trim();
 		string theDialogLines = "[ENTER_NEW_USER]";
 		if (isYes && text.empty() && mPlayerInfo != null)
 		{
@@ -696,12 +713,12 @@ internal class LawnApp : SexyAppBase
 			KillDialog(30);
 			return;
 		}
-		PlayerInfo playerInfo = mProfileMgr.AddProfile(text);
-		if (playerInfo == null)
+		if (mProfileMgr.GetProfile(text) != null)
 		{
 			DoDialog(33, isModal: true, "[NAME_CONFLICT]", "[ENTER_UNIQUE_PLAYER_NAME]", "[DIALOG_BUTTON_OK]", 3);
 			return;
 		}
+		PlayerInfo playerInfo = mProfileMgr.AddProfile(text);
 		mProfileMgr.Save();
 		mPlayerInfo = playerInfo;
 		KillDialog(29);
@@ -1357,8 +1374,21 @@ internal class LawnApp : SexyAppBase
 		{
 			num = (int)Constants.InvertAndScale(125f);
 		}
-		int num2 = AtlasResources.IMAGE_DIALOG_TOPLEFT.mWidth + num + AtlasResources.IMAGE_DIALOG_TOPRIGHT.mWidth;
-		lawnDialog.mReanimation.AddReanimation((float)(num2 / 2) - Constants.InvertAndScale(85f), Constants.InvertAndScale(30f), ReanimationType.REANIM_ZOMBIE_NEWSPAPER);
+		// La reanimacion del dialogo suma su posicion dos veces (traslacion
+		// del widget + matriz overlay de la reanim). Para posicionarla de
+		// forma explicita se aparca el widget en el origen y se coloca solo
+		// el overlay una vez conocido el ancho real del dialogo: X centrada
+		// con el texto PAUSA y el boton, Y original debajo del header.
+		lawnDialog.mReanimation.AddReanimation(0f, 0f, ReanimationType.REANIM_ZOMBIE_NEWSPAPER);
+		lawnDialog.mSpaceAfterHeader = (int)Constants.InvertAndScale(65f);
+		lawnDialog.CalcSize((int)Constants.InvertAndScale(20f), (int)Constants.InvertAndScale(10f), num);
+		CenterDialog(lawnDialog, lawnDialog.mWidth, lawnDialog.mHeight);
+		lawnDialog.mReanimation.mPosX = 0f;
+		lawnDialog.mReanimation.mPosY = 0f;
+		// El arte del zombie carga a la derecha de su origen: micro-ajuste
+		// medido para centrarlo visualmente con PAUSA y el boton.
+		lawnDialog.mReanimation.mReanim.SetPosition((float)lawnDialog.mWidth / 2f - 50f, 2f * Constants.InvertAndScale(30f));
+		lawnDialog.Resize(lawnDialog.mX, lawnDialog.mY, lawnDialog.mWidth, lawnDialog.mHeight);
 		lawnDialog.mSpaceAfterHeader = (int)Constants.InvertAndScale(65f);
 		lawnDialog.CalcSize((int)Constants.InvertAndScale(20f), (int)Constants.InvertAndScale(10f), num);
 		CenterDialog(lawnDialog, lawnDialog.mWidth, lawnDialog.mHeight);

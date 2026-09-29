@@ -23,26 +23,50 @@ internal class NewUserDialog : LawnDialog, EditListener
 		mNameEditWidget.mMaxChars = 12;
 		mNameEditWidget.mAcceptsEmptyText = true;
 		mNameEditWidget.SetFont(Resources.FONT_BRIANNETOD16);
-		CalcSize((int)Constants.InvertAndScale(110f), (int)Constants.InvertAndScale(50f));
+		// Alto extra generoso: en el original el campo vivia en el teclado
+		// virtual de la Guide y el dialogo era bajo. Aqui hay que dejar sitio
+		// para el campo de texto Y para los botones de abajo.
+		CalcSize((int)Constants.InvertAndScale(110f), (int)Constants.InvertAndScale(90f));
 	}
 
 	public override int GetPreferredHeight(int theWidth)
 	{
-		return GetPreferredHeight(theWidth) + (int)Constants.InvertAndScale(40f);
+		return base.GetPreferredHeight(theWidth) + (int)Constants.InvertAndScale(40f);
 	}
 
 	public override void Resize(int theX, int theY, int theWidth, int theHeight)
 	{
 		base.Resize(theX, theY, theWidth, theHeight);
-		mNameEditWidget.Resize(mContentInsets.mLeft + (int)Constants.InvertAndScale(12f), (int)Constants.InvertAndScale(mIsRename ? 143 : 170), mWidth - mContentInsets.mLeft - mContentInsets.mRight - (int)Constants.InvertAndScale(24f), (int)Constants.InvertAndScale(28f));
+		// El campo se ancla ENCIMA del boton (nunca se solapa) y se centra en
+		// la misma franja horizontal que los botones: antes usaba solo
+		// mContentInsets y quedaba descentrado respecto al boton ACEPTAR.
+		int fieldH = (int)Constants.InvertAndScale(28f);
+		int gap = (int)Constants.InvertAndScale(12f);
+		int margin = (int)Constants.InvertAndScale(12f);
+		int regionX = mContentInsets.mLeft + mBackgroundInsets.mLeft - (int)Constants.InvertAndScale(5f);
+		int regionW = mWidth - mContentInsets.mLeft - mContentInsets.mRight - mBackgroundInsets.mLeft - mBackgroundInsets.mRight + (int)Constants.InvertAndScale(8f);
+		int fieldW = regionW - margin * 2;
+		int fieldX = regionX + margin;
+		int buttonTop = (mLawnYesButton != null) ? mLawnYesButton.mY : mHeight;
+		// Justo debajo del texto "INTRODUCE TU NOMBRE:", no centrada en el
+		// hueco ni pegada al boton.
+		int freeTop = GetTop() + mLinesFont.GetHeight() + gap;
+		int freeBottom = buttonTop - gap;
+		int fieldY = freeTop;
+		if (fieldY + fieldH > freeBottom)
+		{
+			fieldY = freeBottom - fieldH;
+		}
+		mNameEditWidget.Resize(fieldX, fieldY, fieldW, fieldH);
 	}
 
 	public override void AddedToManager(WidgetManager theWidgetManager)
 	{
+		// Sin esto no se pintan ni el fondo del dialogo ni los botones OK /
+		// Cancel: LawnDialog.AddedToManager es quien los agrega.
+		base.AddedToManager(theWidgetManager);
 		AddWidget(mNameEditWidget);
 		theWidgetManager.SetFocus(mNameEditWidget);
-		RemoveWidget(mLawnNoButton);
-		RemoveWidget(mLawnYesButton);
 	}
 
 	public override void RemovedFromManager(WidgetManager theWidgetManager)
@@ -53,6 +77,8 @@ internal class NewUserDialog : LawnDialog, EditListener
 
 	public override void Draw(Graphics g)
 	{
+		base.Draw(g);
+		LawnCommon.DrawEditBox(g, mNameEditWidget);
 	}
 
 	public override void Update()
@@ -63,11 +89,6 @@ internal class NewUserDialog : LawnDialog, EditListener
 	public virtual void EditWidgetText(int theId, string theString)
 	{
 		mApp.ButtonDepress(2000 + mId + theId);
-	}
-
-	public virtual bool AllowChar(int theId, SexyChar theChar)
-	{
-		return true;
 	}
 
 	public override void Dispose()
@@ -92,12 +113,14 @@ internal class NewUserDialog : LawnDialog, EditListener
 
 	public bool AllowChar(int theId, char theChar)
 	{
-		return false;
+		// El decompile dejo esto en false (residuo del teclado virtual de la
+		// Xbox), con lo que el campo rechazaba cualquier caracter.
+		return theChar >= ' ' && theChar <= '~';
 	}
 
 	public bool AllowText(int theId, ref string theText)
 	{
-		return false;
+		return true;
 	}
 
 	public bool ShouldClear()

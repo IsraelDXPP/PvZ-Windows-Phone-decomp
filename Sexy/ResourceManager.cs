@@ -1282,6 +1282,9 @@ internal class ResourceManager : IDisposable
 		}
 		lock (DrawLocker)
 		{
+#if !ANDROID
+			// En Android GLES el premultiplicado por GPU sale con canales
+			// corruptos (todo rojizo); se usa siempre la ruta CPU de abajo.
 			if (texture2D.Width * texture2D.Height < 4194304)
 			{
 				RenderTarget2D renderTarget2D = null;
@@ -1311,6 +1314,7 @@ internal class ResourceManager : IDisposable
 					renderTarget2D?.Dispose();
 				}
 			}
+#endif
 		}
 		if (!flag)
 		{

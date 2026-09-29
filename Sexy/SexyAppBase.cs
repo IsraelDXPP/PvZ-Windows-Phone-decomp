@@ -738,6 +738,21 @@ internal class SexyAppBase : SexyAppBaseInterface, ButtonListener, DialogListene
 		mWidgetManager.TouchesCanceled();
 	}
 
+	public void KeyDown(KeyCode theKey)
+	{
+		mWidgetManager.KeyDown(theKey);
+	}
+
+	public void KeyUp(KeyCode theKey)
+	{
+		mWidgetManager.KeyUp(theKey);
+	}
+
+	public void KeyChar(SexyChar theChar)
+	{
+		mWidgetManager.KeyChar(theChar);
+	}
+
 	public void ShakeBegan(double timestamp)
 	{
 	}

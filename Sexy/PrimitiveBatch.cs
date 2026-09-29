@@ -252,7 +252,7 @@ internal class PrimitiveBatch : IDisposable
 		{
 			throw new InvalidOperationException("End must be called before Begin can be called again.");
 		}
-		if (screenWidth != device.PresentationParameters.BackBufferWidth || screenHeight != device.PresentationParameters.BackBufferHeight)
+		if (screenWidth != device.Viewport.Width || screenHeight != device.Viewport.Height)
 		{
 			SetupMatrices();
 		}

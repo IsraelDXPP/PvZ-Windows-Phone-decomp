@@ -68,7 +68,7 @@ internal class XNAMusicInterface : MusicInterface
 	{
 		try
 		{
-			if (MusicInterface.USER_MUSIC_PLAYING || (theSongid == mCurrentSong && XnaMediaPlayer.State == MediaState.Playing))
+			if (MusicInterface.USER_MUSIC_PLAYING || (theSongid == mCurrentSong && (XnaMediaPlayer.State == MediaState.Playing || XnaMediaPlayer.State == MediaState.Paused)))
 			{
 				return;
 			}

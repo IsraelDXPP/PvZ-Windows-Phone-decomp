@@ -60,10 +60,7 @@ internal class ReanimationWidget : Widget
 		Debug.ASSERT(mReanim == null);
 		mPosX = x;
 		mPosY = y;
-		// NOTE: la reanimacion se dibuja con la traslacion del widget acumulada
-		// (dialogo + widget), asi que se asigna en (0,0) para no aplicar la
-		// posicion dos veces (antes el zombie salia desfazado a la derecha).
-		mReanim = mApp.mEffectSystem.mReanimationHolder.AllocReanimation(0f, 0f, 0, theReanimationType);
+		mReanim = mApp.mEffectSystem.mReanimationHolder.AllocReanimation(x, y, 0, theReanimationType);
 		mReanim.mLoopType = ReanimLoopType.REANIM_LOOP;
 		mReanim.mIsAttachment = true;
 		if (mReanim.TrackExists(GlobalMembersReanimIds.ReanimTrackId_anim_idle))

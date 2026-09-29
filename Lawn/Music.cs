@@ -26,8 +26,18 @@ internal class Music
 
 	public void MusicTitleScreenInit()
 	{
+		LoadTitleMusic();
+		StartTitleMusic();
+	}
+
+	public void LoadTitleMusic()
+	{
 		LoadSong(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME, "crazydave");
-		PlayMusic(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
+	}
+
+	public void StartTitleMusic()
+	{
+		MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
 	}
 
 	public void MusicInit()

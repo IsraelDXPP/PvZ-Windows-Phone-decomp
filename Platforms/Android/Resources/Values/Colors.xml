@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources>
-  <string name="app_name">PvZ Windows Phone</string>
+  <color name="ic_launcher_background">#03A9D6</color>
 </resources>

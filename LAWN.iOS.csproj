@@ -28,6 +28,7 @@
     <BundleResource Include="resources.xml;todresources.xml;LawnStrings_*.txt" />
     <InterfaceDefinition Include="Platforms\iOS\LaunchScreen.storyboard" />
     <BundleResource Include="Platforms\iOS\Default.png" />
+    <ImageAsset Include="Platforms\iOS\Assets.xcassets\AppIcon.appiconset\Contents.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.iOS" Version="3.8.1.303" />

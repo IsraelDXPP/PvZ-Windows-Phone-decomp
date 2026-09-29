@@ -47,6 +47,10 @@ internal class TitleScreen : Widget, ButtonListener
 
 	public bool mNeedToUnpackAtlas;
 
+	public bool mTitleMusicStarted;
+
+	private static int popcapLogCount;
+
 	public int mNextImageIndex;
 
 	public LawnApp mApp;
@@ -157,7 +161,8 @@ internal class TitleScreen : Widget, ButtonListener
 		MarkDirty();
 		if (mTitleState == TitleState.TITLESTATE_WAITING_FOR_FIRST_DRAW)
 		{
-			mApp.mMusic.MusicTitleScreenInit();
+			Sexy.SexyAppBase.LoadLog("title: WAITING_FOR_FIRST_DRAW -> POPCAP_LOGO, load song only");
+			mApp.mMusic.LoadTitleMusic();
 			mApp.StartLoadingThread();
 			mTitleState = TitleState.TITLESTATE_POPCAP_LOGO;
 			mTitleStateDuration = 200;
@@ -334,6 +339,17 @@ internal class TitleScreen : Widget, ButtonListener
 		base.Draw(g);
 		if (mTitleState == TitleState.TITLESTATE_POPCAP_LOGO)
 		{
+			if (popcapLogCount < 8)
+			{
+				popcapLogCount++;
+				Sexy.SexyAppBase.LoadLog(string.Format("popcap draw n={0} ctr={1} dur={2} logoNull={3} logoW={4}", popcapLogCount, mTitleStateCounter, mTitleStateDuration, Resources.IMAGE_POPCAP_LOGO == null, Resources.IMAGE_POPCAP_LOGO == null ? -1 : Resources.IMAGE_POPCAP_LOGO.mWidth));
+			}
+			if (!mTitleMusicStarted)
+			{
+				mTitleMusicStarted = true;
+				Sexy.SexyAppBase.LoadLog("start title music (popcap draw)");
+				mApp.mMusic.StartTitleMusic();
+			}
 			g.SetColor(SexyColor.Black);
 			g.FillRect(0, 0, mWidth, mHeight);
 			int num = 50;
