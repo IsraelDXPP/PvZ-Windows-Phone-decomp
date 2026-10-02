@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Sexy;
 
 internal class AtlasResources
@@ -5257,6 +5263,162 @@ internal class AtlasResources
 
 	public static Image IMAGE_MINIGAMES_ZOMBOTANY2;
 
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ARM;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_HAND;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER1_1;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER1_2;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER2_1;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER2_2;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER3_1;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER3_2;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER4_1;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_FINGER4_2;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK1;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK2;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK3;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK4;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK5;
+
+	public static Image IMAGE_REANIM_ZOMBIE_HAND_ROCK6;
+
+	public static Image IMAGE_ACHIEVEMENT_BUTTON;
+
+	public static Image IMAGE_ACHIEVEMENT_HIGHLIGHT;
+
+	public static Image IMAGE_ALMANAC_CLOSEBUTTONHIGHLIGHT;
+
+	public static Image IMAGE_ALMANAC_INDEXBACK;
+
+	public static Image IMAGE_ALMANAC_INDEXBUTTON;
+
+	public static Image IMAGE_ALMANAC_INDEXBUTTONHIGHLIGHT;
+
+	public static Image IMAGE_ALMANAC_PLANTBACK;
+
+	public static Image IMAGE_ALMANAC_PLANTCARD;
+
+	public static Image IMAGE_ALMANAC_ZOMBIEBACK;
+
+	public static Image IMAGE_ALMANAC_ZOMBIECARD;
+
+	public static Image IMAGE_AWARDSCREEN_BACK;
+
+	public static Image IMAGE_BACKGROUND1;
+
+	public static Image IMAGE_BACKGROUND2;
+
+	public static Image IMAGE_BACKGROUND6BOSS;
+
+	public static Image IMAGE_BUG_SPRAY;
+
+	public static Image IMAGE_CHALLENGE_BACKGROUND;
+
+	public static Image IMAGE_CHALLENGE_SLIDERSLOT;
+
+	public static Image IMAGE_CHALLENGE_THUMBNAILS;
+
+	public static Image IMAGE_CONSOLE_IMITATERSEED;
+
+	public static Image IMAGE_CONSOLE_SEEDPACKET_LARGER;
+
+	public static Image IMAGE_CONSOLE_SEEDS;
+
+	public static Image IMAGE_CREDITS_ZOMBIENOTE;
+
+	public static Image IMAGE_FERTILIZER;
+
+	public static Image IMAGE_IMITATERSEED;
+
+	public static Image IMAGE_OPTIONS_SLIDERKNOB_PLANT;
+
+	public static Image IMAGE_OPTIONS_SLIDERSLOT_PLANT;
+
+	public static Image IMAGE_PACKET_PLANTS;
+
+	public static Image IMAGE_QUICKPLAY_BUTTON;
+
+	public static Image IMAGE_QUICKPLAY_BUTTON_HIGHLIGHT;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_ALMANAC_SHADOW;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_BUTTON;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_HIGHLIGHT;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_KEY_SHADOW;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_STARTADVENTURE_BUTTON;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_STARTADVENTURE_HIGHLIGHT;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_BUTTON;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_HIGHLIGHT;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_BUTTON;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_WOODSIGN2_PRESS;
+
+	public static Image IMAGE_REANIM_SELECTORSCREEN_WOODSIGN3_PRESS;
+
+	public static Image IMAGE_SEEDCHOOSER_BACKGROUND;
+
+	public static Image IMAGE_SEEDPACKET_LARGER;
+
+	public static Image IMAGE_SEEDS;
+
+	public static Image IMAGE_SELECTORSCREEN_HELP1;
+
+	public static Image IMAGE_SELECTORSCREEN_HELP2;
+
+	public static Image IMAGE_SELECTORSCREEN_QUIT1;
+
+	public static Image IMAGE_SELECTORSCREEN_QUIT2;
+
+	public static Image IMAGE_SELECTORSCREEN_ZENGARDEN;
+
+	public static Image IMAGE_SELECTORSCREEN_ZENGARDENHIGHLIGHT;
+
+	public static Image IMAGE_STORE_PVZICON;
+
+	public static Image IMAGE_STORE_TREEOFWISDOMICON;
+
+	public static Image IMAGE_SURVIVAL_THUMBNAILS;
+
+	public static Image IMAGE_TREEFOOD;
+
+	public static Image IMAGE_WATERINGCAN;
+
+	public static Image IMAGE_WATERINGCANGOLD;
+
+	public static Image IMAGE_ZOMBIE_FINAL_NOTE;
+
+	public static Image IMAGE_ZOMBIE_NOTE;
+
+	public static Image IMAGE_ZOMBIE_NOTE_HELP;
+
+	public static Image IMAGE_ZOMBIE_NOTE1;
+
+	public static Image IMAGE_ZOMBIE_NOTE2;
+
+	public static Image IMAGE_ZOMBIE_NOTE3;
+
+	public static Image IMAGE_ZOMBIE_NOTE4;
+
 	private static AtlasStringTable[] table = new AtlasStringTable[1745]
 	{
 		new AtlasStringTable("IMAGE_REANIM_CRAZYDAVE_BODY1", 10794),
@@ -7006,6 +7168,85 @@ internal class AtlasResources
 		new AtlasStringTable("IMAGE_MINIGAMES_ZOMBOTANY2", 10002)
 	};
 
+	// Carga suelta estilo PvZ normal (sin atlas): devuelve la imagen del mod
+	// correspondiente al perfil activo (Constants.ImageSubPath). Si el archivo
+	// no existe se conserva la version del atlas (fallback durante la migracion).
+	protected static readonly HashSet<string> sLooseMissingLogged = new HashSet<string>();
+
+	protected static void SetLoose(ref Image field, string baseName, int rows, int cols)
+	{
+		try
+		{
+			string rel = null;
+			foreach (string ext in new string[2] { "png", "jpg" })
+			{
+				string cand = ("Content/images" + Constants.ImageSubPath + baseName + "." + ext).Replace('\\', '/');
+				try
+				{
+					using (Stream s = TitleContainer.OpenStream(cand))
+					{
+					}
+					rel = cand;
+					break;
+				}
+				catch
+				{
+				}
+			}
+			if (rel == null)
+			{
+				if (sLooseMissingLogged.Add(baseName))
+				{
+					SexyAppBase.LoadLog("SetLoose sin archivo: " + baseName);
+				}
+				return;
+			}
+			GraphicsDevice gd = GlobalStaticVars.g.GraphicsDevice;
+			Texture2D tex;
+			using (Stream stream = TitleContainer.OpenStream(rel))
+			{
+				tex = Texture2D.FromStream(gd, stream);
+			}
+			Color[] px = new Color[tex.Width * tex.Height];
+			tex.GetData(px);
+			for (int i = 0; i < px.Length; i++)
+			{
+				Color c = px[i];
+				c.R = (byte)((float)(c.R * c.A) / 255f);
+				c.G = (byte)((float)(c.G * c.A) / 255f);
+				c.B = (byte)((float)(c.B * c.A) / 255f);
+				px[i] = c;
+			}
+			if (Main.DO_LOW_MEMORY_OPTIONS)
+			{
+				Texture2D low = new Texture2D(gd, tex.Width, tex.Height, false, SurfaceFormat.Bgra4444);
+				Bgra4444[] px4 = new Bgra4444[px.Length];
+				for (int j = 0; j < px4.Length; j++)
+				{
+					px4[j] = new Bgra4444(px[j].ToVector4());
+				}
+				low.SetData(px4);
+				tex.Dispose();
+				tex = low;
+			}
+			else
+			{
+				tex.SetData(px);
+			}
+			Image img = new Image(tex, 0, 0, tex.Width, tex.Height);
+			img.mNumRows = rows;
+			img.mNumCols = cols;
+			field = img;
+		}
+		catch (Exception ex)
+		{
+			if (sLooseMissingLogged.Add(baseName))
+			{
+				SexyAppBase.LoadLog("SetLoose fallo: " + baseName + " " + ex.Message);
+			}
+		}
+	}
+
 	public void ExtractResources()
 	{
 		UnpackDaveAtlasImages();
@@ -7023,6 +7264,83 @@ internal class AtlasResources
 		UnpackZengardenAtlasImages();
 		UnpackPileAtlasImages();
 		UnpackMiniGamesAtlasImages();
+		UnpackCreditsAtlasImages();
+		UnpackZombieHandAtlasImages();
+	}
+
+	public virtual void UnpackCreditsAtlasImages()
+	{
+		SetLoose(ref Resources.IMAGE_FOG_SOFTWARE, "fog_software", 3, 1);
+		SetLoose(ref Resources.IMAGE_CREDITS_BG, "CreditsBG", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_DISCOLIGHTS, "Credits_DiscoLights", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FOGMACHINE, "Credits_fogmachine", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_BACKGROUND1, "background1", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_BACKGROUND2, "background2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_BACKGROUND3, "background3", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_BACKGROUND4, "background4", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_BACKGROUND5, "background5", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_BIGBRAIN, "Credits_BigBrain_", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_BOX, "Credits_box", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_CIRCLEFADE, "Credits_CircleFade", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_CRAZYDAVE_ROPE, "Credits_CrazyDave_rope", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL1, "Credits_Flower_petal1", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL2, "Credits_Flower_petal2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL3, "Credits_Flower_petal3", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL4, "Credits_Flower_petal4", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL5, "Credits_Flower_petal5", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL6, "Credits_Flower_petal6", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL7, "Credits_Flower_petal7", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_FLOWER_PETAL8, "Credits_Flower_petal8", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_JAW, "Credits_jaw", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_LIGHT_BLUE, "Credits_light_blue", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_LIGHT_RED, "Credits_light_red", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_LIGHT_YELLOW, "Credits_light_yellow", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_LIGHTS, "Credits_lights", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_MIC, "Credits_mic", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_MTV, "Credits_MTV", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_NOZOMBIES, "Credits_nozombies", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_PLATE, "Credits_plate", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_PLATESHADOW, "Credits_plateshadow", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_SADHEART, "Credits_sadheart", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_SADHEART_HAPPY, "Credits_sadheart_happy", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_SPEAKER, "Credits_speaker", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_SPEAKER_OVERLAY, "Credits_speaker_overlay", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_STAGE, "Credits_stage", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_THROAT, "Credits_throat", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_WEARETHEUNDEAD, "Credits_wearetheundead_", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_CREDITS_WHITELINE, "Credits_WhiteLine", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_PLANTSHADOW, "plantshadow", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_PLANTSHADOW2, "plantshadow2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SPOTLIGHT, "spotlight", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SPOTLIGHT2, "spotlight2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_STORE_SPEECHBUBBLE, "Store_SpeechBubble", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_STORE_SPEECHBUBBLE2, "Store_SpeechBubble2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_SING1, "SunFlower_head_sing1", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_SING2, "SunFlower_head_sing2", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_SING3, "SunFlower_head_sing3", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_SING4, "SunFlower_head_sing4", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_SING5, "SunFlower_head_sing5", 1, 1);
+		SetLoose(ref Resources.IMAGE_REANIM_SUNFLOWER_HEAD_WINK, "SunFlower_head_wink", 1, 1);
+	}
+
+	public virtual void UnpackZombieHandAtlasImages()
+	{
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ARM, "Zombie_hand_arm", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_HAND, "Zombie_hand_hand", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER1_1, "Zombie_hand_finger1_1", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER1_2, "Zombie_hand_finger1_2", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER2_1, "Zombie_hand_finger2_1", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER2_2, "Zombie_hand_finger2_2", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER3_1, "Zombie_hand_finger3_1", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER3_2, "Zombie_hand_finger3_2", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER4_1, "Zombie_hand_finger4_1", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_FINGER4_2, "Zombie_hand_finger4_2", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK1, "Zombie_hand_rock1", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK2, "Zombie_hand_rock2", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK3, "Zombie_hand_rock3", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK4, "Zombie_hand_rock4", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK5, "Zombie_hand_rock5", 1, 1);
+		SetLoose(ref IMAGE_REANIM_ZOMBIE_HAND_ROCK6, "Zombie_hand_rock6", 1, 1);
 	}
 
 	public virtual void UnpackDaveAtlasImages()
