@@ -53,6 +53,23 @@ internal class SexyAppBase : SexyAppBaseInterface, ButtonListener, DialogListene
 
 	public WidgetManager mWidgetManager;
 
+	public int mCursorNum;
+
+	public bool mCustomCursor;
+
+	public const int CURSOR_POINTER = 0;
+
+	public const int CURSOR_HAND = 1;
+
+	public const int CURSOR_DRAGGING = 2;
+
+	public const int CURSOR_NONE = 11;
+
+	public void SetCursor(int theCursorNum)
+	{
+		mCursorNum = theCursorNum;
+	}
+
 	public ResourceManager mResourceManager;
 
 	public ContentManager mContentManager;
@@ -289,6 +306,18 @@ internal class SexyAppBase : SexyAppBaseInterface, ButtonListener, DialogListene
 			return mIntProperties[theId];
 		}
 		return theDefault;
+	}
+
+	public bool GetBoolean(string theId, bool theDefault)
+	{
+		return GetInteger(theId, theDefault ? 1 : 0) != 0;
+	}
+
+	public bool mIs3dAccel = true;
+
+	public void Set3DAcclerated(bool is3D)
+	{
+		mIs3dAccel = is3D;
 	}
 
 	public void SetDouble(string theId, double theValue)

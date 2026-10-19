@@ -148,51 +148,51 @@ internal class Coin : GameObject
 		}
 		if (mType == CoinType.COIN_FINAL_SEED_PACKET)
 		{
-			mWidth = AtlasResources.IMAGE_SEEDPACKETS.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_SEEDPACKETS.GetCelHeight();
+			mWidth = Resources.IMAGE_SEEDPACKETS.GetCelWidth();
+			mHeight = Resources.IMAGE_SEEDPACKETS.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 			LoadSeedPacketImage(GetFinalSeedPacketType());
 		}
 		else if (mType == CoinType.COIN_TROPHY)
 		{
-			mWidth = AtlasResources.IMAGE_TROPHY.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_TROPHY.GetCelHeight();
+			mWidth = Resources.IMAGE_TROPHY.GetCelWidth();
+			mHeight = Resources.IMAGE_TROPHY.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_SHOVEL)
 		{
-			mWidth = AtlasResources.IMAGE_SHOVEL.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_SHOVEL.GetCelHeight();
+			mWidth = Resources.IMAGE_SHOVEL.GetCelWidth();
+			mHeight = Resources.IMAGE_SHOVEL.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_CARKEYS)
 		{
-			mWidth = AtlasResources.IMAGE_CARKEYS.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_CARKEYS.GetCelHeight();
+			mWidth = Resources.IMAGE_CARKEYS.GetCelWidth();
+			mHeight = Resources.IMAGE_CARKEYS.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_ALMANAC)
 		{
-			mWidth = AtlasResources.IMAGE_ALMANAC.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_ALMANAC.GetCelHeight();
+			mWidth = Resources.IMAGE_ALMANAC.GetCelWidth();
+			mHeight = Resources.IMAGE_ALMANAC.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_WATERING_CAN)
 		{
-			mWidth = AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1.GetCelHeight();
+			mWidth = Resources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1.GetCelWidth();
+			mHeight = Resources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_TACO)
 		{
-			mWidth = AtlasResources.IMAGE_TACO.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_TACO.GetCelHeight();
+			mWidth = Resources.IMAGE_TACO.GetCelWidth();
+			mHeight = Resources.IMAGE_TACO.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_BACON)
 		{
-			mWidth = AtlasResources.IMAGE_BACON.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_BACON.GetCelHeight();
+			mWidth = Resources.IMAGE_BACON.GetCelWidth();
+			mHeight = Resources.IMAGE_BACON.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_NOTE)
@@ -203,14 +203,14 @@ internal class Coin : GameObject
 		}
 		else if (mType == CoinType.COIN_USABLE_SEED_PACKET)
 		{
-			mWidth = AtlasResources.IMAGE_SEEDPACKETS.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_SEEDPACKETS.GetCelHeight();
+			mWidth = Resources.IMAGE_SEEDPACKETS.GetCelWidth();
+			mHeight = Resources.IMAGE_SEEDPACKETS.GetCelHeight();
 			mRenderOrder = 500002;
 		}
 		else if (mType == CoinType.COIN_PRESENT_PLANT)
 		{
-			mWidth = AtlasResources.IMAGE_PRESENT.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_PRESENT.GetCelHeight();
+			mWidth = Resources.IMAGE_PRESENT.GetCelWidth();
+			mHeight = Resources.IMAGE_PRESENT.GetCelHeight();
 			if (mApp.IsSurvivalEndless(mApp.mGameMode) || mApp.IsEndlessIZombie(mApp.mGameMode) || mApp.IsEndlessScaryPotter(mApp.mGameMode))
 			{
 				SeedType theSeedType = mApp.mZenGarden.PickRandomSeedType();
@@ -254,20 +254,20 @@ internal class Coin : GameObject
 		}
 		else if (mType == CoinType.COIN_AWARD_MONEY_BAG || mType == CoinType.COIN_AWARD_BAG_DIAMOND)
 		{
-			mWidth = AtlasResources.IMAGE_MONEYBAG_HI_RES.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_MONEYBAG_HI_RES.GetCelHeight();
+			mWidth = Resources.IMAGE_MONEYBAG_HI_RES.GetCelWidth();
+			mHeight = Resources.IMAGE_MONEYBAG_HI_RES.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (mType == CoinType.COIN_CHOCOLATE || mType == CoinType.COIN_AWARD_CHOCOLATE)
 		{
-			mWidth = AtlasResources.IMAGE_CHOCOLATE.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_CHOCOLATE.GetCelHeight();
+			mWidth = Resources.IMAGE_CHOCOLATE.GetCelWidth();
+			mHeight = Resources.IMAGE_CHOCOLATE.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		else if (IsPresentWithAdvice())
 		{
-			mWidth = AtlasResources.IMAGE_PRESENT.GetCelWidth();
-			mHeight = AtlasResources.IMAGE_PRESENT.GetCelHeight();
+			mWidth = Resources.IMAGE_PRESENT.GetCelWidth();
+			mHeight = Resources.IMAGE_PRESENT.GetCelHeight();
 			mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_ABOVE_UI, 0, 0);
 		}
 		mWidth = (int)((float)mWidth * Constants.IS);
@@ -462,25 +462,25 @@ internal class Coin : GameObject
 		if (mType == CoinType.COIN_DIAMOND)
 		{
 			g.SetColorizeImages(colorizeImages: true);
-			g.DrawImage(AtlasResources.IMAGE_AWARDPICKUPGLOW, (mPosX - 56f) * Constants.S, (mPosY - 66f) * Constants.S);
+			g.DrawImage(Resources.IMAGE_AWARDPICKUPGLOW, (mPosX - 56f) * Constants.S, (mPosY - 66f) * Constants.S);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		if (mType == CoinType.COIN_PRESENT_PLANT)
 		{
 			g.SetColorizeImages(colorizeImages: true);
-			g.DrawImage(AtlasResources.IMAGE_AWARDPICKUPGLOW, (mPosX - 50f) * Constants.S, (mPosY - 70f) * Constants.S);
+			g.DrawImage(Resources.IMAGE_AWARDPICKUPGLOW, (mPosX - 50f) * Constants.S, (mPosY - 70f) * Constants.S);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		if (mType == CoinType.COIN_AWARD_PRESENT && mIsBeingCollected)
 		{
 			g.SetColorizeImages(colorizeImages: true);
-			g.DrawImage(AtlasResources.IMAGE_AWARDPICKUPGLOW, (mPosX - 50f) * Constants.S, (mPosY - 64f) * Constants.S);
+			g.DrawImage(Resources.IMAGE_AWARDPICKUPGLOW, (mPosX - 50f) * Constants.S, (mPosY - 64f) * Constants.S);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		if (mType == CoinType.COIN_CHOCOLATE || mType == CoinType.COIN_AWARD_CHOCOLATE)
 		{
 			g.SetColorizeImages(colorizeImages: true);
-			g.DrawImage(AtlasResources.IMAGE_AWARDPICKUPGLOW, (mPosX - 56f) * Constants.S, (mPosY - 50f) * Constants.S);
+			g.DrawImage(Resources.IMAGE_AWARDPICKUPGLOW, (mPosX - 56f) * Constants.S, (mPosY - 50f) * Constants.S);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		if (mAttachmentID != null)
@@ -502,7 +502,7 @@ internal class Coin : GameObject
 		if (mType == CoinType.COIN_SILVER || mType == CoinType.COIN_GOLD)
 		{
 			g.SetColorizeImages(colorizeImages: true);
-			TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_REANIM_COINGLOW, (mPosX - (float)Constants.Coin_Glow_Offset.X) * Constants.S, (mPosY - (float)Constants.Coin_Glow_Offset.Y) * Constants.S, mScale, mScale);
+			TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_REANIM_COINGLOW, (mPosX - (float)Constants.Coin_Glow_Offset.X) * Constants.S, (mPosY - (float)Constants.Coin_Glow_Offset.Y) * Constants.S, mScale, mScale);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		Image theImageStrip = null;
@@ -512,13 +512,13 @@ internal class Coin : GameObject
 		float num3 = 0f;
 		if (mType == CoinType.COIN_SILVER)
 		{
-			theImageStrip = AtlasResources.IMAGE_REANIM_COIN_SILVER_DOLLAR;
+			theImageStrip = Resources.IMAGE_REANIM_COIN_SILVER_DOLLAR;
 			num2 = 8f;
 			num3 = 10f;
 		}
 		else if (mType == CoinType.COIN_GOLD)
 		{
-			theImageStrip = AtlasResources.IMAGE_REANIM_COIN_GOLD_DOLLAR;
+			theImageStrip = Resources.IMAGE_REANIM_COIN_GOLD_DOLLAR;
 			num2 = 8f;
 			num3 = 10f;
 		}
@@ -530,7 +530,7 @@ internal class Coin : GameObject
 			}
 			if (mType == CoinType.COIN_FINAL_SEED_PACKET)
 			{
-				TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_SEEDPACKETS, (int)(mPosX * Constants.S), (int)(mPosY * Constants.S), mScale, mScale, (int)LoadedSeedType, doTexelOffset: true);
+				TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_SEEDPACKETS, (int)(mPosX * Constants.S), (int)(mPosY * Constants.S), mScale, mScale, (int)LoadedSeedType, doTexelOffset: true);
 				return;
 			}
 			if (mType == CoinType.COIN_PRESENT_PLANT || mType == CoinType.COIN_AWARD_PRESENT)
@@ -540,7 +540,7 @@ internal class Coin : GameObject
 					mApp.mZenGarden.DrawPottedPlantIcon(g, (mPosX + 35f) * Constants.S, (mPosY + 15f) * Constants.S, mPottedPlantSpec);
 					return;
 				}
-				theImageStrip = AtlasResources.IMAGE_PRESENT;
+				theImageStrip = Resources.IMAGE_PRESENT;
 				num3 = -60f;
 			}
 			else if (IsPresentWithAdvice())
@@ -550,11 +550,11 @@ internal class Coin : GameObject
 				{
 					num2 = -10f;
 					num3 -= -10f;
-					theImageStrip = AtlasResources.IMAGE_PRESENTOPEN;
+					theImageStrip = Resources.IMAGE_PRESENTOPEN;
 				}
 				else
 				{
-					theImageStrip = AtlasResources.IMAGE_PRESENT;
+					theImageStrip = Resources.IMAGE_PRESENT;
 				}
 			}
 			else if (mType == CoinType.COIN_AWARD_MONEY_BAG || mType == CoinType.COIN_AWARD_BAG_DIAMOND)
@@ -563,7 +563,7 @@ internal class Coin : GameObject
 				{
 					return;
 				}
-				theImageStrip = AtlasResources.IMAGE_MONEYBAG_HI_RES;
+				theImageStrip = Resources.IMAGE_MONEYBAG_HI_RES;
 				if (mScale == 1f)
 				{
 					num2 -= (float)(mWidth / 4 + 10);
@@ -573,43 +573,43 @@ internal class Coin : GameObject
 			}
 			else if (mType == CoinType.COIN_CHOCOLATE || mType == CoinType.COIN_AWARD_CHOCOLATE)
 			{
-				theImageStrip = AtlasResources.IMAGE_CHOCOLATE;
+				theImageStrip = Resources.IMAGE_CHOCOLATE;
 			}
 			else if (mType == CoinType.COIN_TROPHY)
 			{
-				theImageStrip = AtlasResources.IMAGE_TROPHY_HI_RES;
+				theImageStrip = Resources.IMAGE_TROPHY_HI_RES;
 				num2 -= (float)(mWidth / 2);
 				num3 -= (float)(mHeight / 2);
 				num *= 0.5f;
 			}
 			else if (mType == CoinType.COIN_SHOVEL)
 			{
-				theImageStrip = AtlasResources.IMAGE_SHOVEL_HI_RES;
+				theImageStrip = Resources.IMAGE_SHOVEL_HI_RES;
 				num2 -= (float)Constants.Coin_Shovel_Offset.X;
 				num3 -= (float)Constants.Coin_Shovel_Offset.Y;
 				num *= 0.5f;
 			}
 			else if (mType == CoinType.COIN_CARKEYS)
 			{
-				theImageStrip = AtlasResources.IMAGE_CARKEYS;
+				theImageStrip = Resources.IMAGE_CARKEYS;
 			}
 			else if (mType == CoinType.COIN_ALMANAC)
 			{
-				theImageStrip = AtlasResources.IMAGE_ALMANAC;
+				theImageStrip = Resources.IMAGE_ALMANAC;
 			}
 			else if (mType == CoinType.COIN_TACO)
 			{
-				theImageStrip = AtlasResources.IMAGE_TACO;
+				theImageStrip = Resources.IMAGE_TACO;
 			}
 			else if (mType == CoinType.COIN_BACON)
 			{
-				theImageStrip = AtlasResources.IMAGE_BACON;
+				theImageStrip = Resources.IMAGE_BACON;
 			}
 			else if (mType == CoinType.COIN_WATERING_CAN)
 			{
 				num2 -= (float)Constants.Coin_Shovel_Offset.X;
 				num3 -= (float)Constants.Coin_Shovel_Offset.Y;
-				theImageStrip = AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1;
+				theImageStrip = Resources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1;
 			}
 			else if (mType == CoinType.COIN_NOTE)
 			{

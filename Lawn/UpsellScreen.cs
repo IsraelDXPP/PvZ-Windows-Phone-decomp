@@ -20,11 +20,11 @@ internal class UpsellScreen : Dialog
 		mBackButton = new NewLawnButton(null, 1001, this);
 		mBackButton.mDoFinger = true;
 		mBackButton.mLabel = "";
-		mBackButton.mButtonImage = AtlasResources.IMAGE_STORE_MAINMENUBUTTON;
-		mBackButton.mDownImage = AtlasResources.IMAGE_STORE_MAINMENUBUTTONDOWN;
+		mBackButton.mButtonImage = Resources.IMAGE_STORE_MAINMENUBUTTON;
+		mBackButton.mDownImage = Resources.IMAGE_STORE_MAINMENUBUTTONDOWN;
 		mBackButton.mColors[0] = new SexyColor(98, 153, 235);
 		mBackButton.mColors[1] = new SexyColor(167, 192, 235);
-		mBackButton.Resize(Constants.StoreScreen_BackButton_X, Constants.StoreScreen_BackButton_Y, AtlasResources.IMAGE_STORE_MAINMENUBUTTON.mWidth, AtlasResources.IMAGE_STORE_MAINMENUBUTTON.mHeight);
+		mBackButton.Resize(Constants.StoreScreen_BackButton_X, Constants.StoreScreen_BackButton_Y, Resources.IMAGE_STORE_MAINMENUBUTTON.mWidth, Resources.IMAGE_STORE_MAINMENUBUTTON.mHeight);
 		mBackButton.mTextOffsetX = -7;
 		mBackButton.mTextOffsetY = 1;
 		mBackButton.mTextDownOffsetX = 2;
@@ -32,12 +32,12 @@ internal class UpsellScreen : Dialog
 		mBuyButton = new NewLawnButton(null, 1000, this);
 		mBuyButton.mDoFinger = true;
 		mBuyButton.mLabel = "";
-		mBuyButton.mButtonImage = AtlasResources.IMAGE_STORE_PREVBUTTON;
-		mBuyButton.mOverImage = AtlasResources.IMAGE_STORE_PREVBUTTONHIGHLIGHT;
-		mBuyButton.mDownImage = AtlasResources.IMAGE_STORE_PREVBUTTONHIGHLIGHT;
+		mBuyButton.mButtonImage = Resources.IMAGE_STORE_PREVBUTTON;
+		mBuyButton.mOverImage = Resources.IMAGE_STORE_PREVBUTTONHIGHLIGHT;
+		mBuyButton.mDownImage = Resources.IMAGE_STORE_PREVBUTTONHIGHLIGHT;
 		mBuyButton.mColors[0] = new SexyColor(255, 240, 0);
 		mBuyButton.mColors[1] = new SexyColor(200, 200, 255);
-		mBuyButton.Resize(Constants.StoreScreen_PrevButton_X, Constants.StoreScreen_PrevButton_Y, AtlasResources.IMAGE_STORE_PREVBUTTON.mWidth, AtlasResources.IMAGE_STORE_PREVBUTTON.mHeight);
+		mBuyButton.Resize(Constants.StoreScreen_PrevButton_X, Constants.StoreScreen_PrevButton_Y, Resources.IMAGE_STORE_PREVBUTTON.mWidth, Resources.IMAGE_STORE_PREVBUTTON.mHeight);
 	}
 
 	public override void Dispose()

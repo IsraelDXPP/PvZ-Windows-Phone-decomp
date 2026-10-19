@@ -5,77 +5,82 @@ using Sexy.TodLib;
 
 namespace Lawn;
 
-internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacListener, MiniGamesWidgetListener, QuickPlayWidgetListener
+internal enum SelectorAnimState
 {
-	private enum GameSelectorScreenState
+	SELECTOR_OPEN,
+	SELECTOR_NEW_USER,
+	SELECTOR_SHOW_SIGN,
+	SELECTOR_SUB_MENU,
+	SELECTOR_IDLE
+}
+
+internal class GameSelectorOverlay : Widget
+{
+	public GameSelector mParent;
+
+	public GameSelectorOverlay(GameSelector theGameSelector)
 	{
-		Main,
-		MoreGames,
-		Achievements,
-		QuickPlay
+		mParent = theGameSelector;
+		mMouseVisible = false;
+		mHasAlpha = true;
 	}
 
-	private GameSelectorScreenState state;
+	public override void Draw(Graphics g)
+	{
+		mParent.DrawOverlay(g);
+	}
+}
 
+internal class GameSelector : Widget, ButtonListener, StoreListener, LawnMessageBoxListener
+{
+	public bool mWaitingTrialConfirm;
 	public LawnApp mApp;
 
 	public NewLawnButton mAdventureButton;
 
-	public NewLawnButton mMoreWaysToPlayButton;
+	public NewLawnButton mMinigameButton;
 
-	public NewLawnButton mZenGardenButton;
+	public NewLawnButton mPuzzleButton;
 
 	public NewLawnButton mOptionsButton;
 
-	public DialogButton mStoreButton;
+	public NewLawnButton mQuitButton;
 
-	public DialogButton mAlmanacButton;
+	public NewLawnButton mHelpButton;
 
-	public DialogButton mUnlockGameButton;
+	public NewLawnButton mStoreButton;
 
-	public DialogButton mAchievementsButton;
+	public NewLawnButton mAlmanacButton;
 
-	public DialogButton mMoreGamesButton;
+	public NewLawnButton mZenGardenButton;
 
-	public DialogButton mMoreGamesBackButton;
+	public NewLawnButton mAchievementButton;
 
-	public DialogButton mLeaderboardButton;
+	public NewLawnButton mQuickPlayButton;
 
-	public DialogButton mMiniGamesButton;
+	public NewLawnButton mCreditsButton;
 
-	public DialogButton mVaseBreakerButton;
+	public NewLawnButton mSurvivalButton;
 
-	public DialogButton mIZombieButton;
+	public NewLawnButton mChangeUserButton;
 
-	public DialogButton mMoreWaysBackButton;
+	public Widget mOverlayWidget;
 
-	public int mSelectedQuickplayButtonId;
+	public bool mStartingGame;
 
-	public MoreGamesListWidget mMoreGamesListWidget;
+	public int mStartingGameCounter;
 
-	public ScrollWidget mMoreGamesScrollWidget;
+	public bool mMinigamesLocked;
 
-	public string mLexText = string.Empty;
+	public bool mPuzzleLocked;
 
-	public AchievementsWidget mAchievementsWidget;
-
-	public ScrollWidget mAchievementsScrollWidget;
-
-	public QuickPlayWidget mQuickplayWidget;
-
-	public ScrollWidget mQuickplayScrollWidget;
-
-	public MiniGamesWidget mMiniGamesWidget;
-
-	public ScrollWidget mMiniGamesScrollWidget;
-
-	public bool mQuickplayLocked;
+	public bool mSurvivalLocked;
 
 	public bool mShowStartButton;
 
 	public TodParticleSystem mTrophyParticleID;
 
-	public Reanimation mWoodSignReanimID;
+	public Reanimation mSelectorReanimID;
 
 	public Reanimation[] mCloudReanimID = new Reanimation[6];
 
@@ -83,51 +88,45 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 
 	public Reanimation[] mFlowerReanimID = new Reanimation[3];
 
+	public Reanimation mLeafReanimID;
+
+	public Reanimation mHandReanimID;
+
 	public int mLeafCounter;
 
-	public SelectorSignState mSignState;
-
-	public bool mInUserDialog;
+	public SelectorAnimState mSelectorState;
 
 	public int mLevel;
 
 	public bool mLoading;
 
+	public ToolTipWidget mToolTip;
+
 	public bool mHasTrophy;
 
 	public bool mUnlockSelectorCheat;
 
-	public int mSlideCounter;
+	public bool mDebugText;
 
-	public int mStartX;
+	public bool mDebugKeysEnabled;
 
-	public int mStartY;
+	public int mMovementTimer;
 
-	public int mDestX;
+	public int mCurrentY;
 
-	public int mDestY;
+	public int mDestinationY;
 
-	public bool mNeedToPlayRollIn;
+	public int mCurrentX;
 
-	public int mFadeInCounter;
+	public int mDestinationX;
 
-	private static string cachedWelcomeString;
+	public bool mEnableButtonsTransition;
 
-	private static string cachedWelcomeStringName;
-
-	private string cachedTrophyString = string.Empty;
-
-	private int cachedTrophyStringCount = -1;
-
-	private bool wantToExitFromAchievementsViaBackButton;
-
-	private float woodSignY;
+	public bool mInUserDialog;
 
 	public bool mDoNewGameAfterStore;
 
-	public int mQuickplaySlideCounter;
-
-	public bool mRetractingQuickplay;
+	private static float[,] gFlowerCenter = new float[3, 2] { { 765f, 483f }, { 663f, 455f }, { 701f, 439f } };
 
 	public GameSelector(LawnApp theApp)
 	{
@@ -135,138 +134,269 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		mLevel = 1;
 		mLoading = false;
 		mHasTrophy = false;
-		mDoNewGameAfterStore = false;
+		mToolTip = new ToolTipWidget();
+		mDebugText = false;
+		mDebugKeysEnabled = GlobalStaticVars.gIsPartnerBuild;
 		mInUserDialog = false;
-		mAdventureButton = GameButton.MakeNewButton(100, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT);
-		mAdventureButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AdventureButton_X, 10, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON.mHeight);
+		mDoNewGameAfterStore = false;
+		mMovementTimer = 0;
+		mCurrentY = mY;
+		mDestinationY = mCurrentY;
+		mCurrentX = mX;
+		mDestinationX = mCurrentX;
+		mEnableButtonsTransition = false;
+		mAdventureButton = GameButton.MakeNewButton(100, this, "", null, Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON, Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT, Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT);
+		mAdventureButton.Resize(0, 0, Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON.mWidth, 125);
 		mAdventureButton.mClip = false;
-		mFadeInCounter = 0;
-		mMoreWaysToPlayButton = GameButton.MakeNewButton(101, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_HIGHLIGHT);
-		mMoreWaysToPlayButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_MiniGameButton_X, Constants.GameSelector_MiniGameButton_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS.mHeight);
-		mMoreWaysToPlayButton.mClip = false;
-		mLeaderboardButton = GameButton.MakeNewButton(120, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEADERBOARD, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEADERBOARD_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEADERBOARD_HIGHLIGHT);
-		mLeaderboardButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LeaderboardButton_X, Constants.GameSelector_LeaderboardButton_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEADERBOARD.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEADERBOARD.mHeight);
-		mLeaderboardButton.mClip = false;
-		mZenGardenButton = GameButton.MakeNewButton(124, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ZENGARDEN, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ZENGARDEN_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ZENGARDEN_HIGHLIGHT);
-		mZenGardenButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_ZenGardenButton_X, Constants.GameSelector_ZenGardenButton_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ZENGARDEN.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ZENGARDEN.mHeight);
+		mAdventureButton.mMouseVisible = false;
+		mAdventureButton.mPolygonShape[0] = new SexyVector2(7f, 1f);
+		mAdventureButton.mPolygonShape[1] = new SexyVector2(328f, 30f);
+		mAdventureButton.mPolygonShape[2] = new SexyVector2(314f, 125f);
+		mAdventureButton.mPolygonShape[3] = new SexyVector2(1f, 78f);
+		mAdventureButton.mUsePolygonShape = true;
+		mMinigameButton = GameButton.MakeNewButton(101, this, "", null, Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_BUTTON, Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_HIGHLIGHT, Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_HIGHLIGHT);
+		mMinigameButton.Resize(0, 0, Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_BUTTON.mWidth, 130);
+		mMinigameButton.mClip = false;
+		mMinigameButton.mBtnNoDraw = true;
+		mMinigameButton.mMouseVisible = false;
+		mMinigameButton.mPolygonShape[0] = new SexyVector2(4f, 2f);
+		mMinigameButton.mPolygonShape[1] = new SexyVector2(312f, 51f);
+		mMinigameButton.mPolygonShape[2] = new SexyVector2(296f, 130f);
+		mMinigameButton.mPolygonShape[3] = new SexyVector2(7f, 77f);
+		mMinigameButton.mUsePolygonShape = true;
+		mPuzzleButton = GameButton.MakeNewButton(102, this, "", null, Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_BUTTON, Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_HIGHLIGHT, Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_HIGHLIGHT);
+		mPuzzleButton.Resize(0, 0, Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_BUTTON.mWidth, 121);
+		mPuzzleButton.mClip = false;
+		mPuzzleButton.mBtnNoDraw = true;
+		mPuzzleButton.mMouseVisible = false;
+		mPuzzleButton.mPolygonShape[0] = new SexyVector2(2f, 0f);
+		mPuzzleButton.mPolygonShape[1] = new SexyVector2(281f, 55f);
+		mPuzzleButton.mPolygonShape[2] = new SexyVector2(268f, 121f);
+		mPuzzleButton.mPolygonShape[3] = new SexyVector2(3f, 60f);
+		mPuzzleButton.mUsePolygonShape = true;
+		mSurvivalButton = GameButton.MakeNewButton(110, this, "", null, Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_BUTTON, Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT, Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT);
+		mSurvivalButton.Resize(0, 0, Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_BUTTON.mWidth, 124);
+		mSurvivalButton.mClip = false;
+		mSurvivalButton.mBtnNoDraw = true;
+		mSurvivalButton.mMouseVisible = false;
+		mSurvivalButton.mPolygonShape[0] = new SexyVector2(7f, 1f);
+		mSurvivalButton.mPolygonShape[1] = new SexyVector2(267f, 62f);
+		mSurvivalButton.mPolygonShape[2] = new SexyVector2(257f, 124f);
+		mSurvivalButton.mPolygonShape[3] = new SexyVector2(7f, 57f);
+		mSurvivalButton.mUsePolygonShape = true;
+		mZenGardenButton = GameButton.MakeNewButton(109, this, "", null, Resources.IMAGE_SELECTORSCREEN_ZENGARDEN, Resources.IMAGE_SELECTORSCREEN_ZENGARDENHIGHLIGHT, Resources.IMAGE_SELECTORSCREEN_ZENGARDENHIGHLIGHT);
+		mZenGardenButton.Resize(0, 0, 130, 130);
+		mZenGardenButton.mMouseVisible = false;
 		mZenGardenButton.mClip = false;
-		mOptionsButton = GameButton.MakeNewButton(109, this, "", null, AtlasResources.IMAGE_SELECTORSCREEN_OPTIONS1, AtlasResources.IMAGE_SELECTORSCREEN_OPTIONS2, AtlasResources.IMAGE_SELECTORSCREEN_OPTIONS2);
-		mOptionsButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_OptionsButton_X, Constants.GameSelector_OptionsButton_Y, AtlasResources.IMAGE_SELECTORSCREEN_OPTIONS1.mWidth, AtlasResources.IMAGE_SELECTORSCREEN_OPTIONS1.mHeight + 25);
-		mUnlockGameButton = GameButton.MakeNewButton(113, this, string.Empty, null, AtlasResources.IMAGE_BLANK, AtlasResources.IMAGE_BLANK, AtlasResources.IMAGE_BLANK);
-		mUnlockGameButton.Resize(Constants.MAIN_MENU_ORIGIN_X, (int)Constants.InvertAndScale(100f), (int)Constants.InvertAndScale(210f), (int)Constants.InvertAndScale(30f));
-		mStoreButton = GameButton.MakeNewButton(112, this, "", null, AtlasResources.IMAGE_SELECTORSCREEN_STORE, AtlasResources.IMAGE_SELECTORSCREEN_STOREHIGHLIGHT, AtlasResources.IMAGE_SELECTORSCREEN_STOREHIGHLIGHT);
-		mStoreButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_StoreButton_X, Constants.GameSelector_StoreButton_Y, AtlasResources.IMAGE_SELECTORSCREEN_STORE.mWidth, AtlasResources.IMAGE_SELECTORSCREEN_STORE.mHeight);
-		mAlmanacButton = GameButton.MakeNewButton(114, this, "", null, AtlasResources.IMAGE_SELECTORSCREEN_ALMANAC, AtlasResources.IMAGE_SELECTORSCREEN_ALMANACHIGHLIGHT, AtlasResources.IMAGE_SELECTORSCREEN_ALMANACHIGHLIGHT);
-		mAlmanacButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AlmanacButton_X, Constants.GameSelector_AlmanacButton_Y, AtlasResources.IMAGE_SELECTORSCREEN_ALMANAC.mWidth, AtlasResources.IMAGE_SELECTORSCREEN_ALMANAC.mHeight);
-		mMoreGamesButton = GameButton.MakeNewButton(115, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BUTTON, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_HIGHLIGHT);
-		mMoreGamesButton.Resize(Constants.MAIN_MENU_ORIGIN_X + (int)Constants.InvertAndScale(10f), (int)Constants.InvertAndScale(170f), AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BUTTON.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BUTTON.mHeight);
-		mMoreGamesButton.mTranslateX = 0;
-		mMoreGamesButton.mTranslateY = 0;
-		mMoreGamesBackButton = GameButton.MakeNewButton(116, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BACK_BUTTON, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BACK_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BACK_HIGHLIGHT);
-		mMoreGamesBackButton.Resize(Constants.MAIN_MENU_ORIGIN_X + (int)Constants.InvertAndScale(10f), (int)Constants.InvertAndScale(170f), AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BACK_BUTTON.mWidth, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREGAMES_BACK_BUTTON.mHeight);
-		mMoreGamesBackButton.mVisible = false;
-		mMoreGamesBackButton.mDisabled = true;
-		mMoreGamesBackButton.mTranslateX = 0;
-		mMoreGamesBackButton.mTranslateY = 0;
-		mAchievementsButton = GameButton.MakeNewButton(117, this, "", null, AtlasResources.IMAGE_BLANK, AtlasResources.IMAGE_BLANK, AtlasResources.IMAGE_BLANK);
-		mAchievementsButton.Resize(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AchievementsStatue_X, Constants.GameSelector_AchievementsStatue_Y, Resources.IMAGE_ACHIEVEMENT_GNOME.mWidth, Resources.IMAGE_ACHIEVEMENT_GNOME.mHeight);
-		mMiniGamesButton = GameButton.MakeNewButton(121, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MINIGAMES, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MINIGAMES_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MINIGAMES_HIGHLIGHT);
-		mVaseBreakerButton = GameButton.MakeNewButton(122, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT);
-		mIZombieButton = GameButton.MakeNewButton(123, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_IZOMBIE, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_IZOMBIE_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_IZOMBIE_HIGHLIGHT);
-		mMoreWaysBackButton = GameButton.MakeNewButton(108, this, "", null, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_BACK, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_BACK_HIGHLIGHT, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_BACK_HIGHLIGHT);
-		mMiniGamesButton.Resize(Constants.QUICKPLAY_ORIGIN_X + Constants.GameSelector_MoreWaysToPlay_MiniGames_X, Constants.GameSelector_MoreWaysToPlay_MiniGames_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MINIGAMES.mWidth + 2, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MINIGAMES.mHeight + 2);
-		mVaseBreakerButton.Resize(Constants.QUICKPLAY_ORIGIN_X + Constants.GameSelector_MoreWaysToPlay_VaseBreaker_X, Constants.GameSelector_MoreWaysToPlay_VaseBreaker_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER.mWidth + 2, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER.mHeight + 2);
-		mIZombieButton.Resize(Constants.QUICKPLAY_ORIGIN_X + Constants.GameSelector_MoreWaysToPlay_IZombie_X, Constants.GameSelector_MoreWaysToPlay_IZombie_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_IZOMBIE.mWidth + 2, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_IZOMBIE.mHeight + 2);
-		mMoreWaysBackButton.Resize(Constants.QUICKPLAY_ORIGIN_X + Constants.GameSelector_MoreWaysToPlay_Back_X, Constants.GameSelector_MoreWaysToPlay_Back_Y, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_BACK.mWidth + 2, AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_BACK.mHeight + 2);
-		mMiniGamesButton.mTranslateX = -1;
-		mMoreWaysBackButton.mTranslateX = (mMoreWaysBackButton.mTranslateY = 0);
-		mSelectedQuickplayButtonId = 121;
-		ToggleGameButton(mSelectedQuickplayButtonId);
-		mMoreGamesListWidget = new MoreGamesListWidget(mApp);
-		LoadGames();
-		mMoreGamesListWidget.Resize(0, 0, mMoreGamesListWidget.mWidth, mMoreGamesListWidget.GetPreferredHeight() + (int)Constants.InvertAndScale(20f));
-		mMoreGamesScrollWidget = new ScrollWidget();
-		mMoreGamesScrollWidget.Resize(0, 0, mMoreGamesListWidget.mWidth, Constants.BOARD_HEIGHT);
-		mMoreGamesScrollWidget.AddWidget(mMoreGamesListWidget);
-		mMoreGamesScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		mAchievementsWidget = new AchievementsWidget(mApp);
-		mAchievementsScrollWidget = new ScrollWidget();
-		mAchievementsScrollWidget.EnableBounce(enable: false);
-		mAchievementsScrollWidget.Resize(Constants.ACHIEVEMENTS_ORIGIN_X, Constants.BOARD_HEIGHT, mAchievementsWidget.mWidth, Constants.BOARD_HEIGHT);
-		mAchievementsScrollWidget.AddWidget(mAchievementsWidget);
-		mQuickplayWidget = new QuickPlayWidget(mApp, this);
-		mQuickplayScrollWidget = new ScrollWidget();
-		mQuickplayScrollWidget.SetScrollMode(ScrollWidget.ScrollMode.SCROLL_HORIZONTAL);
-		mQuickplayWidget.SizeToFit();
-		mQuickplayScrollWidget.Resize(Constants.QUICKPLAY_ORIGIN_X + 30, 0, Constants.BOARD_WIDTH, mQuickplayWidget.mHeight);
-		mQuickplayScrollWidget.AddWidget(mQuickplayWidget);
-		mQuickplayScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		mMiniGamesWidget = new MiniGamesWidget(mApp, this);
-		mMiniGamesScrollWidget = new ScrollWidget();
-		mMiniGamesScrollWidget.SetScrollMode(ScrollWidget.ScrollMode.SCROLL_HORIZONTAL);
-		mMiniGamesWidget.SizeToFit();
-		mMiniGamesScrollWidget.Resize(Constants.QUICKPLAY_ORIGIN_X + 30, 10, Constants.BOARD_WIDTH, mMiniGamesWidget.mHeight);
-		mMiniGamesScrollWidget.AddWidget(mMiniGamesWidget);
-		mMiniGamesScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		mRetractingQuickplay = false;
-		mQuickplaySlideCounter = 0;
-		mNeedToPlayRollIn = false;
-		AddWidget(mAdventureButton);
-		AddWidget(mMoreWaysToPlayButton);
-		AddWidget(mOptionsButton);
-		AddWidget(mStoreButton);
-		AddWidget(mAlmanacButton);
-		AddWidget(mZenGardenButton);
-		AddWidget(mAchievementsButton);
-		if (mApp.mPlayerInfo != null && mApp.mPlayerInfo.mHasUnlockedPuzzleMode)
-		{
-			AddWidget(mVaseBreakerButton);
-			AddWidget(mIZombieButton);
-		}
-		AddWidget(mMiniGamesButton);
-		AddWidget(mMoreWaysBackButton);
-		AddWidget(mAchievementsScrollWidget);
-		AddWidget(mLeaderboardButton);
-		AddWidget(mMiniGamesScrollWidget);
+		mOptionsButton = GameButton.MakeNewButton(103, this, "", null, Resources.IMAGE_SELECTORSCREEN_OPTIONS1, Resources.IMAGE_SELECTORSCREEN_OPTIONS2, Resources.IMAGE_SELECTORSCREEN_OPTIONS2);
+		mOptionsButton.Resize(0, 0, Resources.IMAGE_SELECTORSCREEN_OPTIONS1.mWidth, Resources.IMAGE_SELECTORSCREEN_OPTIONS1.mHeight + 23);
+		mOptionsButton.mBtnNoDraw = true;
+		mOptionsButton.mMouseVisible = false;
+		mOptionsButton.mButtonOffsetY = 15;
+		mOptionsButton.mClip = false;
+		mHelpButton = GameButton.MakeNewButton(104, this, "", null, Resources.IMAGE_SELECTORSCREEN_HELP1, Resources.IMAGE_SELECTORSCREEN_HELP2, Resources.IMAGE_SELECTORSCREEN_HELP2);
+		mHelpButton.Resize(0, 0, Resources.IMAGE_SELECTORSCREEN_HELP1.mWidth, Resources.IMAGE_SELECTORSCREEN_HELP1.mHeight + 33);
+		mHelpButton.mBtnNoDraw = true;
+		mHelpButton.mMouseVisible = false;
+		mHelpButton.mButtonOffsetY = 30;
+		mHelpButton.mClip = false;
+		mQuitButton = GameButton.MakeNewButton(105, this, "", null, Resources.IMAGE_SELECTORSCREEN_QUIT1, Resources.IMAGE_SELECTORSCREEN_QUIT2, Resources.IMAGE_SELECTORSCREEN_QUIT2);
+		mQuitButton.Resize(0, 0, Resources.IMAGE_SELECTORSCREEN_QUIT1.mWidth + 10, Resources.IMAGE_SELECTORSCREEN_QUIT1.mHeight + 10);
+		mQuitButton.mBtnNoDraw = true;
+		mQuitButton.mMouseVisible = false;
+		mQuitButton.mButtonOffsetX = 5;
+		mQuitButton.mButtonOffsetY = 5;
+		mQuitButton.mClip = false;
+		mChangeUserButton = GameButton.MakeNewButton(106, this, "", null, Resources.IMAGE_BLANK, Resources.IMAGE_BLANK, Resources.IMAGE_BLANK);
+		mChangeUserButton.Resize(0, 0, 250, 30);
+		mChangeUserButton.mBtnNoDraw = true;
+		mChangeUserButton.mMouseVisible = false;
+		mOverlayWidget = new GameSelectorOverlay(this);
+		mOverlayWidget.Resize(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+		mStoreButton = GameButton.MakeNewButton(107, this, "", null, Resources.IMAGE_SELECTORSCREEN_STORE, Resources.IMAGE_SELECTORSCREEN_STOREHIGHLIGHT, Resources.IMAGE_SELECTORSCREEN_STOREHIGHLIGHT);
+		mStoreButton.Resize(405, 484, Resources.IMAGE_SELECTORSCREEN_STORE.mWidth, Resources.IMAGE_SELECTORSCREEN_STORE.mHeight);
+		mStoreButton.mMouseVisible = false;
+		mStoreButton.mClip = false;
+		mAlmanacButton = GameButton.MakeNewButton(108, this, "", null, Resources.IMAGE_SELECTORSCREEN_ALMANAC, Resources.IMAGE_SELECTORSCREEN_ALMANACHIGHLIGHT, Resources.IMAGE_SELECTORSCREEN_ALMANACHIGHLIGHT);
+		mAlmanacButton.Resize(327, 428, Resources.IMAGE_SELECTORSCREEN_ALMANAC.mWidth, Resources.IMAGE_SELECTORSCREEN_ALMANAC.mHeight);
+		mAlmanacButton.mMouseVisible = false;
+		mAlmanacButton.mClip = false;
+		mAchievementButton = GameButton.MakeNewButton(111, this, "", null, Resources.IMAGE_ACHIEVEMENT_BUTTON, Resources.IMAGE_ACHIEVEMENT_HIGHLIGHT, Resources.IMAGE_ACHIEVEMENT_HIGHLIGHT);
+		mAchievementButton.Resize(20, mApp.mHeight - Resources.IMAGE_ACHIEVEMENT_BUTTON.mHeight - 35, Resources.IMAGE_ACHIEVEMENT_BUTTON.mWidth, Resources.IMAGE_ACHIEVEMENT_BUTTON.mHeight);
+		mAchievementButton.mClip = false;
+		mAchievementButton.mMouseVisible = false;
+		mQuickPlayButton = GameButton.MakeNewButton(112, this, "", null, Resources.IMAGE_QUICKPLAY_BUTTON, Resources.IMAGE_QUICKPLAY_BUTTON_HIGHLIGHT, Resources.IMAGE_QUICKPLAY_BUTTON_HIGHLIGHT);
+		mQuickPlayButton.Resize(300, mApp.mHeight - Resources.IMAGE_QUICKPLAY_BUTTON.mHeight - 100, Resources.IMAGE_QUICKPLAY_BUTTON.mWidth, Resources.IMAGE_QUICKPLAY_BUTTON.mHeight);
+		mQuickPlayButton.mClip = false;
+		mQuickPlayButton.mMouseVisible = false;
+		mQuickPlayButton.SetDisabled(false);
+		mQuickPlayButton.mVisible = true;
+		mCreditsButton = GameButton.MakeNewButton(113, this, "", null, Resources.IMAGE_BLANK, Resources.IMAGE_BLANK, Resources.IMAGE_BLANK);
+		mCreditsButton.Resize(0, 0, Resources.IMAGE_REANIM_SELECTORSCREEN_WOODSIGN3_PRESS.mWidth, Resources.IMAGE_REANIM_SELECTORSCREEN_WOODSIGN3_PRESS.mHeight);
+		mCreditsButton.mBtnNoDraw = true;
+		mCreditsButton.mMouseVisible = false;
 		mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
-		mQuickplayLocked = false;
+		mStartingGame = false;
+		mStartingGameCounter = 0;
+		mMinigamesLocked = false;
+		mPuzzleLocked = false;
+		mSurvivalLocked = false;
 		mUnlockSelectorCheat = false;
 		mTrophyParticleID = null;
 		mShowStartButton = false;
-		float theX = 0f;
-		float theY = 0f;
-		Reanimation theReanimation = mApp.AddReanimation(theX, theY, 400000, ReanimationType.REANIM_WOODSIGN, theDoScalePos: false);
-		mWoodSignReanimID = mApp.ReanimationGetID(theReanimation);
-		SetupUnlockFullGameReanim();
-		if (SexyAppBase.IsInTrialMode)
+		Reanimation aSelectorReanim = mApp.AddReanimation(0.5f + Constants.Board_Additional_Width, 0.5f + Constants.Board_Background_Offset_Y, 0, ReanimationType.REANIM_SELECTOR_SCREEN);
+		aSelectorReanim.PlayReanim("anim_open", ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 30f);
+		aSelectorReanim.AssignRenderGroupToPrefix("flower", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+		aSelectorReanim.AssignRenderGroupToPrefix("leaf", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+		aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_BG", 1);
+		aSelectorReanim.AssignRenderGroupToPrefix("SelectorScreen_Adventure_", ReanimatorXnaHelpers.RENDER_GROUP_NORMAL);
+		aSelectorReanim.AssignRenderGroupToPrefix("SelectorScreen_StartAdventure_", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+		mSelectorReanimID = mApp.ReanimationGetID(aSelectorReanim);
+		mSelectorState = SelectorAnimState.SELECTOR_OPEN;
+		short aFrameStart, aFrameCount;
+		aSelectorReanim.GetFramesForLayer("anim_sign", out aFrameStart, out aFrameCount);
+		aSelectorReanim.mFrameBasePose = (short)(aFrameStart + aFrameCount - 1);
+		for (int i = 0; i < 6; i++)
 		{
-			AddWidget(mUnlockGameButton);
+			Reanimation aCloudReanim = mApp.AddReanimation(0.5f, 0.5f, 0, ReanimationType.REANIM_SELECTOR_SCREEN);
+			string aAnimName = Common.StrFormat_("anim_cloud{0}", i > 1 ? i + 2 : i + 1);
+			aCloudReanim.PlayReanim(aAnimName, ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 0f);
+			mCloudReanimID[i] = mApp.ReanimationGetID(aCloudReanim);
+			mCloudCounter[i] = TodCommon.RandRangeInt(-6000, 2000);
+			if (mCloudCounter[i] < 0)
+			{
+				aCloudReanim.mAnimTime = (float)(-mCloudCounter[i]) / 6000f;
+				aCloudReanim.mAnimRate = 0.5f;
+				mCloudCounter[i] = 0;
+			}
+			else
+			{
+				aCloudReanim.mAnimRate = 0f;
+			}
 		}
+		for (int i = 0; i < 3; i++)
+		{
+			Reanimation aFlowerReanim = mApp.AddReanimation(0.5f + Constants.Board_Additional_Width, 0.5f + Constants.Board_Background_Offset_Y, 0, ReanimationType.REANIM_SELECTOR_SCREEN);
+			string aAnimName = Common.StrFormat_("anim_flower{0}", i + 1);
+			aFlowerReanim.PlayReanim(aAnimName, ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 0f);
+			aFlowerReanim.mAnimRate = 0f;
+			Reanimation selReanim = mApp.ReanimationGet(mSelectorReanimID);
+			aFlowerReanim.AttachToAnotherReanimation(ref selReanim, "SelectorScreen_BG_Right");
+			aFlowerReanim.mIsAttachment = false;
+			mFlowerReanimID[i] = mApp.ReanimationGetID(aFlowerReanim);
+		}
+		Reanimation aLeafReanim = mApp.AddReanimation(0.5f + Constants.Board_Additional_Width, 0.5f + Constants.Board_Background_Offset_Y, 0, ReanimationType.REANIM_SELECTOR_SCREEN);
+		aLeafReanim.PlayReanim("anim_grass", ReanimLoopType.REANIM_LOOP, 0, 6f);
+		aLeafReanim.mAnimRate = 0f;
+		mLeafReanimID = mApp.ReanimationGetID(aLeafReanim);
 		mLeafCounter = 50;
-		mSignState = SelectorSignState.SIGN_UP;
+		mApp.mDetails = "[DISCORD_MAIN_MENU]";
 		SyncProfile(theShowLoading: false);
-		LowerSign();
-		mSlideCounter = 0;
-		mStartX = (mStartY = (mDestX = (mDestY = 0)));
-	}
-
-	private void SetupUnlockFullGameReanim()
-	{
-		if (SexyAppBase.IsInTrialMode)
-		{
-			mWoodSignReanimID.AssignRenderGroupToPrefix("short rope1", -1);
-			mWoodSignReanimID.AssignRenderGroupToPrefix("short rope2", -1);
-			return;
-		}
-		mWoodSignReanimID.AssignRenderGroupToPrefix("long rope1", -1);
-		mWoodSignReanimID.AssignRenderGroupToPrefix("long rope2", -1);
-		mWoodSignReanimID.AssignRenderGroupToPrefix("click here", -1);
-		mWoodSignReanimID.AssignRenderGroupToPrefix("broken", -1);
+		mApp.PlaySample(Resources.SOUND_ROLL_IN);
 	}
 
 	public override void Dispose()
 	{
 		RemoveAllWidgets(doDelete: true, recursive: true);
+		mApp.UpdateDiscordState();
+	}
+
+	public void SyncButtons()
+	{
+		bool aAlmanacAvailable = mApp.CanShowAlmanac() || mUnlockSelectorCheat;
+		bool aStoreOpen = mApp.CanShowStore() || mUnlockSelectorCheat;
+		bool aZenGardenOpen = mApp.CanShowZenGarden() || mUnlockSelectorCheat;
+		mAlmanacButton.mDisabled = !aAlmanacAvailable;
+		mAlmanacButton.mVisible = aAlmanacAvailable;
+		mQuickPlayButton.mDisabled = !mApp.HasFinishedAdventure();
+		mQuickPlayButton.mVisible = mApp.HasFinishedAdventure();
+		mStoreButton.mDisabled = !aStoreOpen;
+		mStoreButton.mVisible = aStoreOpen;
+		Reanimation aSelectorReanim = mApp.ReanimationGet(mSelectorReanimID);
+		if (aAlmanacAvailable)
+		{
+			aSelectorReanim.AssignRenderGroupToPrefix("almanac_key_shadow", ReanimatorXnaHelpers.RENDER_GROUP_NORMAL);
+			if (aStoreOpen)
+			{
+				aSelectorReanim.SetImageOverride("almanac_key_shadow", null);
+			}
+			else
+			{
+				aSelectorReanim.SetImageOverride("almanac_key_shadow", Resources.IMAGE_REANIM_SELECTORSCREEN_ALMANAC_SHADOW);
+			}
+		}
+		else if (aStoreOpen)
+		{
+			aSelectorReanim.AssignRenderGroupToPrefix("almanac_key_shadow", ReanimatorXnaHelpers.RENDER_GROUP_NORMAL);
+			aSelectorReanim.SetImageOverride("almanac_key_shadow", Resources.IMAGE_REANIM_SELECTORSCREEN_KEY_SHADOW);
+		}
+		else
+		{
+			aSelectorReanim.AssignRenderGroupToPrefix("almanac_key_shadow", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+		}
+		mZenGardenButton.mDisabled = !aZenGardenOpen;
+		mZenGardenButton.mVisible = aZenGardenOpen;
+		if (mMinigamesLocked)
+		{
+			mMinigameButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_BUTTON;
+			mMinigameButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_BUTTON;
+			mMinigameButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, new SexyColor(128, 128, 128));
+		}
+		else
+		{
+			mMinigameButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_HIGHLIGHT;
+			mMinigameButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_SURVIVAL_HIGHLIGHT;
+			mMinigameButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, SexyColor.White);
+		}
+		if (mPuzzleLocked)
+		{
+			mPuzzleButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_BUTTON;
+			mPuzzleButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_BUTTON;
+			mPuzzleButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, new SexyColor(128, 128, 128));
+		}
+		else
+		{
+			mPuzzleButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_HIGHLIGHT;
+			mPuzzleButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_CHALLENGES_HIGHLIGHT;
+			mPuzzleButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, SexyColor.White);
+		}
+		if (mSurvivalLocked)
+		{
+			mSurvivalButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_BUTTON;
+			mSurvivalButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_BUTTON;
+			mSurvivalButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, new SexyColor(128, 128, 128));
+		}
+		else
+		{
+			mSurvivalButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT;
+			mSurvivalButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_VASEBREAKER_HIGHLIGHT;
+			mSurvivalButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, SexyColor.White);
+		}
+		ReanimatorTrackInstance aMinigameTrack = aSelectorReanim.GetTrackInstanceByName("SelectorScreen_Survival_button");
+		ReanimatorTrackInstance aPuzzleTrack = aSelectorReanim.GetTrackInstanceByName("SelectorScreen_Challenges_button");
+		ReanimatorTrackInstance aSurvivalTrack = aSelectorReanim.GetTrackInstanceByName("SelectorScreen_ZenGarden_button");
+		aMinigameTrack.mTrackColor = new SexyColor(mMinigameButton.GetColor((int)GameButton.ButtonColours.COLOR_BKG));
+		aPuzzleTrack.mTrackColor = new SexyColor(mPuzzleButton.GetColor((int)GameButton.ButtonColours.COLOR_BKG));
+		aSurvivalTrack.mTrackColor = new SexyColor(mSurvivalButton.GetColor((int)GameButton.ButtonColours.COLOR_BKG));
+		if (mShowStartButton)
+		{
+			mAdventureButton.mButtonImage = Resources.IMAGE_REANIM_SELECTORSCREEN_STARTADVENTURE_BUTTON;
+			mAdventureButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_STARTADVENTURE_HIGHLIGHT;
+			mAdventureButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_STARTADVENTURE_HIGHLIGHT;
+		}
+		else
+		{
+			mAdventureButton.mButtonImage = Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_BUTTON;
+			mAdventureButton.mOverImage = Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT;
+			mAdventureButton.mDownImage = Resources.IMAGE_REANIM_SELECTORSCREEN_ADVENTURE_HIGHLIGHT;
+		}
+	}
+
+	public void AddTrophySparkle()
+	{
+		Debug.ASSERT(mTrophyParticleID == null);
+		TodParticleSystem aTrophyParticle = mApp.AddTodParticle(85f + Constants.Board_Additional_Width, 380f + Constants.Board_Background_Offset_Y, 1, ParticleEffect.PARTICLE_TROPHY_SPARKLE);
+		mTrophyParticleID = mApp.ParticleGetID(aTrophyParticle);
 	}
 
 	public void SyncProfile(bool theShowLoading)
@@ -274,13 +404,15 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		if (theShowLoading)
 		{
 			mLoading = true;
+			mApp.DoDialog((int)Dialogs.DIALOG_MESSAGE, true, "[LOADING]", "", "", (int)Dialog.DialogButtons.BUTTONS_NONE);
 			mApp.PreloadForUser();
+			mApp.KillDialog((int)Dialogs.DIALOG_MESSAGE);
 			mLoading = false;
 		}
-		TodParticleSystem todParticleSystem = mApp.ParticleTryToGet(mTrophyParticleID);
-		if (todParticleSystem != null)
+		TodParticleSystem aTrophyParticle = mApp.ParticleTryToGet(mTrophyParticleID);
+		if (aTrophyParticle != null)
 		{
-			todParticleSystem.ParticleSystemDie();
+			aTrophyParticle.ParticleSystemDie();
 			mTrophyParticleID = null;
 		}
 		mLevel = 1;
@@ -289,16 +421,38 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 			mLevel = mApp.mPlayerInfo.mLevel;
 		}
 		mShowStartButton = true;
-		mQuickplayLocked = true;
+		mMinigamesLocked = true;
+		mPuzzleLocked = true;
+		mSurvivalLocked = true;
 		if (mApp.mPlayerInfo != null && !mApp.IsIceDemo())
 		{
 			if (mLevel >= 2)
 			{
 				mShowStartButton = false;
 			}
+			if (mApp.HasFinishedAdventure())
+			{
+				mMinigamesLocked = false;
+				mSurvivalLocked = false;
+				mPuzzleLocked = false;
+				mShowStartButton = false;
+			}
 			if (mApp.mPlayerInfo.mHasUnlockedMinigames)
 			{
-				mQuickplayLocked = false;
+				mMinigamesLocked = false;
+			}
+			if (mApp.mPlayerInfo.mHasUnlockedPuzzleMode)
+			{
+				mPuzzleLocked = false;
+			}
+			if (mApp.mPlayerInfo.mHasUnlockedSurvivalMode)
+			{
+				mSurvivalLocked = false;
+			}
+			if (mApp.IsTrialStageLocked())
+			{
+				mPuzzleLocked = true;
+				mSurvivalLocked = true;
 			}
 		}
 		if (mApp.HasFinishedAdventure() && !mApp.IsTrialStageLocked())
@@ -309,7 +463,7 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		{
 			mHasTrophy = false;
 		}
-		if (mHasTrophy)
+		if (mHasTrophy && mSelectorState != SelectorAnimState.SELECTOR_OPEN)
 		{
 			AddTrophySparkle();
 		}
@@ -320,465 +474,530 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 
 	public override void Draw(Graphics g)
 	{
-		if (mApp.GetDialog(Dialogs.DIALOG_STORE) == null && mApp.GetDialog(Dialogs.DIALOG_ALMANAC) == null)
-		{
-			DrawMoreGamesArea(g);
-			DrawMainMenuArea(g);
-			DrawQuickplayArea(g);
-			DeferOverlay();
-		}
-	}
-
-	public override void DrawOverlay(Graphics g)
-	{
 		if (mApp.GetDialog(Dialogs.DIALOG_STORE) != null || mApp.GetDialog(Dialogs.DIALOG_ALMANAC) != null)
 		{
 			return;
 		}
-		g.SetLinearBlend(linear: true);
-		g.DrawImage(AtlasResources.IMAGE_REANIM_SELECTORSCREEN_LEAVES, Constants.MAIN_MENU_ORIGIN_X, Constants.InvertAndScale(287f));
+		g.SetLinearBlend(true);
+		Reanimation aSelectorReanim = mApp.ReanimationGet(mSelectorReanimID);
+		aSelectorReanim.DrawRenderGroup(g, 1);
+		for (int i = 0; i < 6; i++)
+		{
+			mApp.ReanimationGet(mCloudReanimID[i]).Draw(g);
+		}
+		aSelectorReanim.DrawRenderGroup(g, ReanimatorXnaHelpers.RENDER_GROUP_NORMAL);
+		if (mSelectorState == SelectorAnimState.SELECTOR_OPEN)
+		{
+			int aBGIdx = aSelectorReanim.FindTrackIndex("SelectorScreen_BG_Right");
+			ReanimatorTransform aTransform;
+			aSelectorReanim.GetCurrentTransform(aBGIdx, out aTransform, false);
+			float aFractionalOffsetX = aTransform.mTransX % 1f;
+			float aFractionalOffsetY = aTransform.mTransY % 1f;
+			g.DrawImageF(mOptionsButton.mButtonImage, mOptionsButton.mX + mOptionsButton.mButtonOffsetX + aFractionalOffsetX, mOptionsButton.mY + mOptionsButton.mButtonOffsetY + aFractionalOffsetY);
+			g.DrawImageF(mQuitButton.mButtonImage, mQuitButton.mX + mQuitButton.mButtonOffsetX + aFractionalOffsetX, mQuitButton.mY + mQuitButton.mButtonOffsetY + aFractionalOffsetY);
+			g.DrawImageF(mHelpButton.mButtonImage, mHelpButton.mX + mHelpButton.mButtonOffsetX + aFractionalOffsetX, mHelpButton.mY + mHelpButton.mButtonOffsetY + aFractionalOffsetY);
+		}
+		if (mApp.mPlayerInfo != null && mApp.mPlayerInfo.mName.Length != 0 && mSelectorState != SelectorAnimState.SELECTOR_OPEN && mSelectorState != SelectorAnimState.SELECTOR_NEW_USER)
+		{
+			string aWelcomeStr = mApp.mPlayerInfo.mName + "!";
+			int aSignIdx = aSelectorReanim.FindTrackIndex("woodsign1");
+			SexyTransform2D aOverlayMatrix;
+			aSelectorReanim.GetAttachmentOverlayMatrix(aSignIdx, out aOverlayMatrix);
+			float aStringWidth = Resources.FONT_BRIANNETOD16.StringWidth(aWelcomeStr);
+			SexyTransform2D aOffsetMatrix = default(SexyTransform2D);
+			aOffsetMatrix.Translate(170.5f - (int)(aStringWidth * 0.5f) + mX, 102.5f + mY);
+			TodCommon.TodDrawStringMatrix(g, Resources.FONT_BRIANNETOD16, (aOverlayMatrix * aOffsetMatrix).mMatrix, aWelcomeStr, new SexyColor(255, 245, 200));
+		}
+		if (mDebugText && mApp.mPlayerInfo != null)
+		{
+			string aText = "ACHIEVEMENTS DEBUG\n";
+			for (int i = 0; i < Achievements.NUM_ACHIEVEMENTS; i++)
+			{
+				aText += "ACHIEVEMENT " + i + ": ";
+				aText += i < mApp.mPlayerInfo.mEarnedAchievements.Length && mApp.mPlayerInfo.mEarnedAchievements[i] ? "TRUE\n" : "FALSE\n";
+			}
+			g.SetFont(Resources.FONT_BRIANNETOD12);
+			TRect aShadowRect = new TRect(11, 91, 500, 400);
+			TRect aDebugRect = new TRect(10, 89, 500, 400);
+			g.SetColor(new SexyColor(0, 0, 0));
+			g.WriteWordWrapped(aShadowRect, aText, 0, -1);
+			g.SetColor(SexyColor.White);
+			g.WriteWordWrapped(aDebugRect, aText, 0, -1);
+		}
+	}
+
+	public void DrawOverlay(Graphics g)
+	{
+		g.SetLinearBlend(true);
 		if (mApp.mPlayerInfo == null)
 		{
 			return;
 		}
 		if (!mApp.IsIceDemo() && !mShowStartButton)
 		{
-			float num = 0f;
-			float num2 = 0f;
-			float num3 = 0f;
-			float num4 = 0f;
-			int num5 = TodCommon.ClampInt((mLevel - 1) / 10 + 1, 1, 6);
-			int num6 = mLevel - (num5 - 1) * 10;
-			if (num5 == 1)
+			int aOffsetX = 0;
+			int aOffsetY = 0;
+			if (mAdventureButton.mIsDown && mAdventureButton.mIsOver)
 			{
-				num2 += 1f;
+				aOffsetX = 1;
+				aOffsetY = 1;
 			}
-			if (num5 == 4)
+			Reanimation aSelectorReanim = mApp.ReanimationGet(mSelectorReanimID);
+			int aRightIdx = aSelectorReanim.FindTrackIndex("SelectorScreen_BG_Right");
+			ReanimatorTransform aTransform;
+			aSelectorReanim.GetCurrentTransform(aRightIdx, out aTransform, false);
+			float aTransAreaX = aTransform.mTransX + aOffsetX + Constants.Board_Additional_Width;
+			float aTransAreaY = aTransform.mTransY + aOffsetY + Constants.Board_Background_Offset_Y;
+			float aTransSubX = aTransAreaX;
+			float aTransSubY = aTransAreaY;
+			int aStage = TodCommon.ClampInt((mLevel - 1) / 10 + 1, 1, 6);
+			int aSub = mLevel - (aStage - 1) * 10;
+			if (mApp.IsTrialStageLocked() && (mLevel >= 25 || mApp.HasFinishedAdventure()))
 			{
-				num -= 1f;
+				aStage = 3;
+				aSub = 4;
 			}
-			if (num6 == 3)
+			else
 			{
-				num3 -= 1f;
+				if (aStage == 1)
+				{
+					aTransAreaY += 1f;
+				}
+				else if (aStage == 4)
+				{
+					aTransAreaX -= 1f;
+				}
+				if (aSub == 3)
+				{
+					aTransSubX -= 1f;
+				}
 			}
-			if (mAdventureButton.mIsDown)
+			g.SetColorizeImages(true);
+			g.SetColor(mAdventureButton.GetColor((int)GameButton.ButtonColours.COLOR_BKG));
+			TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, aTransAreaX + 486f + 111f, aTransAreaY + 125f - 77.5f + 80f, aStage, 0);
+			if (aSub < 10)
 			{
-				num += (float)Constants.GameSelector_LevelNumber_ButtonDown_Offset;
-				num3 += (float)Constants.GameSelector_LevelNumber_ButtonDown_Offset;
-				num2 += (float)Constants.GameSelector_LevelNumber_ButtonDown_Offset;
-				num4 += (float)Constants.GameSelector_LevelNumber_ButtonDown_Offset;
+				TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, aTransSubX + 512f + 111f, aTransSubY + 128f - 77.5f + 80f, aSub, 0);
 			}
-			g.SetColorizeImages(colorizeImages: true);
-			g.SetColor(mAdventureButton.mColors[5]);
-			TodCommon.TodDrawImageCelF(g, AtlasResources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, (float)(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LevelNumber_1_Pos.X) + num, (float)Constants.GameSelector_LevelNumber_1_Pos.Y + num2, num5, 0);
-			if (num6 < 10)
+			else if (aSub == 10)
 			{
-				TodCommon.TodDrawImageCelF(g, AtlasResources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, (float)(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LevelNumber_2_Pos.X) + num3, (float)Constants.GameSelector_LevelNumber_2_Pos.Y + num4, num6, 0);
+				TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, aTransSubX + 506f + 111f, aTransSubY + 128f - 77.5f + 80f, 1, 0);
+				TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, aTransSubX + 515f + 111f, aTransSubY + 129f - 77.5f + 80f, 0, 0);
 			}
-			else if (num6 == 10)
+			g.SetColorizeImages(false);
+			int aLeftIdx = aSelectorReanim.FindTrackIndex("SelectorScreen_BG_Left");
+			ReanimatorTransform aTransformLeft;
+			aSelectorReanim.GetCurrentTransform(aLeftIdx, out aTransformLeft, false);
+			if (mHasTrophy)
 			{
-				TodCommon.TodDrawImageCelF(g, AtlasResources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, (float)(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LevelNumber_2_Pos.X) + num3, (float)Constants.GameSelector_LevelNumber_2_Pos.Y + num4, 1, 0);
-				TodCommon.TodDrawImageCelF(g, AtlasResources.IMAGE_SELECTORSCREEN_LEVELNUMBERS, (float)(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LevelNumber_3_Pos.X) + num3, (float)Constants.GameSelector_LevelNumber_3_Pos.Y + num4, 0, 0);
+				int aAchievementOffset = GameConstants.HAS_ACHIEVEMENTS ? 0 : 45;
+				if (mApp.EarnedGoldTrophy())
+				{
+					TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 10f + Constants.Board_Additional_Width + 370f, aTransformLeft.mTransY + 350f + Constants.Board_Background_Offset_Y + 60f + aAchievementOffset, 1, 0);
+				}
+				else
+				{
+					TodCommon.TodDrawImageCelF(g, Resources.IMAGE_SUNFLOWER_TROPHY, aTransformLeft.mTransX + 10f + Constants.Board_Additional_Width + 370f, aTransformLeft.mTransY + 350f + Constants.Board_Background_Offset_Y + 60f + aAchievementOffset, 0, 0);
+				}
+				TodParticleSystem aTrophyParticle = mApp.ParticleTryToGet(mTrophyParticleID);
+				if (aTrophyParticle != null)
+				{
+					aTrophyParticle.Draw(g, doScale: true);
+				}
 			}
-			g.SetColor(new SexyColor(255, 255, 255));
-			g.FillRect(Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_LevelNumber_Bar.X + (int)num, Constants.GameSelector_LevelNumber_Bar.Y + (int)num2, Constants.GameSelector_LevelNumber_Bar.Width, Constants.GameSelector_LevelNumber_Bar.Height);
-			g.SetColorizeImages(colorizeImages: false);
 		}
-		Reanimation reanimation = mApp.ReanimationGet(mWoodSignReanimID);
-		g.Translate(Constants.MAIN_MENU_ORIGIN_X, 0);
-		reanimation.Draw(g);
-		g.Translate(-Constants.MAIN_MENU_ORIGIN_X, 0);
-		if (mApp.mPlayerInfo != null && !string.IsNullOrEmpty(mApp.mPlayerInfo.mName) && (mSignState == SelectorSignState.SIGN_DOWN || mSignState == SelectorSignState.SIGN_MOVING_DOWN))
+		if (mZenGardenButton.mVisible && mApp.mZenGarden.PlantsNeedWater())
 		{
-			string welcomeString = GetWelcomeString();
-			int theTrackIndex = reanimation.FindTrackIndex(GlobalMembersReanimIds.ReanimTrackId_welcome);
-			SexyTransform2D theOverlayMatrix = default(SexyTransform2D);
-			reanimation.GetAttachmentOverlayMatrix(theTrackIndex, out theOverlayMatrix);
-			float num7 = Resources.FONT_BRIANNETOD16.StringWidth(welcomeString);
-			SexyTransform2D sexyTransform2D = default(SexyTransform2D);
-			sexyTransform2D.Translate(Constants.GameSelector_PlayerName_Pos.X - (int)(num7 * 0.5f) + Constants.MAIN_MENU_ORIGIN_X + mX, Constants.GameSelector_PlayerName_Pos.Y + mY);
-			sexyTransform2D.Translate(-g.mTransX, -g.mTransY);
-			TodCommon.TodDrawStringMatrix(g, Resources.FONT_BRIANNETOD16, theOverlayMatrix.mMatrix * sexyTransform2D.mMatrix, welcomeString, new SexyColor(255, 245, 200));
+			g.DrawImage(Resources.IMAGE_PLANTSPEECHBUBBLE, mZenGardenButton.mX + 106, mZenGardenButton.mY + 36);
+			g.DrawImage(Resources.IMAGE_WATERDROP, mZenGardenButton.mX + 123, mZenGardenButton.mY + 45);
 		}
-		if (mApp.mPlayerInfo != null)
+		Reanimation aHandReanim = mApp.ReanimationTryToGet(mHandReanimID);
+		if (aHandReanim != null)
 		{
-			_ = mApp.mPlayerInfo.mLastSeenMoreGames < mApp.mProfileMgr.mLastMoreGamesUpdate;
+			g.SetClipRect(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT - 40);
+			aHandReanim.Draw(g);
+			g.ClearClipRect();
 		}
-		g.SetColor(new SexyColor(115, 101, 66));
-		g.SetColorizeImages(colorizeImages: true);
-		int num8 = mMoreGamesListWidget.mY + mMoreGamesListWidget.mHeight;
-		int num9 = -mMoreGamesListWidget.mY + mMoreGamesScrollWidget.mHeight - 52;
-		if (mMoreGamesListWidget.mY < -48)
+		mApp.ReanimationGet(mLeafReanimID).Draw(g);
+		for (int i = 0; i < 3; i++)
 		{
-			int num10 = Constants.MORE_GAMES_PLANK_HEIGHT + Constants.MORE_GAMES_ITEM_GAP;
-			int num11 = (num9 + num10 / 2) / num10 * num10;
-			int theTimeAge = Math.Abs(num11 - num9);
-			int theAlpha = TodCommon.TodAnimateCurve(0, 35, theTimeAge, 0, 220, TodCurves.CURVE_LINEAR);
-			g.SetColor(new SexyColor(115, 101, 66, theAlpha));
+			Reanimation aFlowerReanim = mApp.ReanimationGet(mFlowerReanimID[i]);
+			if (aFlowerReanim.mTrackInstances[i] != null && aFlowerReanim.mTrackInstances[i].mBlendTransform != null && aFlowerReanim.mTrackInstances[i].mBlendTransform.mFrame == aFlowerReanim.mFrameCount)
+			{
+				break;
+			}
+			aFlowerReanim.Draw(g);
 		}
-		if (num8 > 340)
-		{
-			int num12 = Constants.MORE_GAMES_PLANK_HEIGHT + Constants.MORE_GAMES_ITEM_GAP;
-			int num13 = (num9 + num12 / 2) / num12 * num12;
-			int theTimeAge2 = Math.Abs(num13 - num9);
-			int theAlpha = TodCommon.TodAnimateCurve(0, 35, theTimeAge2, 0, 220, TodCurves.CURVE_LINEAR);
-			g.SetColor(new SexyColor(115, 101, 66, theAlpha));
-		}
-		g.SetColorizeImages(colorizeImages: false);
-		g.Translate(-(Constants.QUICKPLAY_ORIGIN_X + mX), 0);
+		mToolTip.Draw(g);
 	}
 
-	private string GetWelcomeString()
+	public void UpdateTooltip()
 	{
-		if (cachedWelcomeString == null || cachedWelcomeStringName != mApp.mPlayerInfo.mName)
+		if (!mApp.HasFinishedAdventure() || mApp.GetDialog(Dialogs.DIALOG_MESSAGE) != null)
 		{
-			cachedWelcomeString = Common.StrFormat_(TodStringFile.TodStringTranslate("[WELCOME_USER_NAME]"), mApp.mPlayerInfo.mName);
-			cachedWelcomeStringName = mApp.mPlayerInfo.mName;
+			return;
 		}
-		return cachedWelcomeString;
-	}
-
-	public void DrawMainMenuArea(Graphics g)
-	{
-		g.SetLinearBlend(linear: true);
-		g.DrawImage(Resources.IMAGE_SELECTORSCREEN_MAIN_BACKGROUND, Constants.MAIN_MENU_ORIGIN_X, 0);
-		int num = ((mAchievementsButton.mIsDown && mAchievementsButton.mIsOver) ? 1 : 0);
-		g.DrawImage(Resources.IMAGE_ACHIEVEMENT_GNOME, Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AchievementsStatue_X + num, Constants.GameSelector_AchievementsStatue_Y + num);
-		if (mAchievementsButton.mIsDown)
+		if (mHasTrophy)
 		{
-			g.DrawImage(AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ACHIEVEMENTS_HIGHLIGHT, Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AchievementsButton_X + num, Constants.GameSelector_AchievementsButton_Y + num);
+			int aMouseX = mApp.mWidgetManager.mLastMouseX;
+			int aMouseY = mApp.mWidgetManager.mLastMouseY;
+			if (new TRect(50 + Constants.Board_Additional_Width, 325 + Constants.Board_Background_Offset_Y, 85, GameConstants.HAS_ACHIEVEMENTS ? 142 : 225).Contains(aMouseX, aMouseY))
+			{
+				if (mApp.EarnedGoldTrophy())
+				{
+					mToolTip.SetLabel(mApp.Pluralize(mApp.mPlayerInfo.mFinishedAdventure, "[GOLD_SUNFLOWER_TOOLTIP]", "[GOLD_SUNFLOWER_TOOLTIP_PLURAL]"));
+					mToolTip.mX = 32 + Constants.Board_Additional_Width;
+					mToolTip.mY = 510 + Constants.Board_Background_Offset_Y;
+					mToolTip.mVisible = true;
+				}
+				else
+				{
+					mToolTip.SetLabel("[SILVER_SUNFLOWER_TOOLTIP]");
+					mToolTip.mX = 20 + Constants.Board_Additional_Width;
+					mToolTip.mY = 495 + Constants.Board_Background_Offset_Y;
+					mToolTip.mVisible = true;
+				}
+				return;
+			}
 		}
-		else
-		{
-			g.DrawImage(AtlasResources.IMAGE_REANIM_SELECTORSCREEN_ACHIEVEMENTS_BUTTON, Constants.MAIN_MENU_ORIGIN_X + Constants.GameSelector_AchievementsButton_X + num, Constants.GameSelector_AchievementsButton_Y + num);
-		}
-		g.SetColor(SexyColor.White);
-		g.SetFont(Resources.FONT_PICO129);
-	}
-
-	public void DrawQuickplayArea(Graphics g)
-	{
-		g.DrawImage(Resources.IMAGE_SELECTORSCREEN_QUICKPLAY_BACKGROUND, Constants.QUICKPLAY_ORIGIN_X, 0);
-		g.DrawImage(AtlasResources.IMAGE_TROPHY, Constants.QUICKPLAY_ORIGIN_X + Constants.BOARD_WIDTH - 155, Constants.BOARD_HEIGHT - 50);
-		int num = mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_CHALLENGE) + mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_PUZZLE);
-		int num2 = 37;
-		if (cachedTrophyStringCount != num)
-		{
-			cachedTrophyString = num + "/" + num2;
-			cachedTrophyStringCount = num;
-		}
-		g.SetFont(Resources.FONT_DWARVENTODCRAFT18);
-		g.SetColor(new Color(224, 187, 98));
-		g.DrawString(cachedTrophyString, Constants.QUICKPLAY_ORIGIN_X + Constants.BOARD_WIDTH - 90, Constants.BOARD_HEIGHT - 50);
-	}
-
-	public void DrawMoreGamesArea(Graphics g)
-	{
-	}
-
-	public void RaiseSign()
-	{
-		Reanimation reanimation = mApp.ReanimationGet(mWoodSignReanimID);
-		reanimation.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_lift, ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 10f);
-		mSignState = SelectorSignState.SIGN_MOVING_UP;
-		mNeedToPlayRollIn = false;
-	}
-
-	public void LowerSign()
-	{
-		Reanimation reanimation = mApp.ReanimationGet(mWoodSignReanimID);
-		reanimation.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_drop, ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 10f);
-		mSignState = SelectorSignState.SIGN_MOVING_DOWN;
-		mNeedToPlayRollIn = true;
-		woodSignY = -30f;
-	}
-
-	public override bool BackButtonPress()
-	{
-		switch (state)
-		{
-		case GameSelectorScreenState.Achievements:
-			mAchievementsScrollWidget.ScrollToMin(animated: true);
-			wantToExitFromAchievementsViaBackButton = true;
-			mAchievementsScrollWidget.mSpringOverride = 0.6f;
-			break;
-		case GameSelectorScreenState.MoreGames:
-			ButtonPress(mMoreGamesBackButton.mId);
-			ButtonDepress(mMoreGamesBackButton.mId);
-			break;
-		case GameSelectorScreenState.QuickPlay:
-			ButtonPress(mMoreWaysBackButton.mId);
-			ButtonDepress(mMoreWaysBackButton.mId);
-			break;
-		case GameSelectorScreenState.Main:
-			mApp.WantsToExit = true;
-			break;
-		}
-		return true;
+		mToolTip.mVisible = false;
+		mToolTip.Update();
 	}
 
 	public override void Update()
 	{
 		base.Update();
-		if (wantToExitFromAchievementsViaBackButton && mAchievementsScrollWidget.GetScrollOffset().y > -5f)
-		{
-			mAchievementsScrollWidget.SetScrollOffset(0f, 0f);
-			mAchievementsScrollWidget.mSpringOverride = 0f;
-			ButtonPress(118);
-			ButtonDepress(118);
-			wantToExitFromAchievementsViaBackButton = false;
-		}
-		if (mApp.GetDialog(Dialogs.DIALOG_STORE) != null || mApp.GetDialog(Dialogs.DIALOG_ALMANAC) != null)
-		{
-			return;
-		}
 		MarkDirty();
-		if (mSlideCounter > 0)
+		UpdateTooltip();
+		mApp.mZenGarden.UpdatePlantNeeds();
+		string aState = string.Empty;
+		if (mSelectorState == SelectorAnimState.SELECTOR_SUB_MENU)
 		{
-			int theNewX = TodCommon.TodAnimateCurve(75, 0, mSlideCounter, mStartX, mDestX, TodCurves.CURVE_EASE_IN_OUT);
-			int theNewY = TodCommon.TodAnimateCurve(75, 0, mSlideCounter, mStartY, mDestY, TodCurves.CURVE_EASE_IN_OUT);
-			Move(theNewX, theNewY);
-			mSlideCounter -= 3;
-			if (mSlideCounter >= 0 && mSlideCounter < 3)
+			if (mApp.mAchievementScreen != null)
 			{
-				if (mX == -Constants.MAIN_MENU_ORIGIN_X && mY == 0 && mSignState == SelectorSignState.SIGN_UP)
+				aState = "[DISCORD_ACHIEVEMENTS]";
+			}
+		}
+		else
+		{
+			aState = "[DISCORD_GAME_SELECTOR]";
+		}
+		mApp.UpdateDiscordState(aState);
+		if (mMovementTimer > 0)
+		{
+			int aPosY = CalcYPos(mCurrentY, mDestinationY);
+			int aPosX = CalcXPos(mCurrentX, mDestinationX);
+			mY = aPosY;
+			mX = aPosX;
+			if (mApp.mAchievementScreen != null)
+			{
+				mApp.mAchievementScreen.mY = aPosY + mApp.mHeight - 1;
+			}
+			mOverlayWidget.mX = aPosX;
+			mOverlayWidget.mY = aPosY;
+			mAdventureButton.SetButtonOffset(aPosX, aPosY);
+			mMinigameButton.SetButtonOffset(aPosX, aPosY);
+			mPuzzleButton.SetButtonOffset(aPosX, aPosY);
+			mOptionsButton.SetButtonOffset(aPosX, aPosY + 15);
+			mQuitButton.SetButtonOffset(aPosX + 5, aPosY + 5);
+			mHelpButton.SetButtonOffset(aPosX, aPosY + 30);
+			mStoreButton.SetButtonOffset(aPosX, aPosY);
+			mAlmanacButton.SetButtonOffset(aPosX, aPosY);
+			mZenGardenButton.SetButtonOffset(aPosX, aPosY);
+			mSurvivalButton.SetButtonOffset(aPosX, aPosY);
+			mChangeUserButton.SetButtonOffset(aPosX, aPosY);
+			mCreditsButton.SetButtonOffset(aPosX, aPosY);
+			mAchievementButton.SetButtonOffset(aPosX, aPosY);
+			mQuickPlayButton.SetButtonOffset(aPosX, aPosY);
+			mAchievementButton.MarkDirty();
+			mQuickPlayButton.MarkDirty();
+			mOptionsButton.MarkDirty();
+			mHelpButton.MarkDirty();
+			mQuitButton.MarkDirty();
+			mStoreButton.MarkDirty();
+			mMovementTimer--;
+		}
+		else if (mMovementTimer == 0)
+		{
+			mCurrentY = mY;
+			mCurrentX = mX;
+			if (mEnableButtonsTransition)
+			{
+				mAdventureButton.SetDisabled(false);
+				mMinigameButton.SetDisabled(false);
+				mPuzzleButton.SetDisabled(false);
+				mOptionsButton.SetDisabled(false);
+				mQuitButton.SetDisabled(false);
+				mHelpButton.SetDisabled(false);
+				mChangeUserButton.SetDisabled(false);
+				mCreditsButton.SetDisabled(false);
+				mStoreButton.SetDisabled(false);
+				mAlmanacButton.SetDisabled(false);
+				mSurvivalButton.SetDisabled(false);
+				mZenGardenButton.SetDisabled(false);
+				mAchievementButton.SetDisabled(false);
+				mQuickPlayButton.SetDisabled(false);
+				mEnableButtonsTransition = false;
+			}
+		}
+		TodParticleSystem aParticle = mApp.ParticleTryToGet(mTrophyParticleID);
+		if (aParticle != null)
+		{
+			aParticle.Update();
+		}
+		if (mStartingGame)
+		{
+			mStartingGameCounter++;
+			if (mStartingGameCounter > 450)
+			{
+				mApp.KillGameSelector();
+				if (mApp.IsIceDemo())
 				{
-					LowerSign();
+					mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ICE, theLookForSavedGame: false);
+					return;
 				}
-			}
-			else if (mSignState == SelectorSignState.SIGN_DOWN && mStartX == -Constants.MAIN_MENU_ORIGIN_X && mDestX == 0)
-			{
-				RaiseSign();
-			}
-		}
-		if (mQuickplaySlideCounter > 0)
-		{
-			int num = 150;
-			int theNewY2 = ((!mRetractingQuickplay) ? TodCommon.TodAnimateCurve(30, 0, mQuickplaySlideCounter, -mMiniGamesScrollWidget.mHeight - num, 10, TodCurves.CURVE_EASE_IN_OUT) : TodCommon.TodAnimateCurve(30, 0, mQuickplaySlideCounter, 10, -mMiniGamesScrollWidget.mHeight - num, TodCurves.CURVE_EASE_IN_OUT));
-			mQuickplayScrollWidget.Move(mQuickplayScrollWidget.mX, theNewY2);
-			mMiniGamesScrollWidget.Move(mMiniGamesScrollWidget.mX, theNewY2);
-			mQuickplaySlideCounter -= 3;
-			if (mQuickplaySlideCounter >= 0 && mQuickplaySlideCounter < 3 && mRetractingQuickplay && (mSlideCounter == 0 || mDestX == -Constants.QUICKPLAY_ORIGIN_X))
-			{
-				PopulateQuickPlayWidget();
-				SlideOutQuickPlayWidget();
-			}
-		}
-		if (mApp.mZenGarden != null)
-		{
-			mApp.mZenGarden.UpdatePlantNeeds();
-		}
-		mApp.ParticleTryToGet(mTrophyParticleID)?.Update();
-		Reanimation reanimation = mApp.ReanimationGet(mWoodSignReanimID);
-		if (mSignState == SelectorSignState.SIGN_DOWN)
-		{
-			if (reanimation.mLoopCount > 0)
-			{
-				if (mApp.mPlayerInfo == null)
+				if (mApp.IsFirstTimeAdventureMode() && mLevel == 1)
 				{
-					mInUserDialog = true;
-					mApp.DoCreateUserDialog(isOnlyUser: true);
-					RaiseSign();
+					mApp.PreNewGame(GameMode.GAMEMODE_INTRO, theLookForSavedGame: false);
+					return;
+				}
+				if (ShouldDoZenTuturialBeforeAdventure())
+				{
+					mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
+					mApp.mZenGarden.SetupForZenTutorial();
+					return;
+				}
+				mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: true);
+				return;
+			}
+			mAdventureButton.SetColor((int)GameButton.ButtonColours.COLOR_BKG, mStartingGameCounter % 20 < 10 ? new SexyColor(80, 80, 80) : SexyColor.White);
+		}
+		Reanimation aSelectorReanim = mApp.ReanimationGet(mSelectorReanimID);
+		switch (mSelectorState)
+		{
+		case SelectorAnimState.SELECTOR_OPEN:
+			if (mWidgetManager != null)
+			{
+				mWidgetManager.RehupMouse();
+			}
+			if (aSelectorReanim.mLoopCount > 0)
+			{
+				aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_Adventure_button", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+				aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_StartAdventure_button", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+				aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_Survival_button", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+				aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_Challenges_button", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+				aSelectorReanim.AssignRenderGroupToTrack("SelectorScreen_ZenGarden_button", ReanimatorXnaHelpers.RENDER_GROUP_HIDDEN);
+				mMinigameButton.mBtnNoDraw = false;
+				mPuzzleButton.mBtnNoDraw = false;
+				mSurvivalButton.mBtnNoDraw = false;
+				mZenGardenButton.mBtnNoDraw = false;
+				mHelpButton.mBtnNoDraw = false;
+				mOptionsButton.mBtnNoDraw = false;
+				mQuitButton.mBtnNoDraw = false;
+				mQuickPlayButton.mBtnNoDraw = false;
+				mAdventureButton.mMouseVisible = true;
+				mMinigameButton.mMouseVisible = true;
+				mPuzzleButton.mMouseVisible = true;
+				mSurvivalButton.mMouseVisible = true;
+				mZenGardenButton.mMouseVisible = true;
+				mHelpButton.mMouseVisible = true;
+				mOptionsButton.mMouseVisible = true;
+				mQuitButton.mMouseVisible = true;
+				mStoreButton.mMouseVisible = true;
+				mAlmanacButton.mMouseVisible = true;
+				mChangeUserButton.mMouseVisible = true;
+				mCreditsButton.mMouseVisible = true;
+				mAchievementButton.mMouseVisible = true;
+				mQuickPlayButton.mMouseVisible = true;
+			if (mApp.mPlayerInfo == null)
+			{
+				mApp.DoCreateUserDialog(isOnlyUser: true);
+				if (GlobalStaticVars.gIsPartnerBuild)
+				{
+					AddPreviewProfiles();
+				}
+				mSelectorState = SelectorAnimState.SELECTOR_NEW_USER;
+			}
+				else
+				{
+					aSelectorReanim.PlayReanim("anim_sign", ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 30f);
+					mSelectorState = SelectorAnimState.SELECTOR_IDLE;
 				}
 				if (mHasTrophy)
 				{
 					AddTrophySparkle();
 				}
-				if (mApp.mPlayerInfo != null && mApp.mPlayerInfo.mNeedsMessageOnGameSelector)
-				{
-					mApp.mPlayerInfo.mNeedsMessageOnGameSelector = false;
+		if (mApp.mPlayerInfo != null && mApp.mPlayerInfo.mNeedsMessageOnGameSelector)
+		{
+			mApp.mPlayerInfo.mNeedsMessageOnGameSelector = false;
 					mApp.WriteCurrentUserConfig();
-					mApp.LawnMessageBox(49, "[ADVENTURE_COMPLETE_HEADER]", "[ADVENTURE_COMPLETE_BODY]", "[DIALOG_BUTTON_OK]", "", 3, null);
+					mApp.LawnMessageBox((int)Dialogs.DIALOG_MESSAGE, "[ADVENTURE_COMPLETE_HEADER]", "[ADVENTURE_COMPLETE_BODY]", "[DIALOG_BUTTON_OK]", "", (int)Dialog.DialogButtons.BUTTONS_FOOTER, this);
 				}
 			}
-		}
-		else if (mSignState == SelectorSignState.SIGN_MOVING_UP)
-		{
-			if (reanimation.mLoopCount > 0)
+			break;
+		case SelectorAnimState.SELECTOR_NEW_USER:
+			if (mApp.GetDialog(Dialogs.DIALOG_CREATEUSER) == null)
 			{
-				mSignState = SelectorSignState.SIGN_UP;
+				aSelectorReanim.PlayReanim("anim_sign", ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD, 0, 30f);
+				mSelectorState = SelectorAnimState.SELECTOR_SHOW_SIGN;
+			}
+			break;
+		case SelectorAnimState.SELECTOR_SHOW_SIGN:
+			if (aSelectorReanim.mLoopCount > 0)
+			{
+				mSelectorState = SelectorAnimState.SELECTOR_IDLE;
+			}
+			break;
+		}
+		for (int i = 0; i < 6; i++)
+		{
+			Reanimation aCloudReanim = mApp.ReanimationGet(mCloudReanimID[i]);
+			if (mCloudCounter[i] > 0)
+			{
+				if (--mCloudCounter[i] == 0)
+				{
+					aCloudReanim.mLoopCount = 0;
+					aCloudReanim.mAnimTime = 0f;
+					aCloudReanim.mAnimRate = 0.5f;
+				}
+			}
+			else if (aCloudReanim.mLoopCount > 0)
+			{
+				mCloudCounter[i] = TodCommon.RandRangeInt(2000, 4000);
 			}
 		}
-		else if (mSignState == SelectorSignState.SIGN_MOVING_DOWN && reanimation.mLoopCount > 0)
+		aSelectorReanim.Update();
+		Reanimation aLeafReanim = mApp.ReanimationGet(mLeafReanimID);
+		aLeafReanim.Update();
+		int aLeafTrackIndex = aSelectorReanim.FindTrackIndex("SelectorScreen_BG_Right");
+		ReanimatorTransform aLeafTransform;
+		aSelectorReanim.GetCurrentTransform(aLeafTrackIndex, out aLeafTransform, false);
+		aLeafReanim.SetPosition(aLeafTransform.mTransX - 71f + Constants.Board_Additional_Width, aLeafTransform.mTransY - 41f + Constants.Board_Background_Offset_Y);
+		if (--mLeafCounter == 0)
 		{
-			mSignState = SelectorSignState.SIGN_DOWN;
+			float aRate = TodCommon.RandRangeFloat(3f, 12f);
+			aLeafReanim.PlayReanim("anim_grass", ReanimLoopType.REANIM_LOOP, 20, aRate);
+			mLeafCounter = TodCommon.RandRangeInt(200, 400);
 		}
-		if (mInUserDialog && mApp.GetDialog(30) == null)
+		for (int i = 0; i < 6; i++)
 		{
-			mInUserDialog = false;
-			LowerSign();
+			mApp.ReanimationGet(mCloudReanimID[i]).Update();
 		}
-		if (mNeedToPlayRollIn)
+		Reanimation aHandReanim = mApp.ReanimationTryToGet(mHandReanimID);
+		if (aHandReanim != null)
 		{
-			mApp.PlaySample(Resources.SOUND_ROLL_IN);
-			mNeedToPlayRollIn = false;
+			aHandReanim.Update();
 		}
-		if (woodSignY != 0f)
+		if (mSelectorState != SelectorAnimState.SELECTOR_SUB_MENU)
 		{
-			woodSignY += 1f;
-			if (woodSignY > 0f)
+			if (mMovementTimer == 0)
 			{
-				woodSignY = 0f;
+				mApp.KillAchievementScreen();
+				mApp.KillQuickPlayScreen();
 			}
-			reanimation.SetPosition(reanimation.mOverlayMatrix.mMatrix.Translation.X, woodSignY);
-		}
-		reanimation.Update();
-		if (mFadeInCounter > 0)
-		{
-			mFadeInCounter -= 3;
+			TrackButton(mAdventureButton, mShowStartButton ? "SelectorScreen_StartAdventure_button" : "SelectorScreen_Adventure_button", Constants.Board_Additional_Width, Constants.Board_Background_Offset_Y);
+			TrackButton(mMinigameButton, "SelectorScreen_Survival_button", Constants.Board_Additional_Width, Constants.Board_Background_Offset_Y);
+			TrackButton(mPuzzleButton, "SelectorScreen_Challenges_button", Constants.Board_Additional_Width, Constants.Board_Background_Offset_Y);
+			TrackButton(mSurvivalButton, "SelectorScreen_ZenGarden_button", Constants.Board_Additional_Width, Constants.Board_Background_Offset_Y);
+			TrackButton(mZenGardenButton, "SelectorScreen_BG_Right", 100f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 360f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mOptionsButton, "SelectorScreen_BG_Right", 494f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 434f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mQuitButton, "SelectorScreen_BG_Right", 644f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 469f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mHelpButton, "SelectorScreen_BG_Right", 576f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 458f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mAlmanacButton, "SelectorScreen_BG_Right", 256f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 387f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mStoreButton, "SelectorScreen_BG_Right", 334f + Constants.Board_Additional_Width + Constants.GameSelector_Extra.X, 441f + Constants.Board_Background_Offset_Y + Constants.GameSelector_Extra.Y);
+			TrackButton(mChangeUserButton, "woodsign2", 24f + Constants.Board_Additional_Width, 10f + Constants.Board_Background_Offset_Y);
+			TrackButton(mCreditsButton, "woodsign3", Constants.Board_Additional_Width, Constants.Board_Background_Offset_Y);
+			TrackButton(mAchievementButton, "SelectorScreen_BG_Left", Constants.GameSelector_Achievement_Off.X + Constants.Board_Additional_Width, Constants.GameSelector_Achievement_Off.Y + Constants.Board_Background_Offset_Y);
+			TrackButton(mQuickPlayButton, "SelectorScreen_BG_Right", Constants.GameSelector_QuickPlay_Off.X + Constants.Board_Additional_Width, Constants.GameSelector_QuickPlay_Off.Y + Constants.Board_Background_Offset_Y);
+			aSelectorReanim.SetImageOverride("woodsign2", mChangeUserButton.mIsOver || mChangeUserButton.mIsDown ? Resources.IMAGE_REANIM_SELECTORSCREEN_WOODSIGN2_PRESS : null);
+			aSelectorReanim.SetImageOverride("woodsign3", mCreditsButton.mIsOver || mCreditsButton.mIsDown ? Resources.IMAGE_REANIM_SELECTORSCREEN_WOODSIGN3_PRESS : null);
 		}
 	}
 
-	public virtual void ButtonMouseEnter(int theId)
+	public void TrackButton(NewLawnButton theButton, string theTrackName, float theOffsetX, float theOffsetY)
 	{
-		if (!mQuickplayLocked || theId != 101)
+		Reanimation aSelectorReanim = mApp.ReanimationGet(mSelectorReanimID);
+		int aTrackIndex = aSelectorReanim.FindTrackIndex(theTrackName);
+		ReanimatorTransform aTransform;
+		aSelectorReanim.GetCurrentTransform(aTrackIndex, out aTransform, false);
+		theButton.mX = (int)(aTransform.mTransX + theOffsetX);
+		theButton.mY = (int)(aTransform.mTransY + theOffsetY);
+	}
+
+	public override void AddedToManager(WidgetManager theWidgetManager)
+	{
+		base.AddedToManager(theWidgetManager);
+		theWidgetManager.AddWidget(mAdventureButton);
+		theWidgetManager.AddWidget(mMinigameButton);
+		theWidgetManager.AddWidget(mPuzzleButton);
+		theWidgetManager.AddWidget(mOptionsButton);
+		theWidgetManager.AddWidget(mQuitButton);
+		theWidgetManager.AddWidget(mHelpButton);
+		theWidgetManager.AddWidget(mStoreButton);
+		theWidgetManager.AddWidget(mAlmanacButton);
+		theWidgetManager.AddWidget(mSurvivalButton);
+		theWidgetManager.AddWidget(mZenGardenButton);
+		theWidgetManager.AddWidget(mChangeUserButton);
+		theWidgetManager.AddWidget(mCreditsButton);
+		theWidgetManager.AddWidget(mOverlayWidget);
+		if (GameConstants.HAS_ACHIEVEMENTS)
 		{
-			mApp.PlayFoley(FoleyType.FOLEY_BLEEP);
+			theWidgetManager.AddWidget(mAchievementButton);
+		}
+		if (GameConstants.HAS_QUICKPLAY)
+		{
+			theWidgetManager.AddWidget(mQuickPlayButton);
 		}
 	}
 
-	public virtual void ButtonPress(int theId, int theClickCount)
+	public override void RemovedFromManager(WidgetManager theWidgetManager)
 	{
-		if (mSlideCounter == 0)
+		base.RemovedFromManager(theWidgetManager);
+		theWidgetManager.RemoveWidget(mAdventureButton);
+		theWidgetManager.RemoveWidget(mMinigameButton);
+		theWidgetManager.RemoveWidget(mPuzzleButton);
+		theWidgetManager.RemoveWidget(mOptionsButton);
+		theWidgetManager.RemoveWidget(mQuitButton);
+		theWidgetManager.RemoveWidget(mHelpButton);
+		theWidgetManager.RemoveWidget(mStoreButton);
+		theWidgetManager.RemoveWidget(mAlmanacButton);
+		theWidgetManager.RemoveWidget(mSurvivalButton);
+		theWidgetManager.RemoveWidget(mZenGardenButton);
+		theWidgetManager.RemoveWidget(mChangeUserButton);
+		theWidgetManager.RemoveWidget(mCreditsButton);
+		theWidgetManager.RemoveWidget(mOverlayWidget);
+		if (GameConstants.HAS_ACHIEVEMENTS)
 		{
-			if (theId == 100 || theId == 101)
-			{
-				mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
-			}
-			else
-			{
-				mApp.PlaySample(Resources.SOUND_TAP);
-			}
+			theWidgetManager.RemoveWidget(mAchievementButton);
+		}
+		if (GameConstants.HAS_QUICKPLAY)
+		{
+			theWidgetManager.RemoveWidget(mQuickPlayButton);
 		}
 	}
 
-	public virtual void ButtonDepress(int theId)
+	public override void OrderInManagerChanged()
 	{
-		if (mApp.mPlayerInfo == null || mSlideCounter != 0)
+		mWidgetManager.PutInfront(mOverlayWidget, this);
+		mWidgetManager.PutInfront(mAlmanacButton, this);
+		mWidgetManager.PutInfront(mStoreButton, this);
+		mWidgetManager.PutInfront(mHelpButton, this);
+		mWidgetManager.PutInfront(mQuitButton, this);
+		mWidgetManager.PutInfront(mOptionsButton, this);
+		mWidgetManager.PutInfront(mAdventureButton, this);
+		mWidgetManager.PutInfront(mMinigameButton, this);
+		mWidgetManager.PutInfront(mPuzzleButton, this);
+		mWidgetManager.PutInfront(mZenGardenButton, this);
+		mWidgetManager.PutInfront(mSurvivalButton, this);
+		mWidgetManager.PutInfront(mChangeUserButton, this);
+		mWidgetManager.PutInfront(mCreditsButton, this);
+		if (GameConstants.HAS_ACHIEVEMENTS)
 		{
-			return;
+			mWidgetManager.PutInfront(mAchievementButton, this);
 		}
-		if (theId == 101 && mQuickplayLocked)
+		if (GameConstants.HAS_QUICKPLAY)
 		{
-			mApp.LawnMessageBox(49, "[MODE_LOCKED]", "[QUICKPLAY_LOCKED_MESSAGE]", "[DIALOG_BUTTON_OK]", "", 3, null);
-			return;
-		}
-		state = GameSelectorScreenState.Main;
-		switch (theId)
-		{
-		case 124:
-			mApp.KillGameSelector();
-			mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
-			break;
-		case 120:
-			mApp.KillGameSelector();
-			mApp.ShowLeaderboardScreen();
-			break;
-		case 100:
-			mApp.KillGameSelector();
-			ClickedAdventure();
-			break;
-		case 101:
-			mQuickplayWidget.Clear();
-			mQuickplayWidget.SizeToFit();
-			SlideTo(-Constants.QUICKPLAY_ORIGIN_X - 30, 0);
-			SlideOutQuickPlayWidget();
-			state = GameSelectorScreenState.QuickPlay;
-			break;
-		case 111:
-			mApp.ConfirmQuit();
-			break;
-		case 110:
-			mApp.KillGameSelector();
-			mApp.ShowAwardScreen(AwardType.AWARD_HELP_ZOMBIE_NOTE, theShowAchievements: false);
-			break;
-		case 109:
-			mApp.DoNewOptions(theFromGameSelector: true);
-			break;
-		case 113:
-			mApp.BuyGame();
-			break;
-		case 112:
-			mDoNewGameAfterStore = false;
-			mApp.ShowStoreScreen(this);
-			break;
-		case 114:
-			mApp.DoAlmanacDialog(SeedType.SEED_NONE, ZombieType.ZOMBIE_INVALID, this);
-			break;
-		case 115:
-			mMoreGamesButton.mVisible = false;
-			mMoreGamesButton.mDisabled = true;
-			mMoreGamesBackButton.mVisible = true;
-			mMoreGamesBackButton.mDisabled = false;
-			mMoreGamesScrollWidget.ScrollToMin(animated: false);
-			if (mApp.mPlayerInfo != null)
-			{
-				mApp.mPlayerInfo.mLastSeenMoreGames = DateTime.UtcNow;
-				mApp.WriteCurrentUserConfig();
-			}
-			SlideTo(0, 0);
-			state = GameSelectorScreenState.MoreGames;
-			break;
-		case 116:
-			mMoreGamesBackButton.mVisible = false;
-			mMoreGamesBackButton.mDisabled = true;
-			mMoreGamesButton.mVisible = true;
-			mMoreGamesButton.mDisabled = false;
-			SlideTo(-Constants.MAIN_MENU_ORIGIN_X, 0);
-			state = GameSelectorScreenState.Main;
-			break;
-		case 108:
-			RetractQuickPlayWidget();
-			SlideTo(-Constants.MAIN_MENU_ORIGIN_X, 0);
-			state = GameSelectorScreenState.Main;
-			break;
-		case 117:
-			mAchievementsScrollWidget.ScrollToMin(animated: false);
-			SlideTo(-Constants.ACHIEVEMENTS_ORIGIN_X, -Constants.BOARD_HEIGHT);
-			mAchievementsScrollWidget.SetDisabled(isDisabled: false);
-			state = GameSelectorScreenState.Achievements;
-			break;
-		case 118:
-			if (mAchievementsScrollWidget.GetScrollOffset().y != 0f)
-			{
-				mAchievementsScrollWidget.ScrollToMin(animated: true);
-				wantToExitFromAchievementsViaBackButton = true;
-			}
-			else
-			{
-				SlideTo(-Constants.MAIN_MENU_ORIGIN_X, 0);
-				state = GameSelectorScreenState.Main;
-				mAchievementsScrollWidget.SetDisabled(isDisabled: true);
-			}
-			break;
-		case 102:
-		case 103:
-		case 104:
-		case 105:
-		case 106:
-		case 107:
-			if (theId != mSelectedQuickplayButtonId)
-			{
-				ToggleGameButton(mSelectedQuickplayButtonId);
-				ToggleGameButton(theId);
-				mSelectedQuickplayButtonId = theId;
-				RetractQuickPlayWidget();
-			}
-			break;
-		case 121:
-		case 122:
-		case 123:
-			if (theId != mSelectedQuickplayButtonId)
-			{
-				ToggleGameButton(mSelectedQuickplayButtonId);
-				ToggleGameButton(theId);
-				mSelectedQuickplayButtonId = theId;
-				RetractQuickPlayWidget();
-			}
-			state = GameSelectorScreenState.MoreGames;
-			break;
-		case 119:
-			break;
+			mWidgetManager.PutInfront(mQuickPlayButton, this);
 		}
 	}
 
@@ -787,23 +1006,27 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		if (mApp.mKonamiCheck.Check(theKey))
 		{
 			mApp.PlayFoley(FoleyType.FOLEY_DROP);
+			return;
 		}
-		else if (mApp.mMustacheCheck.Check(theKey) || mApp.mMoustacheCheck.Check(theKey))
+		if (mApp.mMustacheCheck.Check(theKey) || mApp.mMoustacheCheck.Check(theKey))
 		{
 			mApp.PlayFoley(FoleyType.FOLEY_POLEVAULT);
 			mApp.mMustacheMode = !mApp.mMustacheMode;
+			return;
 		}
-		else if (mApp.mSuperMowerCheck.Check(theKey) || mApp.mSuperMowerCheck2.Check(theKey))
+		if (mApp.mSuperMowerCheck.Check(theKey) || mApp.mSuperMowerCheck2.Check(theKey))
 		{
 			mApp.PlayFoley(FoleyType.FOLEY_ZAMBONI);
 			mApp.mSuperMowerMode = !mApp.mSuperMowerMode;
+			return;
 		}
-		else if (mApp.mFutureCheck.Check(theKey))
+		if (mApp.mFutureCheck.Check(theKey))
 		{
 			mApp.PlaySample(Resources.SOUND_BOING);
 			mApp.mFutureMode = !mApp.mFutureMode;
+			return;
 		}
-		else if (mApp.mPinataCheck.Check(theKey))
+		if (mApp.mPinataCheck.Check(theKey))
 		{
 			if (mApp.CanDoPinataMode())
 			{
@@ -814,8 +1037,9 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 			{
 				mApp.PlaySample(Resources.SOUND_BUZZER);
 			}
+			return;
 		}
-		else if (mApp.mDanceCheck.Check(theKey))
+		if (mApp.mDanceCheck.Check(theKey))
 		{
 			if (mApp.CanDoDanceMode())
 			{
@@ -826,8 +1050,9 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 			{
 				mApp.PlaySample(Resources.SOUND_BUZZER);
 			}
+			return;
 		}
-		else if (mApp.mDaisyCheck.Check(theKey))
+		if (mApp.mDaisyCheck.Check(theKey))
 		{
 			if (mApp.CanDoDaisyMode())
 			{
@@ -838,119 +1063,174 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 			{
 				mApp.PlaySample(Resources.SOUND_BUZZER);
 			}
+			return;
+		}
+		if (mApp.mSukhbirCheck.Check(theKey))
+		{
+			mApp.PlaySample(Resources.SOUND_SUKHBIR4);
+			mApp.mSukhbirMode = !mApp.mSukhbirMode;
+			return;
 		}
 	}
 
 	public override void KeyChar(SexyChar theChar)
 	{
-		if (theChar.value_type != 'u' || mApp.mPlayerInfo == null)
+		if (mStartingGame)
 		{
 			return;
 		}
-		mApp.mPlayerInfo.mFinishedAdventure = 2;
-		mApp.mPlayerInfo.AddCoins(50000);
-		mApp.mPlayerInfo.mHasUsedCheatKeys = true;
-		mApp.mPlayerInfo.mHasUnlockedMinigames = true;
-		mApp.mPlayerInfo.mHasUnlockedPuzzleMode = true;
-		mApp.mPlayerInfo.mHasUnlockedSurvivalMode = true;
-		for (int i = 0; i < 200; i++)
+		if ((GlobalStaticVars.gIsPartnerBuild || mDebugKeysEnabled) && theChar.value_type == 'u' && mApp.mPlayerInfo != null)
 		{
-			GameMode gameMode = (GameMode)(i + 1);
-			if (gameMode != GameMode.GAMEMODE_SCARY_POTTER_ENDLESS && gameMode != GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS && gameMode != GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_3)
+			mApp.mPlayerInfo.mFinishedAdventure = 2;
+			mApp.mPlayerInfo.AddCoins(50000);
+			mApp.mPlayerInfo.mHasUsedCheatKeys = true;
+			mApp.mPlayerInfo.mHasUnlockedMinigames = true;
+			mApp.mPlayerInfo.mHasUnlockedPuzzleMode = true;
+			mApp.mPlayerInfo.mHasUnlockedSurvivalMode = true;
+			for (int i = 1; i < 100; i++)
 			{
-				mApp.mPlayerInfo.mChallengeRecords[i] = 20;
+				GameMode gameMode = (GameMode)i;
+				if (gameMode != GameMode.GAMEMODE_TREE_OF_WISDOM && gameMode != GameMode.GAMEMODE_SCARY_POTTER_ENDLESS && gameMode != GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS && gameMode != GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_3)
+				{
+					mApp.mPlayerInfo.mChallengeRecords[i - 1] = 20;
+				}
+			}
+			SyncProfile(theShowLoading: true);
+			mApp.EraseFile(LawnCommon.GetSavedGameName(GameMode.GAMEMODE_ADVENTURE, (int)mApp.mPlayerInfo.mId));
+		}
+		if (mDebugKeysEnabled)
+		{
+			if (theChar.value_type == 'c' || theChar.value_type == 'C')
+			{
+				mMinigamesLocked = false;
+				mPuzzleLocked = false;
+				mSurvivalLocked = false;
+				SyncButtons();
+			}
+			if (theChar.value_type == 'a')
+			{
+				mDebugText = !mDebugText;
+				return;
+			}
+			if (theChar.value_type == 'p')
+			{
+				AddPreviewProfiles();
 			}
 		}
-		for (int j = 0; j < 80; j++)
-		{
-			mApp.mPlayerInfo.mPurchases[j] = 1;
-		}
-		mApp.mPlayerInfo.mPurchases[7] = 0;
-		SyncProfile(theShowLoading: true);
-		string savedGameName = LawnCommon.GetSavedGameName(GameMode.GAMEMODE_ADVENTURE, (int)mApp.mPlayerInfo.mId);
-		mApp.EraseFile(savedGameName);
 	}
 
 	public override void MouseDown(int x, int y, int theClickCount)
 	{
-		if (y > Constants.BOARD_HEIGHT)
+		for (int i = 0; i < 3; i++)
 		{
-			mApp.PlaySample(Resources.SOUND_TAP);
-			ButtonDepress(118);
+			Reanimation aFlowerReanim = mApp.ReanimationGet(mFlowerReanimID[i]);
+			if (aFlowerReanim.mAnimRate <= 0f && TodCommon.Distance2D(x - Constants.Board_Additional_Width, y - Constants.Board_Background_Offset_Y, gFlowerCenter[i, 0], gFlowerCenter[i, 1]) < 20f)
+			{
+				aFlowerReanim.mAnimRate = 24f;
+				mApp.PlayFoley(FoleyType.FOLEY_LIMBS_POP);
+			}
+		}
+		if (mApp.mTodCheatKeys && mStartingGame && mStartingGameCounter < 450)
+		{
+			mStartingGameCounter = 450;
 		}
 	}
 
-	public override void AddedToManager(WidgetManager theWidgetManager)
+	public void ButtonMouseEnter(int theId)
 	{
-		base.AddedToManager(theWidgetManager);
-		mX = -Constants.MAIN_MENU_ORIGIN_X;
+		if ((theId == 101 && mMinigamesLocked) || (theId == 102 && mPuzzleLocked) || (theId == 110 && mSurvivalLocked))
+		{
+			return;
+		}
+		mApp.PlayFoley(FoleyType.FOLEY_BLEEP);
 	}
 
-	public void SyncButtons()
+	public virtual void ButtonPress(int theId)
 	{
-		bool flag = mApp.CanShowAlmanac() || mUnlockSelectorCheat;
-		bool flag2 = mApp.CanShowStore() || mUnlockSelectorCheat;
-		bool flag3 = mApp.CanShowZenGarden() || mUnlockSelectorCheat;
-		mAlmanacButton.mDisabled = !flag;
-		mAlmanacButton.mVisible = flag;
-		mStoreButton.mDisabled = !flag2;
-		mStoreButton.mVisible = flag2;
-		mZenGardenButton.mDisabled = !flag3;
-		mZenGardenButton.mVisible = flag3;
-		SetupUnlockFullGameReanim();
-		if (mQuickplayLocked)
+		if (theId == 100 || theId == 101 || theId == 102 || theId == 110)
 		{
-			mMoreWaysToPlayButton.mOverImage = AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS;
-			mMoreWaysToPlayButton.mDownImage = AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS;
-			mMoreWaysToPlayButton.SetColor(5, new SexyColor(128, 128, 128));
+			mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
 		}
 		else
 		{
-			mMoreWaysToPlayButton.mOverImage = AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_HIGHLIGHT;
-			mMoreWaysToPlayButton.mDownImage = AtlasResources.IMAGE_REANIM_SELECTORSCREEN_MOREWAYS_HIGHLIGHT;
-			mMoreWaysToPlayButton.SetColor(5, SexyColor.White);
+			mApp.PlaySample(Resources.SOUND_TAP);
 		}
 	}
 
-	public void AddTrophySparkle()
+	public virtual void ButtonPress(int theId, int theClickCount)
+	{
+		ButtonPress(theId);
+	}
+
+	public virtual void ButtonDownTick(int theId)
+	{
+	}
+
+	public virtual void ButtonMouseLeave(int theId)
+	{
+	}
+
+	public virtual void ButtonMouseMove(int theId, int theX, int theY)
 	{
 	}
 
 	public void ClickedAdventure()
 	{
+		if (mApp.IsTrialStageLocked() && (mLevel >= 25 || mApp.HasFinishedAdventure()))
+		{
+			mWaitingTrialConfirm = true;
+			mApp.LawnMessageBox((int)Dialogs.DIALOG_MESSAGE, "[REPLAY_LEVEL_HEADER]", "[REPLAY_LEVEL_BODY]", "[DIALOG_BUTTON_YES]", "[DIALOG_BUTTON_NO]", (int)Dialog.DialogButtons.BUTTONS_YES_NO, this);
+			return;
+		}
+		StartAdventureAfterConfirm();
+	}
+
+	public virtual void LawnMessageBoxDone(int theResult)
+	{
+		if (!mWaitingTrialConfirm)
+		{
+			return;
+		}
+		mWaitingTrialConfirm = false;
+		if (theResult == (int)Dialog.DialogResult.ID_NO)
+		{
+			return;
+		}
+		mApp.mPlayerInfo.SetLevel(24);
+		mApp.mPlayerInfo.mFinishedAdventure = 0;
+		mApp.EraseFile(LawnCommon.GetSavedGameName(GameMode.GAMEMODE_ADVENTURE, (int)mApp.mPlayerInfo.mId));
+		StartAdventureAfterConfirm();
+	}
+
+	public void StartAdventureAfterConfirm()
+	{
 		mApp.mMusic.StopAllMusic();
-		mAdventureButton.SetDisabled(isDisabled: true);
-		mMoreWaysToPlayButton.SetDisabled(isDisabled: true);
-		mZenGardenButton.SetDisabled(isDisabled: true);
-		mOptionsButton.SetDisabled(isDisabled: true);
-		mUnlockGameButton.SetDisabled(isDisabled: true);
-		mStoreButton.SetDisabled(isDisabled: true);
-		mAlmanacButton.SetDisabled(isDisabled: true);
-		mMoreGamesButton.SetDisabled(isDisabled: true);
-		mAchievementsButton.SetDisabled(isDisabled: true);
-		mApp.KillGameSelector();
-		if (mApp.IsIceDemo())
+		mApp.PlaySample(Resources.SOUND_LOSEMUSIC);
+		mStartingGame = true;
+		mAdventureButton.SetDisabled(true);
+		mMinigameButton.SetDisabled(true);
+		mPuzzleButton.SetDisabled(true);
+		mOptionsButton.SetDisabled(true);
+		mQuitButton.SetDisabled(true);
+		mHelpButton.SetDisabled(true);
+		mChangeUserButton.SetDisabled(true);
+		mCreditsButton.SetDisabled(true);
+		mStoreButton.SetDisabled(true);
+		mAlmanacButton.SetDisabled(true);
+		mSurvivalButton.SetDisabled(true);
+		mZenGardenButton.SetDisabled(true);
+		mAchievementButton.SetDisabled(true);
+		mQuickPlayButton.SetDisabled(true);
+		Reanimation aHandReanim = mApp.AddReanimation(-70f + Constants.Board_Additional_Width, 10f + Constants.Board_Background_Offset_Y, 0, ReanimationType.REANIM_ZOMBIE_HAND);
+		aHandReanim.mLoopType = ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD;
+		mHandReanimID = mApp.ReanimationGetID(aHandReanim);
+		mApp.PlayFoley(FoleyType.FOLEY_DIRT_RISE);
+		for (int i = 0; i < aHandReanim.mDefinition.mTrackCount; i++)
 		{
-			mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ICE, theLookForSavedGame: false);
-		}
-		else if (mApp.IsFirstTimeAdventureMode() && mLevel == 1 && !mApp.SaveFileExists())
-		{
-			mApp.PreNewGame(GameMode.GAMEMODE_INTRO, theLookForSavedGame: false);
-		}
-		else if (mApp.mPlayerInfo.mNeedsMagicTacoReward && mLevel == 35)
-		{
-			StoreScreen storeScreen = mApp.ShowStoreScreen(this);
-			storeScreen.SetupForIntro(601);
-			mDoNewGameAfterStore = true;
-		}
-		else if (ShouldDoZenTuturialBeforeAdventure())
-		{
-			mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
-			mApp.mZenGarden.SetupForZenTutorial();
-		}
-		else
-		{
-			mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: true);
+			if (aHandReanim.mDefinition.mTracks[i].mName.StartsWith("rock", StringComparison.OrdinalIgnoreCase))
+			{
+				aHandReanim.mTrackInstances[i].mIgnoreClipRect = true;
+			}
 		}
 	}
 
@@ -963,9 +1243,228 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		return false;
 	}
 
+	public virtual void ButtonDepress(int theId)
+	{
+		if (theId == 101 && mMinigamesLocked)
+		{
+			mApp.LawnMessageBox((int)Dialogs.DIALOG_MESSAGE, "[MODE_LOCKED]", "[MINIGAME_LOCKED_MESSAGE]", "[DIALOG_BUTTON_OK]", "", (int)Dialog.DialogButtons.BUTTONS_FOOTER, this);
+			return;
+		}
+		if (theId == 102 && mPuzzleLocked)
+		{
+			mApp.LawnMessageBox((int)Dialogs.DIALOG_MESSAGE, "[MODE_LOCKED]", "[PUZZLE_LOCKED_MESSAGE]", "[DIALOG_BUTTON_OK]", "", (int)Dialog.DialogButtons.BUTTONS_FOOTER, this);
+			return;
+		}
+		if (theId == 110 && mSurvivalLocked)
+		{
+			mApp.LawnMessageBox((int)Dialogs.DIALOG_MESSAGE, "[MODE_LOCKED]", "[SURVIVAL_LOCKED_MESSAGE]", "[DIALOG_BUTTON_OK]", "", (int)Dialog.DialogButtons.BUTTONS_FOOTER, this);
+			return;
+		}
+		switch (theId)
+		{
+		case 100:
+			ClickedAdventure();
+			break;
+		case 101:
+			mApp.KillGameSelector();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
+			break;
+		case 102:
+			mApp.KillGameSelector();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_PUZZLE);
+			break;
+		case 110:
+			mApp.KillGameSelector();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
+			break;
+		case 105:
+			mApp.ConfirmQuit();
+			break;
+		case 104:
+			mApp.KillGameSelector();
+			mApp.ShowAwardScreen(AwardType.AWARD_HELP_ZOMBIE_NOTE, theShowAchievements: false);
+			break;
+		case 103:
+			mApp.DoNewOptions(theFromGameSelector: true);
+			break;
+		case 106:
+			mApp.DoUserDialog();
+			break;
+	{
+			mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
+			break;
+	}
+		case 108:
+			mApp.DoAlmanacDialog().WaitForResult(true);
+			mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
+			break;
+		case 111:
+			mMovementTimer = 75;
+			mDestinationY = -mApp.mHeight;
+			mSelectorState = SelectorAnimState.SELECTOR_SUB_MENU;
+			mApp.ShowAchievementScreen();
+			mAdventureButton.SetDisabled(true);
+			mMinigameButton.SetDisabled(true);
+			mPuzzleButton.SetDisabled(true);
+			mOptionsButton.SetDisabled(true);
+			mQuitButton.SetDisabled(true);
+			mHelpButton.SetDisabled(true);
+			mChangeUserButton.SetDisabled(true);
+			mCreditsButton.SetDisabled(true);
+			mStoreButton.SetDisabled(true);
+			mAlmanacButton.SetDisabled(true);
+			mSurvivalButton.SetDisabled(true);
+			mZenGardenButton.SetDisabled(true);
+			mAchievementButton.SetDisabled(true);
+			mQuickPlayButton.SetDisabled(true);
+			break;
+		case 112:
+			mMovementTimer = 75;
+			mDestinationX = -mApp.mWidth;
+			mSelectorState = SelectorAnimState.SELECTOR_SUB_MENU;
+			mApp.ShowQuickPlayScreen();
+			mAdventureButton.SetDisabled(true);
+			mMinigameButton.SetDisabled(true);
+			mPuzzleButton.SetDisabled(true);
+			mOptionsButton.SetDisabled(true);
+			mQuitButton.SetDisabled(true);
+			mHelpButton.SetDisabled(true);
+			mChangeUserButton.SetDisabled(true);
+			mCreditsButton.SetDisabled(true);
+			mStoreButton.SetDisabled(true);
+			mAlmanacButton.SetDisabled(true);
+			mSurvivalButton.SetDisabled(true);
+			mZenGardenButton.SetDisabled(true);
+			mAchievementButton.SetDisabled(true);
+			mQuickPlayButton.SetDisabled(true);
+			break;
+		case 109:
+			mApp.KillGameSelector();
+			mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
+			if (ShouldDoZenTuturialBeforeAdventure())
+			{
+				mApp.mZenGarden.SetupForZenTutorial();
+			}
+			break;
+		case 113:
+			mApp.KillGameSelector();
+			mApp.ShowCreditScreen();
+			break;
+		}
+	}
+
+	public int CalcYPos(int ogY, int theY)
+	{
+		mDestinationY = theY;
+		return TodCommon.TodAnimateCurve(75, 0, mMovementTimer, mCurrentY, mDestinationY, TodCurves.CURVE_EASE_IN_OUT);
+	}
+
+	public int CalcXPos(int ogX, int theX)
+	{
+		mDestinationX = theX;
+		return TodCommon.TodAnimateCurve(75, 0, mMovementTimer, mCurrentX, mDestinationX, TodCurves.CURVE_EASE_IN_OUT);
+	}
+
+	public void AddPreviewProfiles()
+	{
+		PlayerInfo aProfile;
+		aProfile = mApp.mProfileMgr.AddProfile("2 Night");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(11);
+			aProfile.SaveDetails();
+		}
+		aProfile = mApp.mProfileMgr.AddProfile("3 Pool");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(21);
+			aProfile.mHasUnlockedMinigames = true;
+			aProfile.mCoins = 400;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PACKET_UPGRADE] = 1;
+			aProfile.SaveDetails();
+		}
+		aProfile = mApp.mProfileMgr.AddProfile("4 Fog");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(31);
+			aProfile.mHasUnlockedMinigames = true;
+			aProfile.mHasUnlockedSurvivalMode = true;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PACKET_UPGRADE] = 2;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_POOL_CLEANER] = 1;
+			aProfile.mCoins = 400;
+			aProfile.SaveDetails();
+		}
+		aProfile = mApp.mProfileMgr.AddProfile("5 Roof");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(41);
+			aProfile.mHasUnlockedMinigames = true;
+			aProfile.mHasUnlockedPuzzleMode = true;
+			aProfile.mHasUnlockedSurvivalMode = true;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PACKET_UPGRADE] = 2;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_POOL_CLEANER] = 1;
+			aProfile.mCoins = 500;
+			aProfile.SaveDetails();
+		}
+		aProfile = mApp.mProfileMgr.AddProfile("Complete");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(1);
+			aProfile.mFinishedAdventure = 1;
+			aProfile.mHasUnlockedMinigames = true;
+			aProfile.mHasUnlockedPuzzleMode = true;
+			aProfile.mHasUnlockedSurvivalMode = true;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PACKET_UPGRADE] = 2;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_POOL_CLEANER] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_ROOF_CLEANER] = 1;
+			aProfile.mCoins = 1000;
+			aProfile.SaveDetails();
+		}
+		aProfile = mApp.mProfileMgr.AddProfile("Full Unlock");
+		if (aProfile != null)
+		{
+			aProfile.SetLevel(1);
+			aProfile.mFinishedAdventure = 2;
+			aProfile.AddCoins(50000);
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_FERTILIZER] = 1000 + 5;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_BUG_SPRAY] = 1000 + 5;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_CHOCOLATE] = 1000 + 5;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_TREE_FOOD] = 1000 + 5;
+			aProfile.mHasUnlockedMinigames = true;
+			aProfile.mHasUnlockedPuzzleMode = true;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_GATLINGPEA] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_TWINSUNFLOWER] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_GLOOMSHROOM] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_CATTAIL] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_WINTERMELON] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_GOLD_MAGNET] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_SPIKEROCK] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_COBCANNON] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_IMITATER] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PACKET_UPGRADE] = 3;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_POOL_CLEANER] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_ROOF_CLEANER] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_PHONOGRAPH] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_GARDENING_GLOVE] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_MUSHROOM_GARDEN] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_WHEEL_BARROW] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_AQUARIUM_GARDEN] = 1;
+			aProfile.mPurchases[(int)StoreItem.STORE_ITEM_TREE_OF_WISDOM] = 1;
+			aProfile.mChallengeRecords[(int)GameMode.GAMEMODE_TREE_OF_WISDOM - 1] = 1;
+			for (int i = 1; i < 100; i++)
+			{
+				GameMode gameMode = (GameMode)i;
+				if (gameMode != GameMode.GAMEMODE_TREE_OF_WISDOM && gameMode != GameMode.GAMEMODE_SCARY_POTTER_ENDLESS && gameMode != GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS && gameMode != GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_3)
+				{
+					aProfile.mChallengeRecords[i - 1] = 20;
+				}
+			}
+			aProfile.SaveDetails();
+		}
+	}
+
 	public void BackFromStore()
 	{
-		_ = (StoreScreen)mApp.GetDialog(Dialogs.DIALOG_STORE);
 		mApp.KillDialog(4);
 		if (mDoNewGameAfterStore)
 		{
@@ -977,135 +1476,4 @@ internal class GameSelector : Widget, ButtonListener, StoreListener, AlmanacList
 		}
 	}
 
-	public void QuickPlayStageSelected(int theLevel)
-	{
-		mApp.PlaySample(Resources.SOUND_TAP);
-		mApp.KillGameSelector();
-		GameMode theGameMode = (GameMode)(theLevel - 1 + 72);
-		mApp.PreNewGame(theGameMode, theLookForSavedGame: true);
-	}
-
-	public void MiniGamesStageSelected(int theLevel)
-	{
-		mApp.PlaySample(Resources.SOUND_TAP);
-		GameMode theGameMode = (GameMode)(theLevel + 1);
-		mApp.KillGameSelector();
-		mApp.PreNewGame(theGameMode, theLookForSavedGame: true);
-	}
-
-	public void BackFromAlmanac()
-	{
-		mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
-	}
-
-	public void LoadGames()
-	{
-	}
-
-	public void SlideTo(int theX, int theY)
-	{
-		mSlideCounter = 75;
-		mDestX = theX;
-		mDestY = theY;
-		mStartX = mX;
-		mStartY = mY;
-	}
-
-	public void MoveToQuickplay(bool theDoFadeIn, GameSelectorButtons theButton)
-	{
-		state = GameSelectorScreenState.QuickPlay;
-		if (theDoFadeIn)
-		{
-			mFadeInCounter = 180;
-		}
-		mQuickplayWidget.Clear();
-		mQuickplayWidget.SizeToFit();
-		Move(-Constants.QUICKPLAY_ORIGIN_X - 30, 0);
-		RetractQuickPlayWidget();
-		mQuickplaySlideCounter = 0;
-		if (theButton != (GameSelectorButtons)mSelectedQuickplayButtonId)
-		{
-			ToggleGameButton(mSelectedQuickplayButtonId);
-			ToggleGameButton((int)theButton);
-			mSelectedQuickplayButtonId = (int)theButton;
-			PopulateQuickPlayWidget();
-			mMiniGamesScrollWidget.ScrollToMin(animated: false);
-			mMiniGamesScrollWidget.Move(mMiniGamesScrollWidget.mX, 10);
-		}
-	}
-
-	public void SlideOutQuickPlayWidget()
-	{
-		mQuickplayScrollWidget.ScrollToMin(animated: false);
-		mMiniGamesScrollWidget.ScrollToMin(animated: false);
-		mRetractingQuickplay = false;
-		mQuickplaySlideCounter = 30;
-	}
-
-	public void RetractQuickPlayWidget()
-	{
-		mQuickplayScrollWidget.ScrollToMin(animated: false);
-		mRetractingQuickplay = true;
-		mQuickplaySlideCounter = 30;
-	}
-
-	public void PopulateQuickPlayWidget()
-	{
-		MiniGameMode mode = MiniGameMode.MINI_GAME_MODE_GAMES;
-		switch (mSelectedQuickplayButtonId)
-		{
-		case 121:
-			mode = MiniGameMode.MINI_GAME_MODE_GAMES;
-			break;
-		case 123:
-			mode = MiniGameMode.MINI_GAME_MODE_I_ZOMBIE;
-			break;
-		case 122:
-			mode = MiniGameMode.MINI_GAME_MODE_VASEBREAKER;
-			break;
-		}
-		mMiniGamesWidget.SwitchMode(mode);
-	}
-
-	public void ToggleGameButton(int theId)
-	{
-		DialogButton dialogButton;
-		switch (theId)
-		{
-		default:
-			return;
-		case 121:
-			dialogButton = mMiniGamesButton;
-			break;
-		case 122:
-			dialogButton = mVaseBreakerButton;
-			break;
-		case 123:
-			dialogButton = mIZombieButton;
-			break;
-		}
-		Image mButtonImage = dialogButton.mButtonImage;
-		dialogButton.mButtonImage = dialogButton.mDownImage;
-		dialogButton.mDownImage = (dialogButton.mOverImage = mButtonImage);
-	}
-
-	public void ButtonMouseMove(int id, int x, int y)
-	{
-	}
-
-	public void ButtonMouseLeave(int id)
-	{
-	}
-
-	public void ButtonMouseTick(int id)
-	{
-	}
-
-	public void ButtonDownTick(int id)
-	{
-	}
-
-	public void ButtonPress(int id)
-	{
-	}
 }

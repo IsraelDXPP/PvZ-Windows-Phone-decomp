@@ -52,6 +52,8 @@ internal class PlayerInfo
 
 	public bool mHasNewSurvival;
 
+	public bool mHasNewScaryPotter;
+
 	public bool mHasUnlockedSurvivalMode;
 
 	public bool mNeedsMessageOnGameSelector;
@@ -172,8 +174,8 @@ internal class PlayerInfo
 		{
 			mPottedPlant[i] = new PottedPlant();
 		}
-		mShownAchievements = new bool[18];
-		mEarnedAchievements = new bool[18];
+		mShownAchievements = new bool[21];
+		mEarnedAchievements = new bool[21];
 		mPlantTypesUsed = new bool[49];
 		mChallengeRecords = new int[200];
 		for (int j = 0; j < 200; j++)
@@ -202,6 +204,7 @@ internal class PlayerInfo
 		mHasNewVasebreaker = false;
 		mHasNewIZombie = false;
 		mHasNewSurvival = false;
+		mHasNewScaryPotter = false;
 		mHasUnlockedSurvivalMode = false;
 		mNeedsMessageOnGameSelector = false;
 		mNeedsMagicTacoReward = false;
@@ -215,7 +218,7 @@ internal class PlayerInfo
 			mPlaceHolderPlayerStats[l] = 0;
 		}
 		mNumPottedPlants = 0;
-		for (int m = 0; m < 18; m++)
+		for (int m = 0; m < 21; m++)
 		{
 			mEarnedAchievements[m] = false;
 			mShownAchievements[m] = false;
@@ -292,6 +295,7 @@ internal class PlayerInfo
 			mHasNewIZombie = theBuffer.ReadBoolean();
 			mHasNewMiniGame = theBuffer.ReadBoolean();
 			mHasNewSurvival = theBuffer.ReadBoolean();
+			mHasNewScaryPotter = theBuffer.ReadBoolean();
 			mHasNewVasebreaker = theBuffer.ReadBoolean();
 			mHasSeenStinky = theBuffer.ReadBoolean();
 			mHasSeenUpsell = theBuffer.ReadBoolean();
@@ -378,7 +382,7 @@ internal class PlayerInfo
 	{
 		for (int i = 0; i < mEarnedAchievements.Length; i++)
 		{
-			AchievementItem achievementItem = Achievements.GetAchievementItem((AchievementId)i);
+			AchievementItem achievementItem = Sexy.Achievements.GetAchievementItem((AchievementId)i);
 			if (achievementItem != null)
 			{
 				mEarnedAchievements[i] = achievementItem.IsEarned;
@@ -414,6 +418,7 @@ internal class PlayerInfo
 			buffer.WriteBoolean(mHasNewIZombie);
 			buffer.WriteBoolean(mHasNewMiniGame);
 			buffer.WriteBoolean(mHasNewSurvival);
+			buffer.WriteBoolean(mHasNewScaryPotter);
 			buffer.WriteBoolean(mHasNewVasebreaker);
 			buffer.WriteBoolean(mHasSeenStinky);
 			buffer.WriteBoolean(mHasSeenUpsell);

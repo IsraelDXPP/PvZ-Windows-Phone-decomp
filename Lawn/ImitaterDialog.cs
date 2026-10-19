@@ -18,7 +18,7 @@ internal class ImitaterDialog : LawnDialog, SeedPacketsWidgetListener
 		AddWidget(mScrollWidget);
 		mScrollWidget.AddWidget(mSeedPacketsWidget);
 		mScrollWidget.Resize(mWidth / 2 - mSeedPacketsWidget.mWidth / 2 - Constants.ImitaterDialog_ScrollWidget_Offset_X, Constants.ImitaterDialog_ScrollWidget_Y, mSeedPacketsWidget.mWidth + Constants.ImitaterDialog_ScrollWidget_ExtraWidth, Constants.ImitaterDialog_Height);
-		mScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
+		mScrollWidget.EnableIndicators(Resources.IMAGE_SCROLL_INDICATOR);
 		mSeedPacketsWidget.Move(0, 0);
 		mClip = false;
 		mLawnYesButton.mLabel = TodStringFile.TodStringTranslate("[DIALOG_BUTTON_CANCEL]");
@@ -42,11 +42,11 @@ internal class ImitaterDialog : LawnDialog, SeedPacketsWidgetListener
 		g.SetColorizeImages(colorizeImages: true);
 		if (mSeedPacketsWidget.mY < 0)
 		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT, mScrollWidget.mX, mScrollWidget.mY + (int)Constants.InvertAndScale(-2f), (int)Constants.InvertAndScale(222f), (int)Constants.InvertAndScale(12f));
+			g.DrawImage(Resources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT, mScrollWidget.mX, mScrollWidget.mY + (int)Constants.InvertAndScale(-2f), (int)Constants.InvertAndScale(222f), (int)Constants.InvertAndScale(12f));
 		}
 		if (mSeedPacketsWidget.mY + mSeedPacketsWidget.mHeight > mScrollWidget.mHeight)
 		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT, mScrollWidget.mX + (int)Constants.InvertAndScale(-2f), mScrollWidget.mY + Constants.ImitaterDialog_BottomGradient_Y, (int)Constants.InvertAndScale(225f), (int)Constants.InvertAndScale(12f));
+			g.DrawImage(Resources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT, mScrollWidget.mX + (int)Constants.InvertAndScale(-2f), mScrollWidget.mY + Constants.ImitaterDialog_BottomGradient_Y, (int)Constants.InvertAndScale(225f), (int)Constants.InvertAndScale(12f));
 		}
 		g.SetColorizeImages(colorizeImages: false);
 	}
@@ -58,9 +58,11 @@ internal class ImitaterDialog : LawnDialog, SeedPacketsWidgetListener
 			ChosenSeed theChosenSeed = mApp.mSeedChooserScreen.mChosenSeeds[48];
 			theChosenSeed.mSeedState = ChosenSeedState.SEED_IN_CHOOSER;
 			theChosenSeed.mImitaterType = theSeedType;
-			mApp.mSeedChooserScreen.GetSeedPositionInChooser(48, ref theChosenSeed.mX, ref theChosenSeed.mY);
+			int ix, iy;
+			mApp.mSeedChooserScreen.GetSeedPositionInChooser(48, out ix, out iy);
+			theChosenSeed.mX = ix;
+			theChosenSeed.mY = iy;
 			mApp.mSeedChooserScreen.ClickedSeedInChooser(ref theChosenSeed);
-			mApp.mSeedChooserScreen.UpdateImitaterButton();
 			mApp.KillDialog(mId);
 		}
 	}

@@ -18,9 +18,35 @@ internal class Constants : FrameworkConstants
 
 	public const int PC_BOARD_HEIGHT = 600;
 
+	public const int SEED_PACKET_WIDTH = 50;
+
+	public const int SEED_PACKET_HEIGHT = 70;
+
+	public const int BOARD_OFFSET_X = 220;
+
+	public const int IMITATER_POS_X = 459;
+
+	public const int IMITATER_POS_Y = 503;
+
+	public static int SEED_CHOOSER_OFFSET_Y;
+
+	public static int ROOF_POLE_START;
+
+	public static int ROOF_POLE_END;
+
+	public static int ROOF_TREE_START;
+
+	public static int ROOF_TREE_END;
+
+	public static bool UseConsoleSeedVariants;
+
+	public static int SEED_CHOOSER_EXTRA_HEIGHT;
+
 	public static bool Loaded;
 
 	public static string ImageSubPath;
+
+	public static string ReanimSubPath;
 
 	public static DisplayOrientation SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
 
@@ -391,6 +417,12 @@ internal class Constants : FrameworkConstants
 	public static Rectangle StoreScreen_PacketUpgrade_Text_Size;
 
 	public static int StoreScreen_RetardedDave_Offset_X;
+
+	public static int StoreScreen_RetardedDave_Offset_Y;
+
+	public static int StoreScreen_PageString_X;
+
+	public static int StoreScreen_PageString_Y;
 
 	public static int StoreScreen_FirstAidNut_Offset_Y;
 
@@ -792,6 +824,34 @@ internal class Constants : FrameworkConstants
 
 	public static int Board_Offset_AspectRatio_Correction;
 
+	public static int Board_Background_Offset_Y;
+
+	public static int Board_Additional_Width;
+
+	public static int Ach_TileY;
+
+	public static int Ach_TileRowY;
+
+	public static int Ach_ChinaY;
+
+	public static int Ach_GridY0;
+
+	public static int Ach_RockUpdXExtra;
+
+	public static int Ach_MaxScroll;
+
+	public static Point GameSelector_Extra;
+
+	public static Point GameSelector_Achievement_Off;
+
+	public static Point GameSelector_QuickPlay_Off;
+
+	public static Point QuickPlay_BackButton_Pos;
+
+	public static int QuickPlay_Background_Y;
+
+	public static int QuickPlay_PoolClip_Width;
+
 	public static int Board_Ice_Start;
 
 	public static int Board_ProgressBarText_Pos;
@@ -973,499 +1033,6 @@ internal class Constants : FrameworkConstants
 		}
 	}
 
-	public static void Load320x480()
-	{
-		S = 8f / 15f;
-		IS = 1.875f;
-		FrameworkConstants.Font_Scale = 2f / 3f;
-		Board_Offset_AspectRatio_Correction = 0;
-		Loaded = true;
-		BackBufferSize = new Point(320, 480);
-		ImageSubPath = "\\320x480\\";
-		BOARD_WIDTH = 480;
-		BOARD_HEIGHT = 320;
-		BOARD_EDGE = 72;
-		BOARD_OFFSET = 119;
-		BOARD_EXTRA_ROOM = 100;
-		HIGH_GROUND_HEIGHT = 30;
-		GRIDSIZEX = 9;
-		MAX_GRIDSIZEY = 6;
-		MORE_GAMES_ORIGIN_X = 0;
-		MAIN_MENU_ORIGIN_X = 354;
-		ACHIEVEMENTS_ORIGIN_X = 354;
-		QUICKPLAY_ORIGIN_X = 834;
-		MORE_GAMES_PLANK_HEIGHT = 100;
-		MORE_GAMES_PLANK_WIDTH = 320;
-		MORE_GAMES_ITEM_GAP = 2;
-		SMALL_SEEDPACKET_WIDTH = 54;
-		SMALL_SEEDPACKET_HEIGHT = 35;
-		SEED_CHOOSER_OFFSETSCREEN_OFFSET = 320;
-		SCROLL_AREA_OFFSET_X = 67;
-		SCROLL_AREA_OFFSET_Y = 28;
-		DIALOG_HEADER_OFFSET = 24;
-		WIDE_BOARD_WIDTH = 900;
-		BACKGROUND_IMAGE_WIDTH = 1400;
-		LAWN_XMIN = 140;
-		LAWN_YMIN = 80;
-		TitleScreen_ReanimStart_X = 60;
-		GameSelector_Width = 1311;
-		GameSelector_Height = 640;
-		GameSelector_AdventureButton_X = 228;
-		GameSelector_MiniGameButton_X = 236;
-		GameSelector_MiniGameButton_Y = (int)InvertAndScale(94f);
-		GameSelector_PuzzleButton_X = GameSelector_MiniGameButton_X + 4;
-		GameSelector_PuzzleButton_Y = (int)InvertAndScale(160f);
-		GameSelector_OptionsButton_X = 340;
-		GameSelector_OptionsButton_Y = (int)InvertAndScale(200f);
-		GameSelector_ZenGardenButton_X = 260;
-		GameSelector_ZenGardenButton_Y = (int)InvertAndScale(200f);
-		GameSelector_AlmanacButton_X = 255;
-		GameSelector_StoreButton_X = 212;
-		GameSelector_StoreButton_Y = (int)InvertAndScale(168f);
-		GameSelector_AchievementsButton_X = 126;
-		GameSelector_AchievementsButton_Y = (int)InvertAndScale(250f);
-		GameSelector_AchievementsStatue_X = 234;
-		GameSelector_AchievementsStatue_Y = (int)InvertAndScale(170f);
-		GameSelector_MoreWaysToPlay_MiniGames_Y = 276;
-		GameSelector_MoreWaysToPlay_VaseBreaker_X = 65;
-		GameSelector_MoreWaysToPlay_IZombie_X = 161;
-		GameSelector_MoreWaysToPlay_Back_X = 174;
-		GameSelector_PlayerName_Pos = new Point(112, -111);
-		GameSelector_LevelNumber_1_Pos = new Point(306, 19);
-		GameSelector_LevelNumber_2_Pos = new Point(324, 20);
-		GameSelector_LevelNumber_3_Pos = new Point(333, 21);
-		GameSelector_LevelNumber_Bar = new Rectangle(320, 28, 3, 1);
-		GameSelector_LevelNumber_ButtonDown_Offset = 3;
-		GameSelector_Update_Offset = 69;
-		LeaderboardScreen_Vasebreaker_Button_X = 621;
-		LeaderboardScreen_Vasebreaker_Button_Y = 335;
-		LeaderboardScreen_IZombie_Button_X = 129;
-		LeaderboardScreen_IZombie_Button_Y = 307;
-		LeaderboardScreen_PileBase_X = 331;
-		LeaderboardScreen_PileBase_Y = 53;
-		Leaderboard_IZombie_Score_X = 198;
-		Leaderboard_IZombie_Score_Y = 290;
-		Leaderboard_Vasebreaker_Score_X = 698;
-		Leaderboard_Vasebreaker_Score_Y = 322;
-		Leaderboard_Pile_1_X = 297;
-		LeaderboardDialog_CannotConnect_Rect = new TRect(100, 100, 300, 300);
-		LeaderboardScreen_EdgeOfSpace_Overlay_Offset = 30;
-		SEED_PACKET_HORIZ_GAP = 2;
-		SEED_PACKET_VERT_GAP = 1;
-		SeedPacket_Selector_Pos = new Point(-2, 2);
-		AchievementWidget_ROW_HEIGHT = 82;
-		AchievementWidget_ROW_START = 149;
-		AchievementWidget_HOLE_DEPTH = 128;
-		AchievementWidget_GAMERSCORE_POS = new Point(100, 100);
-		AchievementWidget_BackButton_X = 52;
-		AchievementWidget_BackButton_Y = 5;
-		AchievementWidget_BackButton_Rect = new TRect(54, 0, 105, 80);
-		AchievementWidget_Background_Offset_Y = 0;
-		AchievementWidget_Description_Box = new Rectangle(180, 30, 212, 60);
-		AchievementWidget_Pipe_Offset = new Point(27, 13);
-		AchievementWidget_Worm_Offset = new Point(382, 18);
-		AchievementWidget_ZombieWorm_Offset = new Point(29, 74);
-		AchievementWidget_GemLeft_Offset = new Point(86, 43);
-		AchievementWidget_GemRight_Offset = new Point(263, 43);
-		AchievementWidget_Fossile_Offset = new Point(131, 49);
-		AchievementWidget_Image_Pos = new Point(10, 10);
-		AchievementWidget_Image_Size = (int)(FrameworkConstants.Font_Scale * 64f);
-		AchievementWidget_Name_Pos = new Point(250, 10);
-		AchievementWidget_Name_MaxWidth = 300;
-		QuickPlayWidget_Thumb_X = 26;
-		QuickPlayWidget_Thumb_Y = 22;
-		QuickPlayWidget_Bungee_Y = -40;
-		SeedChooserScreen_MenuButton_X = 390;
-		SeedChooserScreen_Background_Top = new Point(58, 2);
-		SeedChooserScreen_Background_Middle = new Point(58, 31);
-		SeedChooserScreen_Background_Middle_Height = 220;
-		SeedChooserScreen_Background_Bottom = new Point(58, 251);
-		SeedChooserScreen_Gradient_Top = new Rectangle(0, 24, 222, 12);
-		SeedChooserScreen_Gradient_Bottom = new Rectangle(-1, 246, 223, 12);
-		SeedPacket_Cost = new Point(29, 18);
-		SeedPacket_Cost_IZombie = new Point(31, 18);
-		SeedPacket_CostText_Pos = new Point(51, 15);
-		SeedPacket_CostText_IZombie_Pos = new Point(55, 15);
-		ImitaterDialog_Size = new Point(0, 155);
-		ImitaterDialog_ScrollWidget_Offset_X = 0;
-		ImitaterDialog_ScrollWidget_Y = 70;
-		ImitaterDialog_ScrollWidget_ExtraWidth = 13;
-		ImitaterDialog_Height = 152;
-		ImitaterDialog_BottomGradient_Y = 143;
-		CutScene_ReadySetPlant_Pos = new Point(240, 173);
-		CutScene_LogoEndPos = 255;
-		CutScene_LogoBackRect_Height = 150;
-		CutScene_LogoEnd_Particle_Pos = new Point(400, 300);
-		CutScene_ExtraRoom_1_Particle_Pos = new Point(35, 348);
-		CutScene_ExtraRoom_2_Particle_Pos = new Point(35, 246);
-		CutScene_ExtraRoom_3_Particle_Pos = new Point(35, 459);
-		CutScene_ExtraRoom_4_Particle_Pos = new Point(32, 150);
-		CutScene_ExtraRoom_5_Particle_Pos = new Point(32, 551);
-		CutScene_SodRoll_1_Pos = -102;
-		CutScene_SodRoll_2_Pos = 111;
-		CutScene_SodRoll_3_Pos = new Point(-3, -198);
-		CutScene_SodRoll_4_Pos = new Point(-3, 203);
-		CutScene_Upsell_TerraCotta_Arrow = new Point(592, 240);
-		CutScene_Upsell_TerraCotta_Pot = new Point(565, 360);
-		ConveyorBeltClipRect = new TRect(0, 5, 54, 310);
-		StoreScreen_BackButton_X = 230;
-		StoreScreen_BackButton_Y = 257;
-		StoreScreen_Car_X = 120;
-		StoreScreen_Car_Y = 50;
-		StoreScreen_PrevButton_X = 158;
-		StoreScreen_PrevButton_Y = 196;
-		StoreScreen_NextButton_X = 380;
-		StoreScreen_NextButton_Y = 196;
-		StoreScreen_HatchOpen_X = 160;
-		StoreScreen_HatchOpen_Y = -22;
-		StoreScreen_HatchClosed_X = 150;
-		StoreScreen_HatchClosed_Y = 49;
-		StoreScreen_CarNight_X = 120;
-		StoreScreen_CarNight_Y = 50;
-		StoreScreen_StoreSign_X = 269;
-		StoreScreen_StoreSign_Y_Min = -150;
-		StoreScreen_StoreSign_Y_Max = -10;
-		StoreScreen_Coinbank_X = 340;
-		StoreScreen_Coinbank_Y = 270;
-		StoreScreen_Coinbank_TextOffset = new Point(116, 5);
-		StoreScreen_ItemOffset_1_X = 234;
-		StoreScreen_ItemOffset_1_Y = 40;
-		StoreScreen_ItemOffset_2_X = 214;
-		StoreScreen_ItemOffset_2_Y = 109;
-		StoreScreen_ItemSize = 54;
-		StoreScreen_ItemSize_Offset = 4;
-		StoreScreen_PriceTag_X = 3;
-		StoreScreen_PriceTag_Y = 70;
-		StoreScreen_PriceTag_Text_Offset_X = 23;
-		StoreScreen_PriceTag_Text_Offset_Y = 67;
-		StoreScreen_ComingSoon_X = 60;
-		StoreScreen_ComingSoon_Y = 70;
-		StoreScreen_SoldOut_Width = 50;
-		StoreScreen_SoldOut_Y = 30;
-		StoreScreen_SoldOut_Height = 60;
-		StoreScreen_PacketUpgrade_X = 7;
-		StoreScreen_PacketUpgrade_Y = 16;
-		StoreScreen_PacketUpgrade_Text_Size = new Rectangle(0, 12, 55, 70);
-		StoreScreen_RetardedDave_Offset_X = -40;
-		StoreScreen_FirstAidNut_Offset_Y = 22;
-		StoreScreen_PoolCleaner_Offset_X = 16;
-		StoreScreen_PoolCleaner_Offset_Y = 34;
-		StoreScreen_Rake_Offset_X = -10;
-		StoreScreen_Rake_Offset_Y = 34;
-		StoreScreen_RoofCleaner_Offset_X = 10;
-		StoreScreen_RoofCleaner_Offset_Y = 42;
-		StoreScreen_Imitater_Offset_X = -1;
-		StoreScreen_Imitater_Offset_Y = 34;
-		StoreScreen_Default_Offset_Y = 34;
-		StoreScreen_MouseRegion = new Point(50, 87);
-		StoreScreen_Dialog = new Rectangle(120, 32, 322, 280);
-		StoreScreen_PotPlant_Offset = new Point(25, 67);
-		StoreScreenMushroomGardenOffsetX = 15;
-		StoreScreenAquariumGardenOffsetX = 15;
-		StoreScreenGloveOffsetY = 20;
-		StoreScreenWheelbarrowOffsetY = 20;
-		StoreScreenBugSprayOffsetX = 17;
-		StoreScreenBugSprayOffsetY = 20;
-		StoreScreenPhonographOffsetY = 20;
-		StoreScreenPlantFoodOffsetX = 9;
-		StoreScreenPlantFoodOffsetY = 20;
-		StoreScreenWateringCanOffsetX = 6;
-		StoreScreenWateringCanOffsetY = 20;
-		NewOptionsDialog_FXLabel_X = 240;
-		NewOptionsDialog_FXLabel_Y = 92;
-		NewOptionsDialog_MusicLabel_X = 240;
-		NewOptionsDialog_MusicLabel_On_Y = 65;
-		NewOptionsDialog_MusicLabel_Off_Y = 70;
-		NewOptionsDialog_VibrationLabel_X = 240;
-		NewOptionsDialog_VibrationLabel_Y = 125;
-		NewOptionsDialog_VibrationLabel_MaxWidth = 200;
-		NewOptionsDialog_FullScreenOffset = 25;
-		NewOptionsDialog_FX_Offset = 15;
-		NewOptionsDialog_Music_Offset = 5;
-		NewOptionsDialog_Version_Low_Y = 185;
-		NewOptionsDialog_Version_High_Y = 195;
-		RetardedDave_Bubble_Tip_Offset = 4;
-		RetardedDave_Bubble_Offset_Shop = new Point(-190, -78);
-		RetardedDave_Bubble_Offset_Board = new Point(-150, -48);
-		RetardedDave_Bubble_Size = 200;
-		RetardedDave_Bubble_Rect = new TRect(8, 6, 0, 144);
-		RetardedDave_Bubble_TapToContinue_Y = 142;
-		PlantGallerySize = new Point(234, 492);
-		ZombieGallerySize = new Point(249, 712);
-		AlmanacHeaderY = 4;
-		Almanac_PlantsButtonRect = new TRect(40, 100, 180, 160);
-		Almanac_ZombiesButtonRect = new TRect(260, 100, 180, 160);
-		Almanac_CloseButtonRect = new TRect(396, 290, 89, 26);
-		Almanac_IndexButtonRect = new TRect(265, 290, 89, 26);
-		Almanac_IndexPlantPos = new Point(110, 160);
-		Almanac_IndexZombiePos = new Point(320, 150);
-		Almanac_IndexPlantTextPos = new Point(Almanac_PlantsButtonRect.mX + Almanac_PlantsButtonRect.mWidth / 2, Almanac_PlantsButtonRect.mY + Almanac_PlantsButtonRect.mHeight - 50);
-		Almanac_IndexZombieTextPos = new Point(Almanac_ZombiesButtonRect.mX + Almanac_ZombiesButtonRect.mWidth / 2, Almanac_ZombiesButtonRect.mY + Almanac_ZombiesButtonRect.mHeight - 50);
-		Almanac_PlantScrollRect = new TRect(28, 50, 237, 245);
-		Almanac_ZombieScrollRect = new TRect(17, 50, 250, 245);
-		Almanac_DescriptionScrollRect = new TRect(282, 170, 183, 111);
-		Almanac_PlantTopGradientY = 46;
-		Almanac_ZombieTopGradientY = 48;
-		Almanac_BottomGradientY = 288;
-		Almanac_PlantGradientWidth = 222;
-		Almanac_ZombieGradientWidth = 240;
-		Almanac_ZombieStoneRect = new TRect(267, 1, 212, 310);
-		Almanac_BackgroundPosition = new Point(320, 40);
-		Almanac_ZombieClipRect = new TRect(-22, -30, 109, 109);
-		Almanac_NavyRect = new TRect(306, 27, 134, 134);
-		Almanac_NamePosition = new Point(373, 0);
-		Almanac_ClayRect = new TRect(270, 4, 204, 310);
-		Almanac_BrownRect = new TRect(306, 27, 133, 133);
-		Almanac_ZombieSpace = new Point(82, 78);
-		Almanac_ZombieOffset = new Point(0, 5);
-		Almanac_BossPosition = new Point(123, 629);
-		Almanac_ImpPosition = new Point(41, 629);
-		Almanac_ImitatorPosition = new Point(PlantGallerySize.X / 2 - 28, 450);
-		Almanac_SeedSpace = new Point(2, 2);
-		Almanac_SeedOffset = new Point(0, 5);
-		Almanac_ZombiePosition = new Point(640, 130);
-		Almanac_PlantPosition = new Point(350, 70);
-		Almanac_Text_Scale = 0.8f;
-		Almanac_PlantsHeader_Pos = new Point(2, 2);
-		Almanac_ZombieHeader_Pos = new Point(0, 2);
-		Almanac_ItemName_MaxWidth = 230;
-		Zombie_StartOffset = 120f;
-		Zombie_StartRandom_Offset = 40f;
-		AwardScreen_Note_Credits_Background = new Rectangle(-350, -180, 1400, 600);
-		AwardScreen_Note_Credits_Paper = new Point((int)(75f * S) + 25, (int)(60f * S));
-		AwardScreen_Note_Credits_Text = new Rectangle((int)(149f * S) + 25, (int)(103f * S), (int)(475f * S), (int)(325f * S));
-		AwardScreen_Note_Help_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_Help_Paper = new Point(80, 42);
-		AwardScreen_Note_Help_Text = new Point(106, 70);
-		AwardScreen_Note_1_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_1_Paper = new Point(70, 30);
-		AwardScreen_Note_1_Text = new Point(96, 58);
-		AwardScreen_Note_Message = new Point(240, 0);
-		AwardScreen_Note_2_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_2_Paper = new Point(76, 30);
-		AwardScreen_Note_2_Text = new Point(96, 58);
-		AwardScreen_Note_3_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_3_Paper = new Point(70, 26);
-		AwardScreen_Note_3_Text = new Point(92, 46);
-		AwardScreen_Note_4_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_4_Paper = new Point(70, 30);
-		AwardScreen_Note_4_Text = new Point(90, 52);
-		AwardScreen_Note_Final_Background = new Rectangle(-350, -150, 1400, 600);
-		AwardScreen_Note_Final_Paper = new Point(70, 30);
-		AwardScreen_Note_Final_Text = new Point(96, 58);
-		AwardScreen_Bacon = (AwardScreen_Taco = (AwardScreen_CarKeys = new Point(123, 140)));
-		AwardScreen_WateringCan = new Point(123, 140);
-		AwardScreen_Almanac = new Point(123, 120);
-		AwardScreen_Trophy = new Point((int)(400f * S), (int)(137f * S));
-		AwardScreen_Shovel = new Point(123, 132);
-		AwardScreen_MenuButton = new Point(345, 280);
-		AwardScreen_ClayTablet = new TRect(31, 54, 418, 190);
-		AwardScreen_TitlePos = new Point(240, 13);
-		AwardScreen_GroundDay_Pos = new Point(70, 112);
-		AwardScreen_BrownRect = new TRect(56, 97, 133, 133);
-		AwardScreen_BottomMessage_Pos = new Point(240, 56);
-		AwardScreen_BottomText_Rect_Text = new TRect(208, 114, 218, 100);
-		AwardScreen_BottomText_Rect_NoText = new TRect(131, 78, 218, 140);
-		AwardScreen_CreditsButton = new TRect(50, 278, 140, 32);
-		AwardScreen_CreditsButton_Offset = new Point(20, -5);
-		AwardScreen_Seed_Pos = new Point(97, 145);
-		AwardScreen_ContinueButton_Offset = 35;
-		AwardScreen_AchievementImage_Pos = new Point(80, 4);
-		AwardScreen_AchievementName_Pos = new Point(160, 25);
-		AwardScreen_AchievementDescription_Rect = new Rectangle(160, 30, 212, 60);
-		CreditScreen_ReplayButton = new Rectangle(10, 277, 125, 32);
-		CreditScreen_ReplayButton_TextOffset = new Point(15, -5);
-		CreditScreen_MainMenu = new Rectangle(330, 282, 140, 30);
-		CreditScreen_TextStart = 120;
-		CreditScreen_TextEnd = 200;
-		CreditScreen_TextClip = 250;
-		CreditScreen_LeftText_X = 0;
-		CreditScreen_RightText_X = 245;
-		CreditScreen_LeftRight_Text_Width = 230;
-		ConfirmPurchaseDialog_Background = new TRect(26, 70, 262, 140);
-		ConfirmPurchaseDialog_Item_Pos = new Point(42, 80);
-		ConfirmPurchaseDialog_Text = new TRect(120, 70, 150, 140);
-		LawnDialog_Insets = new Insets(40, 15, 46, 20);
-		UILevelPosition = new Point(476, 297);
-		UIMenuButtonPosition = new Point(390, 2);
-		UIMenuButtonWidth = 90;
-		UISunBankPositionX = 57;
-		UISunBankTextOffset = new Point(60, 2);
-		UIShovelButtonPosition = new Point(156, 2);
-		UIProgressMeterPosition = new Point(222, 2);
-		UIProgressMeterHeadEnd = 135;
-		UIProgressMeterBarEnd = 143;
-		UICoinBankPosition = new Point(66, 319);
-		Board_Cutscene_ExtraScroll = 0;
-		Board_SunCoinRange = 550;
-		Board_SunCoin_CollectTarget = new Point(100, 0);
-		Board_Cel_Y_Values_Normal = new int[7] { 80, 177, 280, 380, 470, 570, 610 };
-		Board_Cel_Y_Values_Pool = new int[7] { 80, 170, 275, 360, 447, 522, 610 };
-		Board_Cel_Y_Values_ZenGarden = new int[7] { 80, 177, 280, 380, 470, 570, 610 };
-		Board_GameOver_Interior_Overlay_1 = new Point(-13, 121);
-		Board_GameOver_Interior_Overlay_2 = new Point(-14, 108);
-		Board_GameOver_Interior_Overlay_3 = new Point(-37, 129);
-		Board_GameOver_Interior_Overlay_4 = new Point(-37, 129);
-		Board_GameOver_Exterior_Overlay_1 = new Point(-15, 109);
-		Board_GameOver_Exterior_Overlay_2 = new Point(-14, 112);
-		Board_GameOver_Exterior_Overlay_3 = new Point(-37, 125);
-		Board_GameOver_Exterior_Overlay_4 = new Point(-38, 71);
-		Board_GameOver_Exterior_Overlay_5 = new Point(-63, 44);
-		Board_GameOver_Exterior_Overlay_6 = new Point(-63, 44);
-		Board_Ice_Start = 800;
-		Board_ProgressBarText_Pos = 1;
-		MessageWidget_SlotMachine_Y = 518;
-		LawnMower_Coin_Offset = new Point(40, 40);
-		DescriptionWidget_ScrollBar_Padding = 7;
-		Zombie_Bungee_Offset = new Point(61, 15);
-		Zombie_Bungee_Target_Offset = new Point(10, 60);
-		ZOMBIE_BACKUP_DANCER_RISE_HEIGHT = -145;
-		Zombie_Dancer_Dance_Limit_X = 700;
-		Zombie_Dancer_Spotlight_Scale = 2.1f;
-		Zombie_Dancer_Spotlight_Offset = new Point(-32, 60);
-		Zombie_Dancer_Spotlight_Pos = new Point(-25, -480);
-		Zombie_ClipOffset_Default = 100;
-		Zombie_ClipOffset_Snorkel = 0;
-		Zombie_ClipOffset_Snorkel_intoPool_Small = 40;
-		Zombie_ClipOffset_Snorkel_Dying = 76;
-		Zombie_ClipOffset_Snorkel_Dying_Small = 65;
-		Zombie_ClipOffset_Pail = 78;
-		Zombie_ClipOffset_Normal = 108;
-		Zombie_ClipOffset_Digger = 75;
-		Zombie_ClipOffset_Dolphin_Into_Pool = 65;
-		Zombie_ClipOffset_Snorkel_Grabbed = 75;
-		Zombie_ClipOffset_PeaHead_InPool = 78;
-		Zombie_ClipOffset_RisingFromGrave = 28;
-		Zombie_ClipOffset_RisingFromGrave_Small = -35;
-		Zombie_ClipOffset_Snorkel_Into_Pool = 60;
-		Zombie_ClipOffset_Normal_In_Pool = 30;
-		Zombie_ClipOffset_Flag_In_Pool = 30;
-		Zombie_ClipOffset_Normal_In_Pool_SMALL = -40;
-		Zombie_ClipOffset_TrafficCone_In_Pool_SMALL = -55;
-		Zombie_ClipOffset_Ducky_Dying_In_Pool = 30;
-		Zombie_GameOver_ClipOffset_1 = 53;
-		Zombie_GameOver_ClipOffset_2 = 56;
-		Zombie_GameOver_ClipOffset_3 = 56;
-		ZombieGalleryWidget_Window_Offset = new Point(0, 0);
-		ZombieGalleryWidget_Window_Clip = new Rectangle(2, 2, 72, 72);
-		Coin_AwardSeedpacket_Pos = new Point(460, 300);
-		Coin_Glow_Offset = new Point(14, 12);
-		Coin_Silver_Offset = 9f;
-		Coin_MoneyBag_Offset = new Point(-45, -40);
-		Coin_Shovel_Offset = new Point(3, 15);
-		Coin_Silver_Award_Offset = new Point(21, 21);
-		Coin_Almanac_Offset = new Point(0, -36);
-		Coin_Note_Offset = new Point(0, -10);
-		Coin_CarKeys_Offset = new Point(0, 10);
-		Coin_Taco_Offset = new Point(0, 20);
-		Coin_Bacon_Offset = new Point(0, 20);
-		Plant_CobCannon_Projectile_Offset = new Point(-28, -165);
-		Plant_Squished_Offset = new Point(0, 0);
-		IZombieBrainPosition = 140;
-		IZombie_SeedOffset = new Point(5, 6);
-		IZombie_ClipOffset = new Rectangle(2, 2, 70, 34);
-		ZombieOffsets = new Point[26]
-		{
-			new Point(20, 11),
-			new Point(13, 15),
-			new Point(22, 14),
-			new Point(3, 13),
-			new Point(20, 13),
-			new Point(18, 13),
-			new Point(19, 13),
-			new Point(4, 11),
-			new Point(14, 13),
-			new Point(19, 12),
-			new Point(20, 13),
-			new Point(16, 10),
-			new Point(1, 11),
-			new Point(16, 10),
-			new Point(16, 15),
-			new Point(14, 10),
-			new Point(13, 12),
-			new Point(10, 13),
-			new Point(20, 12),
-			new Point(11, 12),
-			new Point(0, 9),
-			new Point(15, 14),
-			new Point(4, 12),
-			new Point(18, 10),
-			new Point(23, 27),
-			new Point(1, 15)
-		};
-		LastStandButtonRect = new TRect(200, 297, 140, 28);
-		VasebreakerJackInTheBoxOffset = 0;
-		JackInTheBoxPlantRadius = 90;
-		JackInTheBoxZombieRadius = 115;
-		ZenGardenGreenhouseMultiplierX = 1.125f;
-		ZenGardenGreenhouseMultiplierY = 1.182f;
-		ZenGardenGreenhouseOffset = new Point(-30, 30);
-		ZenGardenMushroomGardenOffset = new Point(10, 30);
-		ZenGardenStoreButtonX = 650;
-		ZenGardenStoreButtonY = 33;
-		ZenGardenTopButtonStart = -100;
-		ZenGardenButtonCounterOffset = new Point(40, 40);
-		ZenGardenButton_GoldenWateringCan_Offset = new Point(-2, -6);
-		ZenGardenButton_NormalWateringCan_Offset = new Point(-2, -6);
-		ZenGardenButton_Fertiliser_Offset = new Point(-6, -7);
-		ZenGardenButton_BugSpray_Offset = new Point(0, -1);
-		ZenGardenButton_Phonograph_Offset = new Point(2, 2);
-		ZenGardenButton_Chocolate_Offset = new Point(6, 4);
-		ZenGardenButton_Glove_Offset = new Point(-6, -4);
-		ZenGardenButton_MoneySign_Offset = new Point(-5, -4);
-		ZenGardenButton_NextGarden_Offset = new Point(2, 0);
-		ZenGardenButton_Wheelbarrow_Offset = new Point(-7, -3);
-		ZenGardenButton_WheelbarrowPlant_Offset = new Point(23, -8);
-		ZenGardenButton_Wheelbarrow_Facing_Offset = 80f;
-		ZenGarden_Backdrop_X = 0;
-		ZenGarden_SellDialog_Offset = new Point(120, 60);
-		ZenGarden_NextGarden_Pos = new Point(564, 0);
-		ZenGarden_RetardedDaveBubble_Pos = new Point(-250, -120);
-		ZenGarden_WaterDrop_Pos = new Point(67, 9);
-		ZenGarden_Fertiliser_Pos = new Point(61, 7);
-		ZenGarden_Phonograph_Pos = new Point(60, 7);
-		ZenGarden_BugSpray_Pos = new Point(61, 7);
-		ZenGarden_PlantSpeechBubble_Pos = new Point(50, 0);
-		ZenGarden_StinkySpeechBubble_Pos = new Point(50, -20);
-		ZenGarden_GoldenWater_Pos = new Point(-14, -14);
-		ZenGarden_Chocolate_Pos = new Point(63, -28);
-		ZenGarden_MoneyTarget_X = 442;
-		ZenGarden_TutorialArrow_Offset = 100;
-		ZEN_XMIN = 10;
-		ZEN_YMIN = 65;
-		ZEN_XMAX = 470;
-		ZEN_YMAX = 310;
-		ZenGarden_GoldenWater_Size = new Rectangle(-70, -90, 80, 80);
-		STINKY_SLEEP_POS_Y = 461;
-		gMushroomGridPlacement = new SpecialGridPlacement[8]
-		{
-			new SpecialGridPlacement(110, 441, 0, 0),
-			new SpecialGridPlacement(237, 360, 1, 0),
-			new SpecialGridPlacement(298, 458, 2, 0),
-			new SpecialGridPlacement(355, 296, 3, 0),
-			new SpecialGridPlacement(387, 203, 4, 0),
-			new SpecialGridPlacement(460, 385, 5, 0),
-			new SpecialGridPlacement(486, 478, 6, 0),
-			new SpecialGridPlacement(552, 283, 7, 0)
-		};
-		ZenGarden_Marigold_Sprout_Offset = new Point(24, 30);
-		ZenGarden_Aquarium_ShadowOffset = new Point(35, 0);
-		Challenge_SeeingStars_StarfruitPreview_Offset_Y = 8;
-		Challenge_SlotMachine_Pos = new Point(100, 200);
-		Challenge_SlotMachineHandle_Pos = new TRect(473, 0, 55, 80);
-		Challenge_SlotMachine_Gap = 9;
-		Challenge_SlotMachine_Offset = 62;
-		Challenge_SlotMachine_Shadow_Offset = 3;
-		Challenge_SlotMachine_Y_Offset = 3;
-		Challenge_SlotMachine_Y_Pos = 3;
-		Challenge_SlotMachine_ClipHeight = 40;
-		Challenge_BeghouldedTwist_Offset = new Point(40, 50);
-		GridItem_ScaryPot_SeedPacket_Offset = new Point(23, 33);
-		GridItem_ScaryPot_Zombie_Offset = new Point(6, 19);
-		GridItem_ScaryPot_ZombieFootball_Offset = new Point(1, 16);
-		GridItem_ScaryPot_ZombieGargantuar_Offset = new Point(9, 7);
-		GridItem_ScaryPot_Sun_Offset = new Point(42, 62);
-	}
 
 	public static float InvertLowResValue(float x)
 	{
@@ -1482,7 +1049,7 @@ internal class Constants : FrameworkConstants
 		return FrameworkConstants.Font_Scale * x;
 	}
 
-	public static void Load480x800()
+	private static void LoadBase()
 	{
 		S = 0.8f;
 		IS = 1.25f;
@@ -1510,7 +1077,8 @@ internal class Constants : FrameworkConstants
 		}
 		Loaded = true;
 		BackBufferSize = new Point(480, 800);
-		ImageSubPath = "\\480x800\\";
+		ImageSubPath = "\\1280x720\\";
+		ReanimSubPath = "\\1280x720\\";
 		BOARD_WIDTH = 800;
 		BOARD_HEIGHT = 480;
 		BOARD_EDGE = 50;
@@ -2014,5 +1582,178 @@ internal class Constants : FrameworkConstants
 		GridItem_ScaryPot_ZombieFootball_Offset = new Point(15, 25);
 		GridItem_ScaryPot_ZombieGargantuar_Offset = new Point(-7, -5);
 		GridItem_ScaryPot_Sun_Offset = new Point(42, 62);
+	}
+
+	// Perfil 1280x720 (QEWide-Tweaks).
+	public static void Load1280x720()
+	{
+		LoadBase();
+
+		Loaded = true;
+		S = 1f;
+		IS = 1f;
+		FrameworkConstants.Font_Scale = 1f;
+		BackBufferSize = new Point(1280, 720);
+		ImageSubPath = "\\1280x720\\";
+		ReanimSubPath = "\\1280x720\\";
+		TitleScreen_ReanimStart_X = 480;
+		UseConsoleSeedVariants = true;
+		SEED_CHOOSER_EXTRA_HEIGHT = 120;
+		// Geometria del tablero (GameConstants.h del mod).
+		BOARD_WIDTH = 1280;
+		BOARD_HEIGHT = 720;
+		LAWN_XMIN = 40;
+		LAWN_YMIN = 80;
+		HIGH_GROUND_HEIGHT = 30;
+		WIDE_BOARD_WIDTH = 1040;      // 800 + BOARD_ADDITIONAL_WIDTH
+		BOARD_EDGE = 140;             // -100 + BOARD_ADDITIONAL_WIDTH
+		Board_Ice_Start = 1040;       // 800 + BOARD_ADDITIONAL_WIDTH
+		BACKGROUND_IMAGE_WIDTH = 1420; // 1180 + BOARD_ADDITIONAL_WIDTH
+		BOARD_OFFSET = 460;            // BOARD_OFFSET_X + BOARD_ADDITIONAL_WIDTH
+		Board_Background_Offset_Y = 60; // BOARD_OFFSET_Y
+		Board_Additional_Width = 240;  // BOARD_ADDITIONAL_WIDTH
+		StoreScreen_BackButton_X = 370 + BOARD_OFFSET_X;
+		StoreScreen_BackButton_Y = 572 + Board_Background_Offset_Y;
+		StoreScreen_PrevButton_X = 218 + BOARD_OFFSET_X;
+		StoreScreen_PrevButton_Y = 431 + Board_Background_Offset_Y;
+		StoreScreen_NextButton_X = 618 + BOARD_OFFSET_X;
+		StoreScreen_NextButton_Y = 431 + Board_Background_Offset_Y;
+		StoreScreen_ItemOffset_1_X = 422 + Board_Additional_Width;
+		StoreScreen_ItemOffset_1_Y = 206 + Board_Background_Offset_Y;
+		StoreScreen_ItemOffset_2_X = 372 + Board_Additional_Width;
+		StoreScreen_ItemOffset_2_Y = 325 + Board_Background_Offset_Y;
+		StoreScreen_ItemSize = 74;
+		StoreScreen_ItemSize_Offset = 4;
+		StoreScreen_Car_X = 386;
+		StoreScreen_Car_Y = 198;
+		StoreScreen_HatchOpen_X = 489;
+		StoreScreen_HatchOpen_Y = 60;
+		StoreScreen_HatchClosed_X = 386;
+		StoreScreen_HatchClosed_Y = 198;
+		StoreScreen_CarNight_X = 386;
+		StoreScreen_CarNight_Y = 198;
+		StoreScreen_StoreSign_X = 505;
+		StoreScreen_StoreSign_Y_Min = -150;
+		StoreScreen_StoreSign_Y_Max = 0;
+		StoreScreen_Coinbank_X = 1130;
+		StoreScreen_Coinbank_Y = 679;
+		StoreScreen_Coinbank_TextOffset = new Point(113, 24);
+		StoreScreen_PageString_X = 710;
+		StoreScreen_PageString_Y = 620;
+		StoreScreen_RetardedDave_Offset_X = -162;
+		StoreScreen_RetardedDave_Offset_Y = 8;
+		SEED_CHOOSER_OFFSET_Y = 720;
+		ROOF_POLE_START = WIDE_BOARD_WIDTH + 70 - Board_Additional_Width;
+		ROOF_POLE_END = -BOARD_WIDTH;
+		ROOF_TREE_START = WIDE_BOARD_WIDTH + 130 - Board_Additional_Width;
+		ROOF_TREE_END = -670;
+		QuickPlay_BackButton_Pos = new Point(372, 533);
+		QuickPlay_Background_Y = -42;
+		QuickPlay_PoolClip_Width = 450;
+		Ach_TileY = -30;
+		Ach_TileRowY = -100;
+		Ach_ChinaY = -100;
+		Ach_GridY0 = 138;
+		Ach_RockUpdXExtra = 90;
+		Ach_MaxScroll = 19628;
+		GameSelector_Extra = new Point(111, 80);
+		GameSelector_Achievement_Off = new Point(390, 540);
+		GameSelector_QuickPlay_Off = new Point(190, 310);
+		BOARD_EXTRA_ROOM = 0;
+		Board_Offset_AspectRatio_Correction = 0;
+		GRIDSIZEX = 9;
+		MAX_GRIDSIZEY = 6;
+		// Semillas: el mod usa banco HORIZONTAL de 50x70.
+		SMALL_SEEDPACKET_WIDTH = 50;
+		SMALL_SEEDPACKET_HEIGHT = 70;
+		SEED_CHOOSER_OFFSETSCREEN_OFFSET = 720;
+		// Carga diferida de fondos: ahora son 1880x720 / 1280x720.
+		ReanimTextCenterOffsetX = (int)InvertAndScale(Language == LanguageIndex.it ? 50f : Language == LanguageIndex.es ? -10f : 85f);
+	}
+
+	// Perfil 800x600 4:3 (Quality-Enhanced).
+	public static void Load800x600()
+	{
+		LoadBase();
+
+		Loaded = true;
+		S = 1f;
+		IS = 1f;
+		FrameworkConstants.Font_Scale = 1f;
+		BackBufferSize = new Point(800, 600);
+		ImageSubPath = "\\800x600\\";
+		ReanimSubPath = "\\800x600\\";
+		TitleScreen_ReanimStart_X = 225;
+		UseConsoleSeedVariants = false;
+		SEED_CHOOSER_EXTRA_HEIGHT = 0;
+		BOARD_WIDTH = 800;
+		BOARD_HEIGHT = 600;
+		LAWN_XMIN = 40;
+		LAWN_YMIN = 80;
+		HIGH_GROUND_HEIGHT = 30;
+		WIDE_BOARD_WIDTH = 800;
+		BOARD_EDGE = -100;
+		Board_Ice_Start = 800;
+		BACKGROUND_IMAGE_WIDTH = 1180;
+		BOARD_OFFSET = 220;
+		Board_Background_Offset_Y = 0;
+		Board_Additional_Width = 0;
+		StoreScreen_BackButton_X = 370 + BOARD_OFFSET_X;
+		StoreScreen_BackButton_Y = 572 + Board_Background_Offset_Y;
+		StoreScreen_PrevButton_X = 218 + BOARD_OFFSET_X;
+		StoreScreen_PrevButton_Y = 431 + Board_Background_Offset_Y;
+		StoreScreen_NextButton_X = 618 + BOARD_OFFSET_X;
+		StoreScreen_NextButton_Y = 431 + Board_Background_Offset_Y;
+		StoreScreen_ItemOffset_1_X = 422 + Board_Additional_Width;
+		StoreScreen_ItemOffset_1_Y = 206 + Board_Background_Offset_Y;
+		StoreScreen_ItemOffset_2_X = 372 + Board_Additional_Width;
+		StoreScreen_ItemOffset_2_Y = 325 + Board_Background_Offset_Y;
+		StoreScreen_ItemSize = 74;
+		StoreScreen_ItemSize_Offset = 4;
+		StoreScreen_Car_X = 196;
+		StoreScreen_Car_Y = 138;
+		StoreScreen_HatchOpen_X = 299;
+		StoreScreen_HatchOpen_Y = 0;
+		StoreScreen_HatchClosed_X = 196;
+		StoreScreen_HatchClosed_Y = 138;
+		StoreScreen_CarNight_X = 196;
+		StoreScreen_CarNight_Y = 138;
+		StoreScreen_StoreSign_X = 285;
+		StoreScreen_StoreSign_Y_Min = -150;
+		StoreScreen_StoreSign_Y_Max = 0;
+		StoreScreen_Coinbank_X = 650;
+		StoreScreen_Coinbank_Y = 559;
+		StoreScreen_Coinbank_TextOffset = new Point(113, 24);
+		StoreScreen_PageString_X = 470;
+		StoreScreen_PageString_Y = 500;
+		StoreScreen_RetardedDave_Offset_X = -42;
+		StoreScreen_RetardedDave_Offset_Y = 68;
+		SEED_CHOOSER_OFFSET_Y = 516;
+		ROOF_POLE_START = WIDE_BOARD_WIDTH + 70 - Board_Additional_Width;
+		ROOF_POLE_END = -BOARD_WIDTH;
+		ROOF_TREE_START = WIDE_BOARD_WIDTH + 130 - Board_Additional_Width;
+		ROOF_TREE_END = -670;
+		QuickPlay_BackButton_Pos = new Point(278, 528);
+		QuickPlay_Background_Y = 0;
+		QuickPlay_PoolClip_Width = 500;
+		Ach_TileY = 0;
+		Ach_TileRowY = 0;
+		Ach_ChinaY = -30;
+		Ach_GridY0 = 178;
+		Ach_RockUpdXExtra = 0;
+		Ach_MaxScroll = 15342;
+		GameSelector_Extra = new Point(0, 0);
+		GameSelector_Achievement_Off = new Point(20, 480);
+		GameSelector_QuickPlay_Off = new Point(80, 230);
+		BOARD_EXTRA_ROOM = 0;
+		Board_Offset_AspectRatio_Correction = 0;
+		GRIDSIZEX = 9;
+		MAX_GRIDSIZEY = 6;
+		SMALL_SEEDPACKET_WIDTH = 50;
+		SMALL_SEEDPACKET_HEIGHT = 70;
+		SEED_CHOOSER_OFFSETSCREEN_OFFSET = 516;
+		UIMenuButtonPosition = new Point(681, -10);
+		UIMenuButtonWidth = 117;
+		ReanimTextCenterOffsetX = (int)InvertAndScale(Language == LanguageIndex.it ? 50f : Language == LanguageIndex.es ? -10f : 85f);
 	}
 }

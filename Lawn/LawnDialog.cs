@@ -205,15 +205,15 @@ internal class LawnDialog : Dialog
 	public override void Resize(int theX, int theY, int theWidth, int theHeight)
 	{
 		base.Resize(theX, theY, theWidth, theHeight);
-		Image image = (mTallBottom ? AtlasResources.IMAGE_DIALOG_BIGBOTTOMLEFT : AtlasResources.IMAGE_DIALOG_BOTTOMLEFT);
+		Image image = (mTallBottom ? Resources.IMAGE_DIALOG_BIGBOTTOMLEFT : Resources.IMAGE_DIALOG_BOTTOMLEFT);
 		int num = mContentInsets.mLeft + mBackgroundInsets.mLeft - (int)Constants.InvertAndScale(5f);
 		int num2 = theHeight - image.mHeight;
 		num2 = ((!mTallBottom) ? (num2 + (int)Constants.InvertAndScale(16f)) : (num2 + (int)Constants.InvertAndScale(44f)));
 		int num3 = mWidth - mContentInsets.mLeft - mBackgroundInsets.mLeft - mContentInsets.mRight - mBackgroundInsets.mRight + (int)Constants.InvertAndScale(8f);
-		int theHeight2 = AtlasResources.IMAGE_BUTTON_LEFT.mHeight;
+		int theHeight2 = Resources.IMAGE_BUTTON_LEFT.mHeight;
 		int num4 = (int)Constants.InvertAndScale(10f);
 		int num5 = (num3 - num4) / 2;
-		int num6 = Math.Max(mButtonMinWidth, AtlasResources.IMAGE_BUTTON_LEFT.mWidth + AtlasResources.IMAGE_BUTTON_MIDDLE.mWidth + AtlasResources.IMAGE_BUTTON_RIGHT.mWidth);
+		int num6 = Math.Max(mButtonMinWidth, Resources.IMAGE_BUTTON_LEFT.mWidth + Resources.IMAGE_BUTTON_MIDDLE.mWidth + Resources.IMAGE_BUTTON_RIGHT.mWidth);
 		if (mLawnYesButton != null && mLawnNoButton != null)
 		{
 			int num7 = (int)(0.8f * (float)Math.Max(mLawnYesButton.mFont.StringWidth(mLawnYesButton.mLabel), mLawnNoButton.mFont.StringWidth(mLawnNoButton.mLabel)));
@@ -222,7 +222,7 @@ internal class LawnDialog : Dialog
 				num6 = num7;
 			}
 		}
-		int num8 = num5 - num6 - AtlasResources.IMAGE_BUTTON_MIDDLE.mWidth + 1;
+		int num8 = num5 - num6 - Resources.IMAGE_BUTTON_MIDDLE.mWidth + 1;
 		if (num8 < num6)
 		{
 			num8 = num6;
@@ -241,7 +241,7 @@ internal class LawnDialog : Dialog
 		}
 		else if (mLawnYesButton != null)
 		{
-			int num10 = num3 - AtlasResources.IMAGE_BUTTON_MIDDLE.mWidth + 1;
+			int num10 = num3 - Resources.IMAGE_BUTTON_MIDDLE.mWidth + 1;
 			num += (num3 - num10) / 2;
 			mLawnYesButton.Resize(num, num2, num10, theHeight2);
 		}
@@ -259,32 +259,32 @@ internal class LawnDialog : Dialog
 		{
 			return;
 		}
-		Image image = AtlasResources.IMAGE_DIALOG_BOTTOMLEFT;
-		Image image2 = AtlasResources.IMAGE_DIALOG_BOTTOMMIDDLE;
-		Image image3 = AtlasResources.IMAGE_DIALOG_BOTTOMRIGHT;
+		Image image = Resources.IMAGE_DIALOG_BOTTOMLEFT;
+		Image image2 = Resources.IMAGE_DIALOG_BOTTOMMIDDLE;
+		Image image3 = Resources.IMAGE_DIALOG_BOTTOMRIGHT;
 		if (mTallBottom)
 		{
-			image = AtlasResources.IMAGE_DIALOG_BIGBOTTOMLEFT;
-			image2 = AtlasResources.IMAGE_DIALOG_BIGBOTTOMMIDDLE;
-			image3 = AtlasResources.IMAGE_DIALOG_BIGBOTTOMRIGHT;
+			image = Resources.IMAGE_DIALOG_BIGBOTTOMLEFT;
+			image2 = Resources.IMAGE_DIALOG_BIGBOTTOMMIDDLE;
+			image3 = Resources.IMAGE_DIALOG_BIGBOTTOMRIGHT;
 		}
-		int theWidth = mWidth - AtlasResources.IMAGE_DIALOG_TOPLEFT.mWidth - AtlasResources.IMAGE_DIALOG_TOPRIGHT.mWidth;
+		int theWidth = mWidth - Resources.IMAGE_DIALOG_TOPLEFT.mWidth - Resources.IMAGE_DIALOG_TOPRIGHT.mWidth;
 		int dIALOG_HEADER_OFFSET = Constants.DIALOG_HEADER_OFFSET;
-		g.DrawImage(AtlasResources.IMAGE_DIALOG_TOPLEFT, 0, dIALOG_HEADER_OFFSET);
-		LawnCommon.TileImageHorizontally(g, AtlasResources.IMAGE_DIALOG_TOPMIDDLE, AtlasResources.IMAGE_DIALOG_TOPLEFT.mWidth, dIALOG_HEADER_OFFSET, theWidth);
-		g.DrawImage(AtlasResources.IMAGE_DIALOG_TOPRIGHT, mWidth - AtlasResources.IMAGE_DIALOG_TOPRIGHT.mWidth, dIALOG_HEADER_OFFSET);
-		dIALOG_HEADER_OFFSET += AtlasResources.IMAGE_DIALOG_TOPRIGHT.mHeight;
-		int theWidth2 = mWidth - AtlasResources.IMAGE_DIALOG_CENTERLEFT.mWidth - AtlasResources.IMAGE_DIALOG_CENTERRIGHT.mWidth;
+		g.DrawImage(Resources.IMAGE_DIALOG_TOPLEFT, 0, dIALOG_HEADER_OFFSET);
+		LawnCommon.TileImageHorizontally(g, Resources.IMAGE_DIALOG_TOPMIDDLE, Resources.IMAGE_DIALOG_TOPLEFT.mWidth, dIALOG_HEADER_OFFSET, theWidth);
+		g.DrawImage(Resources.IMAGE_DIALOG_TOPRIGHT, mWidth - Resources.IMAGE_DIALOG_TOPRIGHT.mWidth, dIALOG_HEADER_OFFSET);
+		dIALOG_HEADER_OFFSET += Resources.IMAGE_DIALOG_TOPRIGHT.mHeight;
+		int theWidth2 = mWidth - Resources.IMAGE_DIALOG_CENTERLEFT.mWidth - Resources.IMAGE_DIALOG_CENTERRIGHT.mWidth;
 		int num = mHeight - dIALOG_HEADER_OFFSET - image2.mHeight;
 		Graphics graphics = Graphics.GetNew(g);
 		graphics.SetClipRect(0, dIALOG_HEADER_OFFSET, mWidth, num);
-		int num2 = (num + AtlasResources.IMAGE_DIALOG_CENTERLEFT.mHeight - 1) / AtlasResources.IMAGE_DIALOG_CENTERLEFT.mHeight;
+		int num2 = (num + Resources.IMAGE_DIALOG_CENTERLEFT.mHeight - 1) / Resources.IMAGE_DIALOG_CENTERLEFT.mHeight;
 		while (num2-- > 0)
 		{
-			graphics.DrawImage(AtlasResources.IMAGE_DIALOG_CENTERLEFT, 0, dIALOG_HEADER_OFFSET);
-			LawnCommon.TileImageHorizontally(graphics, AtlasResources.IMAGE_DIALOG_CENTERMIDDLE, AtlasResources.IMAGE_DIALOG_CENTERLEFT.mWidth, dIALOG_HEADER_OFFSET, theWidth2);
-			graphics.DrawImage(AtlasResources.IMAGE_DIALOG_CENTERRIGHT, mWidth - AtlasResources.IMAGE_DIALOG_CENTERRIGHT.mWidth, dIALOG_HEADER_OFFSET);
-			dIALOG_HEADER_OFFSET += AtlasResources.IMAGE_DIALOG_CENTERLEFT.mHeight;
+			graphics.DrawImage(Resources.IMAGE_DIALOG_CENTERLEFT, 0, dIALOG_HEADER_OFFSET);
+			LawnCommon.TileImageHorizontally(graphics, Resources.IMAGE_DIALOG_CENTERMIDDLE, Resources.IMAGE_DIALOG_CENTERLEFT.mWidth, dIALOG_HEADER_OFFSET, theWidth2);
+			graphics.DrawImage(Resources.IMAGE_DIALOG_CENTERRIGHT, mWidth - Resources.IMAGE_DIALOG_CENTERRIGHT.mWidth, dIALOG_HEADER_OFFSET);
+			dIALOG_HEADER_OFFSET += Resources.IMAGE_DIALOG_CENTERLEFT.mHeight;
 		}
 		graphics.PrepareForReuse();
 		int theWidth3 = mWidth - image.mWidth - image3.mWidth;
@@ -292,7 +292,7 @@ internal class LawnDialog : Dialog
 		g.DrawImage(image, 0, dIALOG_HEADER_OFFSET);
 		LawnCommon.TileImageHorizontally(g, image2, image.mWidth, dIALOG_HEADER_OFFSET, theWidth3);
 		g.DrawImage(image3, mWidth - image3.mWidth, dIALOG_HEADER_OFFSET);
-		g.DrawImage(AtlasResources.IMAGE_DIALOG_HEADER, (mWidth - AtlasResources.IMAGE_DIALOG_HEADER.mWidth) / 2, 0);
+		g.DrawImage(Resources.IMAGE_DIALOG_HEADER, (mWidth - Resources.IMAGE_DIALOG_HEADER.mWidth) / 2, 0);
 		int num3 = Constants.DIALOG_HEADER_OFFSET + mContentInsets.mTop + mBackgroundInsets.mTop;
 		if (mDialogHeader.Length > 0)
 		{
@@ -348,7 +348,7 @@ internal class LawnDialog : Dialog
 				num = theMinWidth;
 			}
 		}
-		int num2 = Math.Max(mMinWidth, AtlasResources.IMAGE_DIALOG_TOPLEFT.mWidth + AtlasResources.IMAGE_DIALOG_TOPRIGHT.mWidth + AtlasResources.IMAGE_DIALOG_TOPMIDDLE.mWidth);
+		int num2 = Math.Max(mMinWidth, Resources.IMAGE_DIALOG_TOPLEFT.mWidth + Resources.IMAGE_DIALOG_TOPRIGHT.mWidth + Resources.IMAGE_DIALOG_TOPMIDDLE.mWidth);
 		if (num < num2)
 		{
 			num = num2;
@@ -361,17 +361,17 @@ internal class LawnDialog : Dialog
 		}
 		if (mDialogLines.Length > 0)
 		{
-			num += AtlasResources.IMAGE_DIALOG_TOPMIDDLE.mWidth;
+			num += Resources.IMAGE_DIALOG_TOPMIDDLE.mWidth;
 			Graphics graphics = Graphics.GetNew();
 			graphics.SetFont(mLinesFont);
 			num3 += GetWordWrappedHeight(graphics, num - mContentInsets.mLeft - mContentInsets.mRight - mBackgroundInsets.mLeft - mBackgroundInsets.mRight - (int)Constants.InvertAndScale(4f), mDialogLines, mLineSpacingOffset);
 			graphics.PrepareForReuse();
 		}
-		num3 += AtlasResources.IMAGE_DIALOG_BOTTOMMIDDLE.GetHeight();
-		int num4 = Constants.DIALOG_HEADER_OFFSET + AtlasResources.IMAGE_DIALOG_TOPLEFT.mHeight + AtlasResources.IMAGE_DIALOG_BOTTOMLEFT.mHeight;
+		num3 += Resources.IMAGE_DIALOG_BOTTOMMIDDLE.GetHeight();
+		int num4 = Constants.DIALOG_HEADER_OFFSET + Resources.IMAGE_DIALOG_TOPLEFT.mHeight + Resources.IMAGE_DIALOG_BOTTOMLEFT.mHeight;
 		if (mTallBottom)
 		{
-			num4 = Constants.DIALOG_HEADER_OFFSET + AtlasResources.IMAGE_DIALOG_TOPLEFT.mHeight + AtlasResources.IMAGE_DIALOG_BIGBOTTOMLEFT.mHeight;
+			num4 = Constants.DIALOG_HEADER_OFFSET + Resources.IMAGE_DIALOG_TOPLEFT.mHeight + Resources.IMAGE_DIALOG_BIGBOTTOMLEFT.mHeight;
 		}
 		if (num3 < num4)
 		{

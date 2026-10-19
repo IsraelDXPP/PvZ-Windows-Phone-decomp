@@ -90,7 +90,7 @@ internal class SeedPacketsWidget : Widget
 			}
 			else
 			{
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKETSILHOUETTE, theX, theY);
+				g.DrawImage(Resources.IMAGE_SEEDPACKETSILHOUETTE, theX, theY);
 			}
 		}
 		for (int j = 0; j < 49; j++)

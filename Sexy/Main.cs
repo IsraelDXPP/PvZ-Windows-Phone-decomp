@@ -28,6 +28,8 @@ public class Main : Game
 
 	internal static Graphics graphics;
 
+	public static bool Want800x600;
+
 	private int mFrameCnt;
 
 	private static int letterboxLogCount;
@@ -151,6 +153,13 @@ public class Main : Game
 		letterOffY = innerY;
 		viewOffX = baseX + innerX;
 		viewOffY = baseY + innerY;
+#if !ANDROID && !IOS
+		// Escritorio: sin letterbox. El backbuffer es del tamano del juego.
+		letterOffX = 0;
+		letterOffY = 0;
+		viewOffX = 0;
+		viewOffY = 0;
+#endif
 		if (letterboxLogCount < 6)
 		{
 			letterboxLogCount++;
@@ -203,8 +212,18 @@ public class Main : Game
 		base.Window.AllowUserResizing = true;
 #endif
 		Guide.SimulateTrialMode = false;
-		graphics.PreferredBackBufferWidth = 800;
-		graphics.PreferredBackBufferHeight = 480;
+		// Dos perfiles: 1280x720 (QEWide-Tweaks) por defecto, 800x600
+		// (Quality-Enhanced) con argumento 800x600.
+		if (Want800x600)
+		{
+			graphics.PreferredBackBufferWidth = 800;
+			graphics.PreferredBackBufferHeight = 600;
+		}
+		else
+		{
+			graphics.PreferredBackBufferWidth = 1280;
+			graphics.PreferredBackBufferHeight = 720;
+		}
 		GraphicsState.mGraphicsDeviceManager.SupportedOrientations = Constants.SupportedOrientations;
 		GraphicsState.mGraphicsDeviceManager.DeviceCreated += graphics_DeviceCreated;
 		GraphicsState.mGraphicsDeviceManager.DeviceReset += graphics_DeviceReset;
@@ -426,10 +445,22 @@ public class Main : Game
 		{
 			UpdateLetterbox();
 			var gd = base.GraphicsDevice;
+#if ANDROID || IOS
 			// Viewport 800x480 centrado en coords absolutas de surface: el
 			// batch usa la proyeccion del viewport, asi todo (sprites y
 			// texto) cae en espacio 800x480.
 			gd.Viewport = new Viewport(viewOffX, viewOffY, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+#else
+			// Escritorio: el juego es nativo (1280x720 u 800x600) y el
+			// backbuffer ya tiene ese tamano. Viewport completo siempre:
+			// el letterbox phone recortaba/desplazaba el dibujado.
+			int bbw = gd.PresentationParameters.BackBufferWidth;
+			int bbh = gd.PresentationParameters.BackBufferHeight;
+			if (bbw <= 0) bbw = Constants.BOARD_WIDTH;
+			if (bbh <= 0) bbh = Constants.BOARD_HEIGHT;
+			gd.Viewport = new Viewport(0, 0, bbw, bbh);
+			Graphics.OrientationChanged();
+#endif
 			gd.Clear(Color.Black);
 			GlobalStaticVars.gSexyAppBase.DrawGame(gameTime);
 			base.Draw(gameTime);
@@ -740,19 +771,16 @@ public class Main : Game
 		{
 			Constants.Language = Constants.LanguageIndex.en;
 		}
-		if ((graphics.GraphicsDevice.PresentationParameters.BackBufferWidth == 480 && graphics.GraphicsDevice.PresentationParameters.BackBufferHeight == 800) || (graphics.GraphicsDevice.PresentationParameters.BackBufferWidth == 800 && graphics.GraphicsDevice.PresentationParameters.BackBufferHeight == 480))
+		// Dos perfiles: 1280x720 (QEWide-Tweaks) y 800x600 4:3
+		// (Quality-Enhanced). Las antiguas 480x800 / 320x480 / 800x480
+		// quedaron obsoletas y se eliminaron sus perfiles.
+		if (graphics.GraphicsDevice.PresentationParameters.BackBufferWidth == 800 && graphics.GraphicsDevice.PresentationParameters.BackBufferHeight == 600)
 		{
-			AtlasResources.mAtlasResources = new AtlasResources_480x800();
-			Constants.Load480x800();
-			return;
+			Constants.Load800x600();
 		}
-		// Cualquier otra resolucion (telefonos): se usan los assets 480x800 y
-		// el juego se dibuja con letterbox en Draw(). Antes lanzaba
-		// "Unsupported Resolution" y crasheaba al arrancar.
-		SexyAppBase.LoadLog(string.Format("SetupForResolution fallback: {0}x{1}",
-			graphics.GraphicsDevice.PresentationParameters.BackBufferWidth,
-			graphics.GraphicsDevice.PresentationParameters.BackBufferHeight));
-		AtlasResources.mAtlasResources = new AtlasResources_480x800();
-		Constants.Load480x800();
+		else
+		{
+			Constants.Load1280x720();
+		}
 	}
 }

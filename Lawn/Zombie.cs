@@ -672,15 +672,15 @@ internal class Zombie : GameObject, IComparable
 				switch (num)
 				{
 				case 2:
-					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_telephonepole, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_ZOMBIE);
+					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_telephonepole, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_ZOMBIE);
 					break;
 				case 1:
-					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_telephonepole, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_DUCKXING);
+					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_telephonepole, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_DUCKXING);
 					break;
 				}
 				if (mZombieType == ZombieType.ZOMBIE_REDEYE_GARGANTUAR)
 				{
-					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD_REDEYE);
+					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD_REDEYE);
 					mBodyHealth = 6000;
 				}
 				break;
@@ -942,7 +942,7 @@ internal class Zombie : GameObject, IComparable
 						reanimation18.SetFramesForLayer(GlobalMembersReanimIds.ReanimTrackId_anim_walk2);
 					}
 					ReanimatorTrackInstance trackInstanceByName7 = reanimation18.GetTrackInstanceByName(GlobalMembersReanimIds.ReanimTrackId_anim_head1);
-					trackInstanceByName7.mImageOverride = AtlasResources.IMAGE_BLANK;
+					trackInstanceByName7.mImageOverride = Resources.IMAGE_BLANK;
 					Reanimation reanimation19 = mApp.AddReanimation(0f, 0f, 0, ReanimationType.REANIM_PEASHOOTER);
 					reanimation19.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_head_idle, ReanimLoopType.REANIM_LOOP, 0, 15f);
 					mSpecialHeadReanimID = mApp.ReanimationGetID(reanimation19);
@@ -1038,7 +1038,7 @@ internal class Zombie : GameObject, IComparable
 							reanimation12.SetFramesForLayer(GlobalMembersReanimIds.ReanimTrackId_anim_walk2);
 						}
 						ReanimatorTrackInstance trackInstanceByName4 = reanimation12.GetTrackInstanceByName(GlobalMembersReanimIds.ReanimTrackId_anim_head1);
-						trackInstanceByName4.mImageOverride = AtlasResources.IMAGE_BLANK;
+						trackInstanceByName4.mImageOverride = Resources.IMAGE_BLANK;
 						Reanimation reanimation13 = mApp.AddReanimation(0f, 0f, 0, ReanimationType.REANIM_GATLINGPEA);
 						reanimation13.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_head_idle, ReanimLoopType.REANIM_LOOP, 0, 15f);
 						mSpecialHeadReanimID = mApp.ReanimationGetID(reanimation13);
@@ -1060,7 +1060,7 @@ internal class Zombie : GameObject, IComparable
 							reanimation10.SetFramesForLayer(GlobalMembersReanimIds.ReanimTrackId_anim_walk2);
 						}
 						ReanimatorTrackInstance trackInstanceByName3 = reanimation10.GetTrackInstanceByName(GlobalMembersReanimIds.ReanimTrackId_anim_head1);
-						trackInstanceByName3.mImageOverride = AtlasResources.IMAGE_BLANK;
+						trackInstanceByName3.mImageOverride = Resources.IMAGE_BLANK;
 						Reanimation reanimation11 = mApp.AddReanimation(0f, 0f, 0, ReanimationType.REANIM_SQUASH);
 						reanimation11.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_idle, ReanimLoopType.REANIM_LOOP, 0, 15f);
 						mSpecialHeadReanimID = mApp.ReanimationGetID(reanimation11);
@@ -1283,7 +1283,7 @@ internal class Zombie : GameObject, IComparable
 			{
 				if (mZombieType == ZombieType.ZOMBIE_DANCER && thePlant.mSeedType == SeedType.SEED_HYPNOSHROOM)
 				{
-					mBoard.GrantAchievement(AchievementId.DiscoisUndead);
+					mBoard.GrantAchievement(AchievementId.ACHIEVEMENT_DISCO_IS_UNDEAD);
 				}
 			}
 			else
@@ -1586,18 +1586,18 @@ internal class Zombie : GameObject, IComparable
 			switch (bodyDamageIndex)
 			{
 			case 1:
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_innerleg_foot, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, Resources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, Resources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_innerleg_foot, Resources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
 				break;
 			case 2:
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerleg_foot, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, Resources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, Resources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerleg_foot, Resources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
 				ApplyBossSmokeParticles(theEnable: true);
 				break;
 			}
@@ -1723,10 +1723,6 @@ internal class Zombie : GameObject, IComparable
 		if (mZombieType == ZombieType.ZOMBIE_BOSS)
 		{
 			BossDie();
-		}
-		if (giveAchievements && mZombieType == ZombieType.ZOMBIE_GARGANTUAR && mBoard != null)
-		{
-			mBoard.GrantAchievement(AchievementId.CrashoftheTitan);
 		}
 		if (mLeaderZombie == null || mLeaderZombie.mFollowerZombieID == null)
 		{
@@ -1964,7 +1960,7 @@ internal class Zombie : GameObject, IComparable
 
 	public void DrawBungeeCord(Graphics g, int theOffsetX, int theOffsetY)
 	{
-		int num = (int)((float)AtlasResources.IMAGE_BUNGEECORD.GetCelHeight() * mScaleZombie);
+		int num = (int)((float)Resources.IMAGE_BUNGEECORD.GetCelHeight() * mScaleZombie);
 		float thePosX = 0f;
 		float thePosY = 0f;
 		GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_bungi_body, ref thePosX, ref thePosY);
@@ -1996,7 +1992,7 @@ internal class Zombie : GameObject, IComparable
 		{
 			float thePosX2 = (float)(theOffsetX + Constants.Zombie_Bungee_Offset.X) - 4f / mScaleZombie;
 			float thePosY2 = num3 - mPosY - (float)Constants.Zombie_Bungee_Offset.Y;
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_BUNGEECORD, thePosX2, thePosY2, mScaleZombie, mScaleZombie);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_BUNGEECORD, thePosX2, thePosY2, mScaleZombie, mScaleZombie);
 		}
 		if (mZombiePhase == ZombiePhase.PHASE_ZOMBIE_BURNED)
 		{
@@ -3992,7 +3988,7 @@ internal class Zombie : GameObject, IComparable
 				mApp.PlayFoley(FoleyType.FOLEY_NEWSPAPER_RARRGH);
 			}
 			StartWalkAnim(20);
-			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, AtlasResources.IMAGE_REANIM_ZOMBIE_PAPER_MADHEAD);
+			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, Resources.IMAGE_REANIM_ZOMBIE_PAPER_MADHEAD);
 		}
 	}
 
@@ -4562,11 +4558,11 @@ internal class Zombie : GameObject, IComparable
 			}
 			if (theFront)
 			{
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_ICETRAP, num * Constants.S, num2 * Constants.S, num3, num3);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_ICETRAP, num * Constants.S, num2 * Constants.S, num3, num3);
 			}
 			else
 			{
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_ICETRAP2, num * Constants.S, num2 * Constants.S, num3, num3);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_ICETRAP2, num * Constants.S, num2 * Constants.S, num3, num3);
 			}
 		}
 	}
@@ -5495,18 +5491,18 @@ internal class Zombie : GameObject, IComparable
 		if (mInPool)
 		{
 			num2 += 67f;
-			TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_WHITEWATER_SHADOW, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
+			TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_WHITEWATER_SHADOW, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
 		}
 		else
 		{
 			num2 += 92f;
 			if (num == 0)
 			{
-				TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
+				TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_PLANTSHADOW, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
 			}
 			else
 			{
-				TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW2, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
+				TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_PLANTSHADOW2, mImageOffsetX * Constants.S, num2 * Constants.S, num3, num3);
 			}
 		}
 		if (mUsesClipping)
@@ -5624,32 +5620,32 @@ internal class Zombie : GameObject, IComparable
 			if (mShieldType == ShieldType.SHIELDTYPE_DOOR && shieldDamageIndex2 == 1)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_screendoor, AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_screendoor, Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR2);
 			}
 			else if (mShieldType == ShieldType.SHIELDTYPE_DOOR && shieldDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_screendoor, AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_screendoor, Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR3);
 			}
 			else if (mShieldType == ShieldType.SHIELDTYPE_NEWSPAPER && shieldDamageIndex2 == 1)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_paper, AtlasResources.IMAGE_REANIM_ZOMBIE_PAPER_PAPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_paper, Resources.IMAGE_REANIM_ZOMBIE_PAPER_PAPER2);
 			}
 			else if (mShieldType == ShieldType.SHIELDTYPE_NEWSPAPER && shieldDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_paper, AtlasResources.IMAGE_REANIM_ZOMBIE_PAPER_PAPER3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_paper, Resources.IMAGE_REANIM_ZOMBIE_PAPER_PAPER3);
 			}
 			else if (mShieldType == ShieldType.SHIELDTYPE_LADDER && shieldDamageIndex2 == 1)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_1, AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_1, Resources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE1);
 			}
 			else if (mShieldType == ShieldType.SHIELDTYPE_LADDER && shieldDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_1, AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_1, Resources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE2);
 			}
 		}
 		return result;
@@ -5680,56 +5676,56 @@ internal class Zombie : GameObject, IComparable
 			Reanimation reanimation = mApp.ReanimationTryToGet(mBodyReanimID);
 			if (mHelmType == HelmType.HELMTYPE_TRAFFIC_CONE && helmDamageIndex2 == 1 && reanimation != null)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_cone, AtlasResources.IMAGE_REANIM_ZOMBIE_CONE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_cone, Resources.IMAGE_REANIM_ZOMBIE_CONE2);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_TRAFFIC_CONE && helmDamageIndex2 == 2 && reanimation != null)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_cone, AtlasResources.IMAGE_REANIM_ZOMBIE_CONE3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_cone, Resources.IMAGE_REANIM_ZOMBIE_CONE3);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_PAIL && helmDamageIndex2 == 1)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_bucket, AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_bucket, Resources.IMAGE_REANIM_ZOMBIE_BUCKET2);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_PAIL && helmDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_bucket, AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_bucket, Resources.IMAGE_REANIM_ZOMBIE_BUCKET3);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_DIGGER && helmDamageIndex2 == 1)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_hardhat, AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_hardhat, Resources.IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT2);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_DIGGER && helmDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_hardhat, AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_hardhat, Resources.IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT3);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_FOOTBALL && helmDamageIndex2 == 1)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_helmet, AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_helmet, Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET2);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_FOOTBALL && helmDamageIndex2 == 2)
 			{
 				Debug.ASSERT(reanimation != null);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_helmet, AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_helmet, Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET3);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_WALLNUT && helmDamageIndex2 == 1)
 			{
-				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face, AtlasResources.IMAGE_REANIM_WALLNUT_CRACKED1);
+				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face, Resources.IMAGE_REANIM_WALLNUT_CRACKED1);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_WALLNUT && helmDamageIndex2 == 2)
 			{
-				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face, AtlasResources.IMAGE_REANIM_WALLNUT_CRACKED2);
+				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face, Resources.IMAGE_REANIM_WALLNUT_CRACKED2);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_TALLNUT && helmDamageIndex2 == 1)
 			{
-				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle, AtlasResources.IMAGE_REANIM_TALLNUT_CRACKED1);
+				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle, Resources.IMAGE_REANIM_TALLNUT_CRACKED1);
 			}
 			else if (mHelmType == HelmType.HELMTYPE_TALLNUT && helmDamageIndex2 == 2)
 			{
-				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle, AtlasResources.IMAGE_REANIM_TALLNUT_CRACKED2);
+				mApp.ReanimationGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle, Resources.IMAGE_REANIM_TALLNUT_CRACKED2);
 			}
 		}
 		return result;
@@ -5758,8 +5754,8 @@ internal class Zombie : GameObject, IComparable
 			}
 			if (TodCommon.TestBit(theDamageFlags, 5))
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
 				ZamboniDeath(theDamageFlags);
 			}
 			else if (mBodyHealth <= 0)
@@ -5768,13 +5764,13 @@ internal class Zombie : GameObject, IComparable
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 1)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE1);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE1);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE1);
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 2)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, AtlasResources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_1, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_1_DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_zamboni_2, Resources.IMAGE_REANIM_ZOMBIE_ZAMBONI_2_DAMAGE2);
 				AddAttachedParticle(27, 72, ParticleEffect.PARTICLE_ZAMBONI_SMOKE);
 			}
 		}
@@ -5783,12 +5779,12 @@ internal class Zombie : GameObject, IComparable
 			Reanimation reanimation2 = mApp.ReanimationGet(mBodyReanimID);
 			if (TodCommon.TestBit(theDamageFlags, 5) || mBodyHealth <= 0)
 			{
-				reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_siding, AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
+				reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_siding, Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
 				CatapultDeath(theDamageFlags);
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 1)
 			{
-				reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_siding, AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
+				reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_siding, Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_SIDING_DAMAGE);
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 2)
 			{
@@ -5800,21 +5796,21 @@ internal class Zombie : GameObject, IComparable
 			Reanimation reanimation3 = mApp.ReanimationGet(mBodyReanimID);
 			if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 1)
 			{
-				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantua_body1, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_2);
-				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerarm_lower, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
+				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantua_body1, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_2);
+				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerarm_lower, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 2)
 			{
-				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantua_body1, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_3);
-				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerleg_foot, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_FOOT2);
-				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerarm_lower, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
+				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantua_body1, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_BODY1_3);
+				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerleg_foot, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_FOOT2);
+				reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_gargantuar_outerarm_lower, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_OUTERARM_LOWER2);
 				if (mZombieType == ZombieType.ZOMBIE_REDEYE_GARGANTUAR)
 				{
-					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2_REDEYE);
+					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2_REDEYE);
 				}
 				else
 				{
-					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, AtlasResources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2);
+					reanimation3.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1, Resources.IMAGE_REANIM_ZOMBIE_GARGANTUAR_HEAD2);
 				}
 			}
 		}
@@ -5827,19 +5823,19 @@ internal class Zombie : GameObject, IComparable
 			Reanimation reanimation4 = mApp.ReanimationGet(mBodyReanimID);
 			if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 1)
 			{
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_innerleg_foot, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, Resources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE1);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, Resources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE1);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE1);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE1);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_innerleg_foot, Resources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE1);
 			}
 			else if (bodyDamageIndex != bodyDamageIndex2 && bodyDamageIndex2 == 2)
 			{
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerleg_foot, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_head, Resources.IMAGE_REANIM_ZOMBIE_BOSS_HEAD_DAMAGE2);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_jaw, Resources.IMAGE_REANIM_ZOMBIE_BOSS_JAW_DAMAGE2);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_hand, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_HAND_DAMAGE2);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerarm_thumb2, Resources.IMAGE_REANIM_ZOMBIE_BOSS_OUTERARM_THUMB_DAMAGE2);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_outerleg_foot, Resources.IMAGE_REANIM_ZOMBIE_BOSS_FOOT_DAMAGE2);
 				ApplyBossSmokeParticles(theEnable: true);
 			}
 			if (num >= mBodyMaxHealth / GameConstants.BOSS_FLASH_HEALTH_FRACTION && mBodyHealth < mBodyMaxHealth / GameConstants.BOSS_FLASH_HEALTH_FRACTION)
@@ -5948,18 +5944,18 @@ internal class Zombie : GameObject, IComparable
 			{
 				reanimation = mApp.ReanimationGet(mBodyReanimID);
 				Image currentTrackImage = reanimation.GetCurrentTrackImage(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole);
-				if (currentTrackImage == AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_WITHBALL && !flag2)
+				if (currentTrackImage == Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_WITHBALL && !flag2)
 				{
-					reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_DAMAGE_WITHBALL);
+					reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_DAMAGE_WITHBALL);
 				}
 				else
 				{
-					reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_DAMAGE);
+					reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE_DAMAGE);
 				}
 			}
 			else if (flag2)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_catapult_pole, Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_POLE);
 			}
 		}
 		ZombieDrawPosition theDrawPos = default(ZombieDrawPosition);
@@ -6265,64 +6261,64 @@ internal class Zombie : GameObject, IComparable
 		OverrideParticleScale(todParticleSystem);
 		if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_DANCER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_DISCO);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_HEAD_DISCO);
 			todParticleSystem.OverrideScale(null, 1.2f);
 			ReanimShowPrefix("Zombie_disco_glasses", -1);
 			TodParticleSystem todParticleSystem2 = mApp.AddTodParticle(thePosX, thePosY, aRenderOrder, ParticleEffect.PARTICLE_ZOMBIE_MUSTACHE);
 			OverrideParticleColor(todParticleSystem2);
 			OverrideParticleScale(todParticleSystem2);
-			todParticleSystem2?.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_DISCO_GLASSES);
+			todParticleSystem2?.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_DISCO_GLASSES);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_BACKUP_DANCER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_DANCER_BACKUP_HEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_DANCER_BACKUP_HEAD);
 			todParticleSystem.OverrideScale(null, 1.2f);
 			ReanimShowPrefix("Zombie_backup_stash", -1);
 			todParticleSystem = mApp.AddTodParticle(thePosX, thePosY, aRenderOrder, ParticleEffect.PARTICLE_ZOMBIE_MUSTACHE);
 			OverrideParticleColor(todParticleSystem);
 			OverrideParticleScale(todParticleSystem);
-			todParticleSystem?.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_BACKUP_STASH);
+			todParticleSystem?.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_BACKUP_STASH);
 			ReanimShowPrefix("anim_head2", -1);
 			todParticleSystem = mApp.AddTodParticle(thePosX, thePosY, aRenderOrder, ParticleEffect.PARTICLE_ZOMBIE_MUSTACHE);
 			OverrideParticleColor(todParticleSystem);
 			OverrideParticleScale(todParticleSystem);
-			todParticleSystem?.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_JAW);
+			todParticleSystem?.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_JAW);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_BOBSLED)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEBOBSLEDHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEBOBSLEDHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_LADDER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIELADDERHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIELADDERHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_IMP)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEIMPHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEIMPHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_FOOTBALL)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEFOOTBALLHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEFOOTBALLHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_POLEVAULTER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEPOLEVAULTERHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEPOLEVAULTERHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_SNORKEL)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_SNORKLE_HEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_SNORKLE_HEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_DIGGER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEDIGGERHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEDIGGERHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_DOLPHIN_RIDER)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEDOLPHINRIDERHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEDOLPHINRIDERHEAD);
 		}
 		else if (todParticleSystem != null && mZombieType == ZombieType.ZOMBIE_YETI)
 		{
-			todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEYETIHEAD);
+			todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEYETIHEAD);
 		}
 		Reanimation reanimation = mApp.ReanimationTryToGet(mBodyReanimID);
 		if (mBoard.mMustacheMode && reanimation.TrackExists(GlobalMembersReanimIds.ReanimTrackId_zombie_mustache))
@@ -6341,19 +6337,19 @@ internal class Zombie : GameObject, IComparable
 		{
 			Image imageOverride2 = reanimation.GetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_head1);
 			int num = -1;
-			if (imageOverride2 != null && imageOverride2 == AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES1)
+			if (imageOverride2 != null && imageOverride2 == Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES1)
 			{
 				num = 0;
 			}
-			else if (imageOverride2 != null && imageOverride2 == AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES2)
+			else if (imageOverride2 != null && imageOverride2 == Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES2)
 			{
 				num = 1;
 			}
-			else if (imageOverride2 != null && imageOverride2 == AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES3)
+			else if (imageOverride2 != null && imageOverride2 == Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES3)
 			{
 				num = 2;
 			}
-			else if (imageOverride2 != null && imageOverride2 == AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES4)
+			else if (imageOverride2 != null && imageOverride2 == Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES4)
 			{
 				num = 3;
 			}
@@ -6885,8 +6881,8 @@ internal class Zombie : GameObject, IComparable
 			}
 			else if ((mZombieType == ZombieType.ZOMBIE_GARGANTUAR || mZombieType == ZombieType.ZOMBIE_REDEYE_GARGANTUAR) && !mHasObject)
 			{
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_impblink, AtlasResources.IMAGE_BLANK);
-				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_imphead, AtlasResources.IMAGE_BLANK);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_impblink, Resources.IMAGE_BLANK);
+				reanimation4.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_imphead, Resources.IMAGE_BLANK);
 			}
 			if (mScaleZombie != 1f)
 			{
@@ -7270,7 +7266,7 @@ internal class Zombie : GameObject, IComparable
 		{
 			thePosY -= 10f;
 		}
-		TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_REANIM_CORNPULT_BUTTER_SPLAT, thePosX * Constants.S + 0f, thePosY * Constants.S - 6f, num, num);
+		TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_REANIM_CORNPULT_BUTTER_SPLAT, thePosX * Constants.S + 0f, thePosY * Constants.S - 6f, num, num);
 	}
 
 	public bool IsImmobilizied()
@@ -7523,10 +7519,10 @@ internal class Zombie : GameObject, IComparable
 		}
 		Image theImage = num switch
 		{
-			0 => AtlasResources.IMAGE_ZOMBIE_BOBSLED1, 
-			1 => AtlasResources.IMAGE_ZOMBIE_BOBSLED2, 
-			2 => AtlasResources.IMAGE_ZOMBIE_BOBSLED3, 
-			_ => AtlasResources.IMAGE_ZOMBIE_BOBSLED4, 
+			0 => Resources.IMAGE_ZOMBIE_BOBSLED1, 
+			1 => Resources.IMAGE_ZOMBIE_BOBSLED2, 
+			2 => Resources.IMAGE_ZOMBIE_BOBSLED3, 
+			_ => Resources.IMAGE_ZOMBIE_BOBSLED4, 
 		};
 		if (mZombiePhase == ZombiePhase.PHASE_ZOMBIE_BURNED)
 		{
@@ -7537,7 +7533,7 @@ internal class Zombie : GameObject, IComparable
 		num4 *= Constants.S;
 		if (flag2 && num != 3)
 		{
-			g.DrawImageF(AtlasResources.IMAGE_ZOMBIE_BOBSLED_INSIDE, num3, num4);
+			g.DrawImageF(Resources.IMAGE_ZOMBIE_BOBSLED_INSIDE, num3, num4);
 		}
 		if (flag)
 		{
@@ -7551,7 +7547,7 @@ internal class Zombie : GameObject, IComparable
 			g.SetColor(new SexyColor(num5, num5, num5, 255));
 			if (flag2 && num != 3)
 			{
-				g.DrawImageF(AtlasResources.IMAGE_ZOMBIE_BOBSLED_INSIDE, num3, num4);
+				g.DrawImageF(Resources.IMAGE_ZOMBIE_BOBSLED_INSIDE, num3, num4);
 			}
 			if (flag)
 			{
@@ -7808,7 +7804,7 @@ internal class Zombie : GameObject, IComparable
 			}
 			g.SetColorizeImages(colorizeImages: true);
 			g.SetColor(sexyColor);
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_SPOTLIGHT2, num * Constants.S, (float)Constants.Zombie_Dancer_Spotlight_Offset.Y * Constants.S, zombie_Dancer_Spotlight_Scale, zombie_Dancer_Spotlight_Scale);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_SPOTLIGHT2, num * Constants.S, (float)Constants.Zombie_Dancer_Spotlight_Offset.Y * Constants.S, zombie_Dancer_Spotlight_Scale, zombie_Dancer_Spotlight_Scale);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 		Reanimation reanimation = mApp.ReanimationTryToGet(mBodyReanimID);
@@ -7817,7 +7813,7 @@ internal class Zombie : GameObject, IComparable
 		{
 			g.SetColorizeImages(colorizeImages: true);
 			g.SetColor(sexyColor);
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_SPOTLIGHT, ((float)Constants.Zombie_Dancer_Spotlight_Pos.X + num) * Constants.S, (float)(Constants.Zombie_Dancer_Spotlight_Pos.Y + Constants.Zombie_Dancer_Spotlight_Offset.Y) * Constants.S, zombie_Dancer_Spotlight_Scale, zombie_Dancer_Spotlight_Scale);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_SPOTLIGHT, ((float)Constants.Zombie_Dancer_Spotlight_Pos.X + num) * Constants.S, (float)(Constants.Zombie_Dancer_Spotlight_Pos.Y + Constants.Zombie_Dancer_Spotlight_Offset.Y) * Constants.S, zombie_Dancer_Spotlight_Scale, zombie_Dancer_Spotlight_Scale);
 			g.SetColorizeImages(colorizeImages: false);
 		}
 	}
@@ -7895,7 +7891,7 @@ internal class Zombie : GameObject, IComparable
 				num2 += TodCommon.TodAnimateCurveFloat(GameConstants.BUNGEE_ZOMBIE_HEIGHT, GameConstants.BUNGEE_ZOMBIE_HEIGHT - 400, (int)mAltitude, -600f, 0f, TodCurves.CURVE_LINEAR);
 			}
 			num2 += mAltitude;
-			g.DrawImageF(AtlasResources.IMAGE_BUNGEETARGET, num * Constants.S, num2 * Constants.S);
+			g.DrawImageF(Resources.IMAGE_BUNGEETARGET, num * Constants.S, num2 * Constants.S);
 		}
 	}
 
@@ -8156,66 +8152,66 @@ internal class Zombie : GameObject, IComparable
 			if (mZombieType == ZombieType.ZOMBIE_FOOTBALL)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_football_leftarm_hand, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_leftarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_LEFTARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_football_leftarm_upper, Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_LEFTARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_NEWSPAPER)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_paper_leftarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_leftarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_PAPER_LEFTARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_paper_leftarm_upper, Resources.IMAGE_REANIM_ZOMBIE_PAPER_LEFTARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_POLEVAULTER)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_polevaulter_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_polevaulter_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_POLEVAULTER_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_polevaulter_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_POLEVAULTER_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_BALLOON)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_BALLOON_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_BALLOON_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_IMP)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_imp_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_IMP_ARM1_BONE);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_imp_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_IMP_ARM1_BONE);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_DIGGER)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_digger_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_DIGGER_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_BOBSLED)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_dolphinrider_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_BOBSLED_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_dolphinrider_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_BOBSLED_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_JACK_IN_THE_BOX)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_outerarm_lower, AtlasResources.IMAGE_REANIM_ZOMBIE_JACKBOX_OUTERARM_LOWER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_outerarm_lower, Resources.IMAGE_REANIM_ZOMBIE_JACKBOX_OUTERARM_LOWER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_SNORKEL)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_snorkle_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_SNORKLE_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_snorkle_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_SNORKLE_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_DOLPHIN_RIDER)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_dolphinrider_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_DOLPHINRIDER_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_dolphinrider_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_DOLPHINRIDER_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_POGO)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_OUTERARM_UPPER2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stickhands, AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_STICKHANDS2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stick, AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE2);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stick2, AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_STICK2DAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_POGO_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stickhands, Resources.IMAGE_REANIM_ZOMBIE_POGO_STICKHANDS2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stick, Resources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stick2, Resources.IMAGE_REANIM_ZOMBIE_POGO_STICK2DAMAGE2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_FLAG)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_OUTERARM_UPPER2);
-				mApp.ReanimationTryToGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_flag, AtlasResources.IMAGE_REANIM_ZOMBIE_FLAG3);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_OUTERARM_UPPER2);
+				mApp.ReanimationTryToGet(mSpecialHeadReanimID)?.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_flag, Resources.IMAGE_REANIM_ZOMBIE_FLAG3);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_DANCER)
 			{
@@ -8230,17 +8226,17 @@ internal class Zombie : GameObject, IComparable
 			else if (mZombieType == ZombieType.ZOMBIE_LADDER)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_hand, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_ladder_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_LADDER_OUTERARM_UPPER2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_YETI)
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_hand, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_yeti_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_YETI_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_yeti_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_YETI_OUTERARM_UPPER2);
 			}
 			else
 			{
 				GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_lower, ref thePosX, ref thePosY);
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, AtlasResources.IMAGE_REANIM_ZOMBIE_OUTERARM_UPPER2);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_outerarm_upper, Resources.IMAGE_REANIM_ZOMBIE_OUTERARM_UPPER2);
 			}
 		}
 		if (mInPool || TodCommon.TestBit(theDamageFlags, 4))
@@ -8264,11 +8260,11 @@ internal class Zombie : GameObject, IComparable
 		{
 			if (mZombieType == ZombieType.ZOMBIE_FOOTBALL)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_LEFTARM_HAND);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_LEFTARM_HAND);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_NEWSPAPER)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_PAPER_LEFTARM_LOWER);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_PAPER_LEFTARM_LOWER);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_DANCER)
 			{
@@ -8284,27 +8280,27 @@ internal class Zombie : GameObject, IComparable
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_BOBSLED)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_BOBSLED_OUTERARM_HAND);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_BOBSLED_OUTERARM_HAND);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_IMP)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_IMP_ARM2);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_IMP_ARM2);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_YETI)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_YETI_OUTERARM_HAND);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_YETI_OUTERARM_HAND);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_JACK_IN_THE_BOX)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEJACKBOXARM);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEJACKBOXARM);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_DIGGER)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_ZOMBIEDIGGERARM);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_ZOMBIEDIGGERARM);
 			}
 			else if (mZombieType == ZombieType.ZOMBIE_POLEVAULTER || mZombieType == ZombieType.ZOMBIE_BALLOON || mZombieType == ZombieType.ZOMBIE_DOLPHIN_RIDER || mZombieType == ZombieType.ZOMBIE_POGO || mZombieType == ZombieType.ZOMBIE_LADDER)
 			{
-				todParticleSystem.OverrideImage(null, AtlasResources.IMAGE_REANIM_ZOMBIE_OUTERARM_HAND);
+				todParticleSystem.OverrideImage(null, Resources.IMAGE_REANIM_ZOMBIE_OUTERARM_HAND);
 			}
 		}
 	}
@@ -9064,8 +9060,8 @@ internal class Zombie : GameObject, IComparable
 		}
 		else
 		{
-			reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_eyeglow_red, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_EYEGLOW_BLUE);
-			reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_mouthglow_red, AtlasResources.IMAGE_REANIM_ZOMBIE_BOSS_MOUTHGLOW_BLUE);
+			reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_eyeglow_red, Resources.IMAGE_REANIM_ZOMBIE_BOSS_EYEGLOW_BLUE);
+			reanimation2.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_boss_mouthglow_red, Resources.IMAGE_REANIM_ZOMBIE_BOSS_MOUTHGLOW_BLUE);
 		}
 		Reanimation reanimation3 = mApp.ReanimationTryToGet(mSpecialHeadReanimID);
 		reanimation3.PlayReanim(GlobalMembersReanimIds.ReanimTrackId_anim_drive, ReanimLoopType.REANIM_LOOP, 20, 36f);
@@ -9209,17 +9205,17 @@ internal class Zombie : GameObject, IComparable
 	{
 		if (mZombieType == ZombieType.ZOMBIE_DANCER)
 		{
-			return AtlasResources.IMAGE_REANIM_ZOMBIE_DISCO_HEAD_GROSSOUT;
+			return Resources.IMAGE_REANIM_ZOMBIE_DISCO_HEAD_GROSSOUT;
 		}
 		if (mZombieType == ZombieType.ZOMBIE_BACKUP_DANCER)
 		{
-			return AtlasResources.IMAGE_REANIM_ZOMBIE_DANCER_HEAD_GROSSOUT;
+			return Resources.IMAGE_REANIM_ZOMBIE_DANCER_HEAD_GROSSOUT;
 		}
 		if (mZombieType == ZombieType.ZOMBIE_POLEVAULTER)
 		{
-			return AtlasResources.IMAGE_REANIM_ZOMBIE_POLEVAULTER_HEAD_GROSSOUT;
+			return Resources.IMAGE_REANIM_ZOMBIE_POLEVAULTER_HEAD_GROSSOUT;
 		}
-		return AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_GROSSOUT;
+		return Resources.IMAGE_REANIM_ZOMBIE_HEAD_GROSSOUT;
 	}
 
 	public void ShowYuckyFace(bool theShow)
@@ -9793,7 +9789,7 @@ internal class Zombie : GameObject, IComparable
 			reanimation2.GetCurrentTransform(theTrackIndex2, out var aTransformCurrent2, nullIfInvalidFrame: false);
 			float theX2 = mPosX + aTransformCurrent2.mTransX * Constants.IS + 100f;
 			float theY2 = mPosY + aTransformCurrent2.mTransY * Constants.IS + 50f;
-			mApp.AddTodParticle(theX2, theY2, aRenderOrder, ParticleEffect.PARTICLE_ZOMBIE_BOSS_FIREBALL)?.OverrideImage(null, AtlasResources.IMAGE_ZOMBIE_BOSS_ICEBALL_PARTICLES);
+			mApp.AddTodParticle(theX2, theY2, aRenderOrder, ParticleEffect.PARTICLE_ZOMBIE_BOSS_FIREBALL)?.OverrideImage(null, Resources.IMAGE_ZOMBIE_BOSS_ICEBALL_PARTICLES);
 			aTransformCurrent2.PrepareForReuse();
 		}
 		mApp.PlayFoley(FoleyType.FOLEY_BOSSBOULDERATTACK);
@@ -10351,10 +10347,10 @@ internal class Zombie : GameObject, IComparable
 			break;
 		}
 		case 2:
-			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_mustache, AtlasResources.IMAGE_REANIM_ZOMBIE_MUSTACHE2);
+			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_mustache, Resources.IMAGE_REANIM_ZOMBIE_MUSTACHE2);
 			break;
 		case 3:
-			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_mustache, AtlasResources.IMAGE_REANIM_ZOMBIE_MUSTACHE3);
+			reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_zombie_mustache, Resources.IMAGE_REANIM_ZOMBIE_MUSTACHE3);
 			break;
 		}
 	}
@@ -10381,16 +10377,16 @@ internal class Zombie : GameObject, IComparable
 		switch (num)
 		{
 		case 0:
-			theImage2 = AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES1;
+			theImage2 = Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES1;
 			break;
 		case 1:
-			theImage2 = AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES2;
+			theImage2 = Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES2;
 			break;
 		case 2:
-			theImage2 = AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES3;
+			theImage2 = Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES3;
 			break;
 		case 3:
-			theImage2 = AtlasResources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES4;
+			theImage2 = Resources.IMAGE_REANIM_ZOMBIE_HEAD_SUNGLASSES4;
 			break;
 		default:
 			Debug.ASSERT(value: false);

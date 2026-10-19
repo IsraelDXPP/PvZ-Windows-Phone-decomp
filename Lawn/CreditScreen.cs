@@ -104,7 +104,7 @@ internal class CreditScreen : Widget, ButtonListener
 		mMainMenuButton = GameButton.MakeButton(1, this, "[CREDITS_MAIN_MENU_BUTTON]");
 		mMainMenuButton.Resize(Constants.CreditScreen_MainMenu.X, Constants.CreditScreen_MainMenu.Y, Constants.CreditScreen_MainMenu.Width, Constants.CreditScreen_MainMenu.Height);
 		mMainMenuButton.SetVisible(isVisible: false);
-		mReplayButton = GameButton.MakeNewButton(0, this, "[CREDITS_REPLAY_BUTTON]", Resources.FONT_HOUSEOFTERROR16, AtlasResources.IMAGE_CREDITS_PLAYBUTTON, null, null);
+		mReplayButton = GameButton.MakeNewButton(0, this, "[CREDITS_REPLAY_BUTTON]", Resources.FONT_HOUSEOFTERROR16, Resources.IMAGE_CREDITS_PLAYBUTTON, null, null);
 		mReplayButton.mTextDownOffsetX = 1;
 		mReplayButton.mTextDownOffsetY = 1;
 		mReplayButton.mColors[0] = new SexyColor(255, 255, 255);

@@ -39,17 +39,14 @@ internal class TitleScreen : Widget, ButtonListener
 	public int mTitleStateCounter;
 
 	public int mTitleStateDuration;
-#if ANDROID
-	private static int updateLogCount;
-#endif
 
 	public bool mLoaderScreenIsLoaded;
 
 	public bool mNeedToUnpackAtlas;
 
-	public bool mTitleMusicStarted;
+	public bool mDrawnYet;
 
-	private static int popcapLogCount;
+	public bool mDisplayPartnerLogo;
 
 	public int mNextImageIndex;
 
@@ -83,7 +80,7 @@ internal class TitleScreen : Widget, ButtonListener
 	{
 		mApp = theApp;
 		mCurBarWidth = 0f;
-		mTotalBarWidth = Constants.InvertAndScale(314f);
+		mTotalBarWidth = 314f;
 		mBarVel = 0.2f;
 		mBarStartProgress = 0f;
 		mPrevLoadingPercent = 0f;
@@ -97,6 +94,8 @@ internal class TitleScreen : Widget, ButtonListener
 		mTitleState = TitleState.TITLESTATE_WAITING_FOR_FIRST_DRAW;
 		mTitleStateDuration = 0;
 		mTitleStateCounter = 0;
+		mDrawnYet = false;
+		mDisplayPartnerLogo = mApp.GetBoolean("DisplayPartnerLogo", false);
 		mLoaderScreenIsLoaded = false;
 		mNeedToUnpackAtlas = true;
 		mStartButton = new HyperlinkWidget(0, this);
@@ -133,9 +132,10 @@ internal class TitleScreen : Widget, ButtonListener
 		};
 		aTriggerPoint[0] = 0.11f * mTotalBarWidth;
 		aTriggerPoint[1] = 0.32f * mTotalBarWidth;
-		aTriggerPoint[2] = 0.52f * mTotalBarWidth;
+		aTriggerPoint[2] = 0.54f * mTotalBarWidth;
 		aTriggerPoint[3] = 0.72f * mTotalBarWidth;
-		aTriggerPoint[4] = 0.906f * mTotalBarWidth;
+		aTriggerPoint[4] = 0.91f * mTotalBarWidth;
+		mApp.mDetails = "[DISCORD_TITLE_SCREEN]";
 	}
 
 	public override void Dispose()
@@ -150,22 +150,31 @@ internal class TitleScreen : Widget, ButtonListener
 
 	public override void Update()
 	{
-#if ANDROID
-		if (updateLogCount < 3) { try { Android.Util.Log.Info("PVZ", "TitleScreen.Update " + updateLogCount + " state=" + mTitleState); } catch { } updateLogCount++; }
-#endif
 		base.Update();
 		if (mApp.mShutdown)
 		{
 			return;
 		}
+		mApp.Set3DAcclerated(true);
+		mApp.mIs3dAccel = true;
 		MarkDirty();
+		if (!mDrawnYet)
+		{
+			return;
+		}
 		if (mTitleState == TitleState.TITLESTATE_WAITING_FOR_FIRST_DRAW)
 		{
-			Sexy.SexyAppBase.LoadLog("title: WAITING_FOR_FIRST_DRAW -> POPCAP_LOGO, load song only");
-			mApp.mMusic.LoadTitleMusic();
+			mApp.mMusic.MusicTitleScreenInit();
 			mApp.StartLoadingThread();
 			mTitleState = TitleState.TITLESTATE_POPCAP_LOGO;
-			mTitleStateDuration = 200;
+			if (mDisplayPartnerLogo)
+			{
+				mTitleStateDuration = 150;
+			}
+			else
+			{
+				mTitleStateDuration = 200;
+			}
 			mTitleStateCounter = mTitleStateDuration;
 		}
 		if (mQuickLoadKey != KeyCode.KEYCODE_UNKNOWN && mTitleState != TitleState.TITLESTATE_SCREEN)
@@ -183,11 +192,30 @@ internal class TitleScreen : Widget, ButtonListener
 		{
 			if (mTitleStateCounter <= 0)
 			{
-				Sexy.SexyAppBase.LoadLog("title: POPCAP_LOGO -> SCREEN");
+				if (mDisplayPartnerLogo)
+				{
+					mTitleState = TitleState.TITLESTATE_SCREEN;
+					mTitleStateDuration = 200;
+					mTitleStateCounter = 200;
+				}
+				else
+				{
+					mTitleState = TitleState.TITLESTATE_SCREEN;
+					mTitleStateDuration = 100;
+					mTitleStateCounter = 100;
+				}
+			}
+			return;
+		}
+		else if (mTitleState == TitleState.TITLESTATE_PARTNER_LOGO)
+		{
+			if (mTitleStateCounter <= 0)
+			{
 				mTitleState = TitleState.TITLESTATE_SCREEN;
 				mTitleStateDuration = 100;
-				mTitleStateCounter = mTitleStateDuration;
+				mTitleStateCounter = 100;
 			}
+			return;
 		}
 		else
 		{
@@ -197,7 +225,6 @@ internal class TitleScreen : Widget, ButtonListener
 			}
 			if (mNeedToUnpackAtlas)
 			{
-				AtlasResources.mAtlasResources.UnpackLoadingAtlasImages();
 				mNeedToUnpackAtlas = false;
 			}
 			float num = (float)mApp.GetLoadingThreadProgress();
@@ -206,7 +233,7 @@ internal class TitleScreen : Widget, ButtonListener
 				mNeedToInit = false;
 				mStartButton.mLabel = TodStringFile.TodStringTranslate("[LOADING]");
 				mStartButton.SetFont(Resources.FONT_BRIANNETOD16);
-				mStartButton.Resize(mWidth / 2 - AtlasResources.IMAGE_LOADBAR_DIRT.mWidth / 2, (int)(Constants.S * 650f), (int)mTotalBarWidth, (int)Constants.InvertAndScale(18f));
+				mStartButton.Resize(mWidth / 2 - Resources.IMAGE_LOADBAR_DIRT.mWidth / 2, 650, (int)mTotalBarWidth, 50);
 				mStartButton.mVisible = true;
 				float num2 = ((!(num > 1E-06f)) ? 3000f : ((float)mTitleAge / num));
 				float num3 = num2 * (1f - num);
@@ -215,17 +242,13 @@ internal class TitleScreen : Widget, ButtonListener
 				mBarStartProgress = Math.Min(num, 0.9f);
 			}
 			float num4 = (num - mBarStartProgress) / (1f - mBarStartProgress);
-			int theY = ((mTitleStateCounter <= 10) ? TodCommon.TodAnimateCurve(10, 0, mTitleStateCounter, (int)(Constants.S * 532f), (int)(Constants.S * 523f), TodCurves.CURVE_BOUNCE) : TodCommon.TodAnimateCurve(60, 10, mTitleStateCounter, (int)(Constants.S * 731f), (int)(Constants.S * 532f), TodCurves.CURVE_EASE_IN));
+			int theY = ((mTitleStateCounter <= 10) ? TodCommon.TodAnimateCurve(10, 0, mTitleStateCounter, 534 + Constants.Board_Background_Offset_Y, 529 + Constants.Board_Background_Offset_Y, TodCurves.CURVE_BOUNCE) : TodCommon.TodAnimateCurve(60, 10, mTitleStateCounter, Constants.BOARD_HEIGHT + Constants.Board_Background_Offset_Y, 534 + Constants.Board_Background_Offset_Y, TodCurves.CURVE_EASE_IN));
 			mStartButton.Resize(mStartButton.mX, theY, (int)mTotalBarWidth, mStartButton.mHeight);
 			if (mTitleStateCounter > 0)
 			{
 				return;
 			}
 			mApp.mEffectSystem.Update();
-		if (mTitleAge % 90 == 0)
-		{
-			Sexy.SexyAppBase.LoadLog(string.Format("title: bar cur={0:F1} total={1:F1} vel={2:F3} prog={3:F3} threadDone={4} appDone={5}", mCurBarWidth, mTotalBarWidth, mBarVel, (float)mApp.GetLoadingThreadProgress(), mLoadingThreadComplete, mApp.mLoadingThreadCompleted));
-		}
 			float num5 = mCurBarWidth;
 			mCurBarWidth += mBarVel;
 			if (!mLoadingThreadComplete)
@@ -244,7 +267,7 @@ internal class TitleScreen : Widget, ButtonListener
 				else if (mCurBarWidth >= mTotalBarWidth && mStartButton.mLabel != TodStringFile.TodStringTranslate("[CLICK_TO_START]"))
 				{
 					mStartButton.mLabel = TodStringFile.TodStringTranslate("[CLICK_TO_START]");
-					Sexy.SexyAppBase.LoadLog("title: READY CLICK_TO_START");
+					SexyAppBase.LoadLog("READY");
 					mCurBarWidth = mTotalBarWidth;
 				}
 				else if (mCurBarWidth > mTotalBarWidth)
@@ -289,7 +312,58 @@ internal class TitleScreen : Widget, ButtonListener
 				LawnApp.PreallocateMemory();
 				mLoadingThreadComplete = true;
 				mStartButton.SetDisabled(isDisabled: false);
-				mStartButton.SetVisible(isVisible: true);
+				if (mQuickLoadKey == KeyCode.KEYCODE_ASCIIEND)
+				{
+					mApp.FastLoad(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN);
+				}
+				else if (mQuickLoadKey == (KeyCode)77)
+				{
+					mApp.LoadingCompleted();
+				}
+				else if (mQuickLoadKey == (KeyCode)83)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
+				}
+				else if (mQuickLoadKey == (KeyCode)67)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
+				}
+				else if (mQuickLoadKey == (KeyCode)85)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.PreNewGame(GameMode.GAMEMODE_UPSELL, theLookForSavedGame: false);
+				}
+				else if (mQuickLoadKey == (KeyCode)73)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.PreNewGame(GameMode.GAMEMODE_INTRO, theLookForSavedGame: false);
+				}
+				else if (mQuickLoadKey == (KeyCode)80)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_PUZZLE);
+				}
+				else if (mQuickLoadKey == (KeyCode)82)
+				{
+					mApp.LoadingCompleted();
+					mApp.KillGameSelector();
+					mApp.ShowCreditScreen();
+				}
+				else if (mApp.mTodCheatKeys && mApp.mPlayerInfo != null && mQuickLoadKey == (KeyCode)84)
+				{
+					mApp.FastLoad(GameMode.GAMEMODE_ADVENTURE);
+				}
+				else
+				{
+					mStartButton.SetVisible(isVisible: true);
+				}
 			}
 			for (int i = 0; i < 5; i++)
 			{
@@ -301,7 +375,7 @@ internal class TitleScreen : Widget, ButtonListener
 						theReanimationType = ReanimationType.REANIM_LOADBAR_ZOMBIEHEAD;
 					}
 					float num11 = (float)Constants.TitleScreen_ReanimStart_X + aTriggerPoint[i];
-					float num12 = (float)mStartButton.mY - Constants.InvertAndScale(42f);
+					float num12 = 511f + Constants.Board_Background_Offset_Y;
 					Reanimation reanimation = mApp.AddReanimation(num11, num12, 0, theReanimationType, theDoScalePos: false);
 					reanimation.mLoopType = ReanimLoopType.REANIM_PLAY_ONCE_AND_HOLD;
 					reanimation.mAnimRate = 18f;
@@ -313,10 +387,10 @@ internal class TitleScreen : Widget, ButtonListener
 						break;
 					case 2:
 						reanimation.SetPosition(num11, num12 - 5f);
-						reanimation.OverrideScale(1.1f, 1.2f);
+						reanimation.OverrideScale(1.1f, 1.3f);
 						break;
 					case 4:
-						reanimation.SetPosition(num11 - Constants.InvertAndScale(20f), num12);
+						reanimation.SetPosition(num11 - 20f, num12);
 						break;
 					}
 					if (i == 4)
@@ -337,37 +411,35 @@ internal class TitleScreen : Widget, ButtonListener
 	{
 		g.SetLinearBlend(linear: true);
 		base.Draw(g);
-		if (mTitleState == TitleState.TITLESTATE_POPCAP_LOGO)
+		if (mTitleState == TitleState.TITLESTATE_WAITING_FOR_FIRST_DRAW)
 		{
-			if (popcapLogCount < 8)
-			{
-				popcapLogCount++;
-				Sexy.SexyAppBase.LoadLog(string.Format("popcap draw n={0} ctr={1} dur={2} logoNull={3} logoW={4}", popcapLogCount, mTitleStateCounter, mTitleStateDuration, Resources.IMAGE_POPCAP_LOGO == null, Resources.IMAGE_POPCAP_LOGO == null ? -1 : Resources.IMAGE_POPCAP_LOGO.mWidth));
-			}
-			if (!mTitleMusicStarted)
-			{
-				mTitleMusicStarted = true;
-				Sexy.SexyAppBase.LoadLog("start title music (popcap draw)");
-				mApp.mMusic.StartTitleMusic();
-			}
 			g.SetColor(SexyColor.Black);
 			g.FillRect(0, 0, mWidth, mHeight);
-			int num = 50;
-			int theAlpha = 255;
-			if (mTitleStateCounter < mTitleStateDuration - num)
+			if (!mDrawnYet)
 			{
-				theAlpha = TodCommon.TodAnimateCurve(num, 0, mTitleStateCounter, 255, 0, TodCurves.CURVE_LINEAR);
+				mDrawnYet = true;
 			}
-			g.SetColorizeImages(colorizeImages: true);
-			g.SetColor(new SexyColor(255, 255, 255, theAlpha));
-			if (Constants.Language != Constants.LanguageIndex.de)
+			return;
+		}
+		if (mTitleState == TitleState.TITLESTATE_POPCAP_LOGO)
+		{
+			g.SetColor(SexyColor.Black);
+			g.FillRect(0, 0, mWidth, mHeight);
+			int anAlpha = 255;
+			if (mTitleStateCounter < mTitleStateDuration - 50)
 			{
-				g.DrawImage(Resources.IMAGE_POPCAP_LOGO, (mWidth - Resources.IMAGE_POPCAP_LOGO.mWidth) / 2, (mHeight - Resources.IMAGE_POPCAP_LOGO.mHeight) / 2);
+				if (!mDisplayPartnerLogo)
+				{
+					anAlpha = TodCommon.TodAnimateCurve(50, 0, mTitleStateCounter, 255, 0, TodCurves.CURVE_LINEAR);
+				}
 			}
 			else
 			{
-				g.DrawImage(Resources.IMAGE_POPCAP_LOGO_REGISTERED, (mWidth - Resources.IMAGE_POPCAP_LOGO_REGISTERED.mWidth) / 2, (mHeight - Resources.IMAGE_POPCAP_LOGO_REGISTERED.mHeight) / 2);
+				anAlpha = TodCommon.TodAnimateCurve(mTitleStateDuration, mTitleStateDuration - 50, mTitleStateCounter, 0, 255, TodCurves.CURVE_LINEAR);
 			}
+			g.SetColorizeImages(colorizeImages: true);
+			g.SetColor(new SexyColor(255, 255, 255, anAlpha));
+			g.DrawImage(Resources.IMAGE_POPCAP_LOGO, (mWidth - Resources.IMAGE_POPCAP_LOGO.mWidth) / 2, (mHeight - Resources.IMAGE_POPCAP_LOGO.mHeight) / 2);
 			g.SetColorizeImages(colorizeImages: false);
 			return;
 		}
@@ -383,13 +455,22 @@ internal class TitleScreen : Widget, ButtonListener
 		{
 			return;
 		}
-		g.DrawImage(theY: (mTitleStateCounter <= 60) ? TodCommon.TodAnimateCurve(60, 50, mTitleStateCounter, (int)Constants.InvertAndScale(10f), (int)Constants.InvertAndScale(15f), TodCurves.CURVE_BOUNCE) : TodCommon.TodAnimateCurve(100, 60, mTitleStateCounter, (int)Constants.InvertAndScale(-150f), (int)Constants.InvertAndScale(10f), TodCurves.CURVE_EASE_IN), theImage: Resources.IMAGE_PVZ_LOGO, theX: mWidth / 2 - Resources.IMAGE_PVZ_LOGO.mWidth / 2);
+		int aLogoY;
+		if (mTitleStateCounter > 60)
+		{
+			aLogoY = TodCommon.TodAnimateCurve(100, 60, mTitleStateCounter, -Resources.IMAGE_PVZ_LOGO.mHeight, 10 + Constants.Board_Background_Offset_Y, TodCurves.CURVE_EASE_IN);
+		}
+		else
+		{
+			aLogoY = TodCommon.TodAnimateCurve(60, 50, mTitleStateCounter, 10 + Constants.Board_Background_Offset_Y, 15 + Constants.Board_Background_Offset_Y, TodCurves.CURVE_BOUNCE);
+		}
+		g.DrawImage(Resources.IMAGE_PVZ_LOGO, mWidth / 2 - Resources.IMAGE_PVZ_LOGO.mWidth / 2, aLogoY);
 		int num2 = mStartButton.mX;
-		int num3 = mStartButton.mY - (int)Constants.InvertAndScale(34f);
-		g.DrawImage(AtlasResources.IMAGE_LOADBAR_DIRT, num2, (float)num3 + Constants.InvertAndScale(18f));
+		int num3 = mStartButton.mY - 17;
+		g.DrawImage(Resources.IMAGE_LOADBAR_DIRT, num2, (float)num3 + 18f);
 		if (mCurBarWidth >= mTotalBarWidth)
 		{
-			g.DrawImage(AtlasResources.IMAGE_LOADBAR_GRASS, num2, num3);
+			g.DrawImage(Resources.IMAGE_LOADBAR_GRASS, num2, num3);
 			if (mLoadingThreadComplete)
 			{
 				DrawToPreload(g);
@@ -398,14 +479,14 @@ internal class TitleScreen : Widget, ButtonListener
 		else
 		{
 			Graphics graphics = Graphics.GetNew(g);
-			graphics.ClipRect(num2, num3, (int)mCurBarWidth, AtlasResources.IMAGE_LOADBAR_GRASS.mHeight);
-			graphics.DrawImage(AtlasResources.IMAGE_LOADBAR_GRASS, num2, num3);
+			graphics.ClipRect(240 + Constants.Board_Additional_Width, num3, (int)mCurBarWidth, Resources.IMAGE_LOADBAR_GRASS.mHeight);
+			graphics.DrawImage(Resources.IMAGE_LOADBAR_GRASS, num2, num3);
 			float num4 = mCurBarWidth * 0.94f;
 			float rad = (0f - num4) / 180f * (float)Math.PI * 2f;
 			float num5 = TodCommon.TodAnimateCurveFloatTime(0f, mTotalBarWidth, mCurBarWidth, 1f, 0.5f, TodCurves.CURVE_LINEAR);
 			SexyTransform2D sexyTransform2D = default(SexyTransform2D);
-			TodCommon.TodScaleRotateTransformMatrix(ref sexyTransform2D.mMatrix, (float)num2 + Constants.InvertAndScale(11f) + num4, (float)num3 - Constants.InvertAndScale(3f) - Constants.InvertAndScale(35f) * num5 + Constants.InvertAndScale(35f), rad, num5, num5);
-			TodCommon.TodBltMatrix(theSrcRect: new TRect(0, 0, AtlasResources.IMAGE_REANIM_LOAD_SODROLLCAP.mWidth, AtlasResources.IMAGE_REANIM_LOAD_SODROLLCAP.mHeight), g: g, theImage: AtlasResources.IMAGE_REANIM_LOAD_SODROLLCAP, theTransform: sexyTransform2D.mMatrix, theClipRect: ref g.mClipRect, theColor: SexyColor.White, theDrawMode: g.mDrawMode);
+			TodCommon.TodScaleRotateTransformMatrix(ref sexyTransform2D.mMatrix, (float)num2 + 11f + num4, (float)num3 - 3f - 35f * num5 + 35f, rad, num5, num5);
+			TodCommon.TodBltMatrix(theSrcRect: new TRect(0, 0, Resources.IMAGE_REANIM_LOAD_SODROLLCAP.mWidth, Resources.IMAGE_REANIM_LOAD_SODROLLCAP.mHeight), g: g, theImage: Resources.IMAGE_REANIM_LOAD_SODROLLCAP, theTransform: sexyTransform2D.mMatrix, theClipRect: ref g.mClipRect, theColor: SexyColor.White, theDrawMode: g.mDrawMode);
 			graphics.PrepareForReuse();
 		}
 		foreach (Reanimation mReanimation in mApp.mEffectSystem.mReanimationHolder.mReanimations)
@@ -483,6 +564,7 @@ internal class TitleScreen : Widget, ButtonListener
 
 	public void DrawToPreload(Graphics g)
 	{
+		g.DrawImage(Resources.IMAGE_PLANTSHADOW, 1000, -50);
 	}
 
 	public void PreflightNextImage(Graphics g)

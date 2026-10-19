@@ -139,6 +139,10 @@ internal class Board : Widget, ButtonListener
 
 	public int mNumWaves;
 
+	public int mRoofPoleOffset;
+
+	public int mRoofTreeOffset;
+
 	public int mMainCounter;
 
 	public int mEffectCounter;
@@ -738,18 +742,18 @@ internal class Board : Widget, ButtonListener
 		if (mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp.mGameMode == GameMode.GAMEMODE_TREE_OF_WISDOM)
 		{
 			mMenuButton.SetLabel("[MAIN_MENU_BUTTON]");
-			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, Constants.UIMenuButtonPosition.Y, Constants.UIMenuButtonWidth, AtlasResources.IMAGE_BUTTON_LEFT.mHeight);
+			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, Constants.UIMenuButtonPosition.Y, Constants.UIMenuButtonWidth, Resources.IMAGE_BUTTON_LEFT.mHeight);
 			mStoreButton = new GameButton(1, this);
-			mStoreButton.mButtonImage = AtlasResources.IMAGE_ZENSHOPBUTTON;
-			mStoreButton.mOverImage = AtlasResources.IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
-			mStoreButton.mDownImage = AtlasResources.IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
+			mStoreButton.mButtonImage = Resources.IMAGE_ZENSHOPBUTTON;
+			mStoreButton.mOverImage = Resources.IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
+			mStoreButton.mDownImage = Resources.IMAGE_ZENSHOPBUTTON_HIGHLIGHT;
 			mStoreButton.mParentWidget = this;
-			mStoreButton.Resize(Constants.ZenGardenStoreButtonX, Constants.ZenGardenStoreButtonY, AtlasResources.IMAGE_ZENSHOPBUTTON.mWidth, AtlasResources.IMAGE_ZENSHOPBUTTON.mHeight);
+			mStoreButton.Resize(Constants.ZenGardenStoreButtonX, Constants.ZenGardenStoreButtonY, Resources.IMAGE_ZENSHOPBUTTON.mWidth, Resources.IMAGE_ZENSHOPBUTTON.mHeight);
 		}
 		else
 		{
 			mMenuButton.SetLabel("[MENU_BUTTON]");
-			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, Constants.UIMenuButtonPosition.Y, Constants.UIMenuButtonWidth, AtlasResources.IMAGE_BUTTON_LEFT.mHeight);
+			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, Constants.UIMenuButtonPosition.Y, Constants.UIMenuButtonWidth, Resources.IMAGE_BUTTON_LEFT.mHeight);
 		}
 		if (mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_LAST_STAND)
 		{
@@ -761,7 +765,7 @@ internal class Board : Widget, ButtonListener
 		if (mApp.mGameMode == GameMode.GAMEMODE_UPSELL)
 		{
 			mMenuButton.SetLabel("[MAIN_MENU_BUTTON]");
-			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, 2, Constants.UIMenuButtonWidth, AtlasResources.IMAGE_BUTTON_LEFT.mHeight);
+			mMenuButton.Resize(Constants.UIMenuButtonPosition.X, 2, Constants.UIMenuButtonWidth, Resources.IMAGE_BUTTON_LEFT.mHeight);
 			mStoreButton = new GameButton(1, this);
 			mStoreButton.mDrawStoneButton = true;
 			mStoreButton.mBtnNoDraw = true;
@@ -1595,22 +1599,6 @@ internal class Board : Widget, ButtonListener
 		if (seedType == SeedType.SEED_PEASHOOTER)
 		{
 			mPeashootersPlanted++;
-			if (mPeashootersPlanted >= 10)
-			{
-				if (SexyAppBase.IsInTrialMode)
-				{
-					if (!mApp.mPlayerInfo.mHasSeenAchievementDialog)
-					{
-						mApp.mPlayerInfo.mHasSeenAchievementDialog = true;
-						mApp.achievementToCheck = AchievementId.SoilYourPlants;
-						mApp.DoLockedAchievementDialog(AchievementId.SoilYourPlants);
-					}
-				}
-				else
-				{
-					GrantAchievement(AchievementId.SoilYourPlants);
-				}
-			}
 		}
 		if (seedType != SeedType.SEED_SUNFLOWER && seedType != SeedType.SEED_WALLNUT && seedType != SeedType.SEED_CHOMPER)
 		{
@@ -3265,6 +3253,10 @@ internal class Board : Widget, ButtonListener
 		if (mTimeStopCounter <= 0)
 		{
 			mEffectCounter += 3;
+			if (StageHasPool() && mIceTrapCounter == 0 && mApp.mGameScene != GameScenes.SCENE_ZOMBIES_WON && !mCutScene.IsSurvivalRepick())
+			{
+				mApp.mPoolEffect.PoolEffectUpdate();
+			}
 			if (StageHasPool() && mPoolSparklyParticleID == null)
 			{
 				int aRenderOrder = 220000;
@@ -3378,20 +3370,20 @@ internal class Board : Widget, ButtonListener
 		if (mLevel == 1 && mApp.IsFirstTimeAdventureMode())
 		{
 			g.DrawImage(Resources.IMAGE_BACKGROUND1UNSODDED, 0f - (float)Constants.BOARD_OFFSET * Constants.S, 0f);
-			int theWidth = TodCommon.TodAnimateCurve(0, 950, mSodPosition, 0, AtlasResources.IMAGE_SOD1ROW.GetWidth(), TodCurves.CURVE_LINEAR);
-			g.DrawImage(theSrcRect: new TRect(0, 0, theWidth, AtlasResources.IMAGE_SOD1ROW.GetHeight()), theImage: AtlasResources.IMAGE_SOD1ROW, theX: (int)((float)(-Constants.BOARD_OFFSET + 239) * Constants.S), theY: (int)(265f * Constants.S));
+			int theWidth = TodCommon.TodAnimateCurve(0, 950, mSodPosition, 0, Resources.IMAGE_SOD1ROW.GetWidth(), TodCurves.CURVE_LINEAR);
+			g.DrawImage(theSrcRect: new TRect(0, 0, theWidth, Resources.IMAGE_SOD1ROW.GetHeight()), theImage: Resources.IMAGE_SOD1ROW, theX: (int)((float)(-Constants.BOARD_OFFSET + 239) * Constants.S), theY: (int)(265f * Constants.S));
 		}
 		else if (((mLevel == 2 || mLevel == 3) && mApp.IsFirstTimeAdventureMode()) || mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_RESODDED)
 		{
 			g.DrawImage(Resources.IMAGE_BACKGROUND1UNSODDED, (float)(-Constants.BOARD_OFFSET) * Constants.S, 0f);
-			g.DrawImage(AtlasResources.IMAGE_SOD1ROW, (float)(-Constants.BOARD_OFFSET + 239) * Constants.S, 265f * Constants.S);
-			int theWidth2 = TodCommon.TodAnimateCurve(0, 950, mSodPosition, 0, AtlasResources.IMAGE_SOD3ROW.GetWidth(), TodCurves.CURVE_LINEAR);
-			g.DrawImage(theSrcRect: new TRect(0, 0, theWidth2, AtlasResources.IMAGE_SOD3ROW.GetHeight()), theImage: AtlasResources.IMAGE_SOD3ROW, theX: (int)((float)(-Constants.BOARD_OFFSET + 235) * Constants.S), theY: (int)(149f * Constants.S));
+			g.DrawImage(Resources.IMAGE_SOD1ROW, (float)(-Constants.BOARD_OFFSET + 239) * Constants.S, 265f * Constants.S);
+			int theWidth2 = TodCommon.TodAnimateCurve(0, 950, mSodPosition, 0, Resources.IMAGE_SOD3ROW.GetWidth(), TodCurves.CURVE_LINEAR);
+			g.DrawImage(theSrcRect: new TRect(0, 0, theWidth2, Resources.IMAGE_SOD3ROW.GetHeight()), theImage: Resources.IMAGE_SOD3ROW, theX: (int)((float)(-Constants.BOARD_OFFSET + 235) * Constants.S), theY: (int)(149f * Constants.S));
 		}
 		else if (mLevel == 4 && mApp.IsFirstTimeAdventureMode())
 		{
 			g.DrawImage(Resources.IMAGE_BACKGROUND1UNSODDED, (float)(-Constants.BOARD_OFFSET) * Constants.S, 0f);
-			g.DrawImage(AtlasResources.IMAGE_SOD3ROW, (float)(-Constants.BOARD_OFFSET + 235) * Constants.S, 149f * Constants.S);
+			g.DrawImage(Resources.IMAGE_SOD3ROW, (float)(-Constants.BOARD_OFFSET + 235) * Constants.S, 149f * Constants.S);
 			int num = TodCommon.TodAnimateCurve(0, 950, mSodPosition, 0, 773, TodCurves.CURVE_LINEAR);
 			g.DrawImage(theSrcRect: new TRect((int)(232f * Constants.S), 0, (int)((float)num * Constants.S), Resources.IMAGE_BACKGROUND1.GetHeight()), theImage: Resources.IMAGE_BACKGROUND1, theX: (int)((float)(-Constants.BOARD_OFFSET + 232) * Constants.S), theY: 0);
 		}
@@ -3399,16 +3391,24 @@ internal class Board : Widget, ButtonListener
 		{
 			if (image == Resources.IMAGE_BACKGROUND_MUSHROOMGARDEN || image == Resources.IMAGE_BACKGROUND_GREENHOUSE || image == Resources.IMAGE_AQUARIUM1)
 			{
-				g.DrawImage(image, -Constants.ZenGarden_Backdrop_X, 0);
+				g.DrawImage(image, -Constants.ZenGarden_Backdrop_X, -Constants.Board_Background_Offset_Y * Constants.S);
 			}
 			else
 			{
-				g.DrawImage(image, (int)((float)(-Constants.BOARD_OFFSET) * Constants.S), 0);
+				g.DrawImage(image, (int)((float)(-Constants.BOARD_OFFSET) * Constants.S), -Constants.Board_Background_Offset_Y * Constants.S);
 			}
 		}
 		if (mApp.mGameScene == GameScenes.SCENE_ZOMBIES_WON)
 		{
 			DrawHouseDoorBottom(g);
+		}
+		if (StageHasPool())
+		{
+			g.mTransX += Constants.BOARD_EXTRA_ROOM;
+			g.mTransY += Constants.Board_Background_Offset_Y;
+			mApp.mPoolEffect.PoolEffectDraw(g, StageIsNight());
+			g.mTransX -= Constants.BOARD_EXTRA_ROOM;
+			g.mTransY -= Constants.Board_Background_Offset_Y;
 		}
 		if (mTutorialState == TutorialState.TUTORIAL_LEVEL_1_PLANT_PEASHOOTER)
 		{
@@ -3416,14 +3416,14 @@ internal class Board : Widget, ButtonListener
 			SexyColor flashingColor = TodCommon.GetFlashingColor(mMainCounter, 75);
 			graphics.SetColorizeImages(colorizeImages: true);
 			graphics.SetColor(flashingColor);
-			graphics.DrawImage(AtlasResources.IMAGE_SOD1ROW, (float)(-Constants.BOARD_OFFSET + 239) * Constants.S, 265f * Constants.S);
+			graphics.DrawImage(Resources.IMAGE_SOD1ROW, (float)(-Constants.BOARD_OFFSET + 239) * Constants.S, 265f * Constants.S);
 			graphics.SetColorizeImages(colorizeImages: false);
 			graphics.PrepareForReuse();
 		}
 		mChallenge.DrawBackdrop(g);
 		if (mApp.mGameScene == GameScenes.SCENE_LEVEL_INTRO && StageHasGraveStones())
 		{
-			g.DrawImage(AtlasResources.IMAGE_NIGHT_GRAVE_GRAPHIC, Constants.InvertAndScale(640f), 40f * Constants.S);
+			g.DrawImage(Resources.IMAGE_NIGHT_GRAVE_GRAPHIC, Constants.InvertAndScale(640f), 40f * Constants.S);
 		}
 	}
 
@@ -4537,13 +4537,13 @@ internal class Board : Widget, ButtonListener
 		}
 		int num = Constants.UIProgressMeterPosition.X - Constants.Board_Offset_AspectRatio_Correction;
 		int y = Constants.UIProgressMeterPosition.Y;
-		g.DrawImageCel(AtlasResources.IMAGE_FLAGMETER, num, y, 0);
-		int celWidth = AtlasResources.IMAGE_FLAGMETER.GetCelWidth();
-		int celHeight = AtlasResources.IMAGE_FLAGMETER.GetCelHeight();
+		g.DrawImageCel(Resources.IMAGE_FLAGMETER, num, y, 0);
+		int celWidth = Resources.IMAGE_FLAGMETER.GetCelWidth();
+		int celHeight = Resources.IMAGE_FLAGMETER.GetCelHeight();
 		int thePosX = num + celWidth / 2;
 		int board_ProgressBarText_Pos = Constants.Board_ProgressBarText_Pos;
 		int num2 = TodCommon.TodAnimateCurve(0, 150, mProgressMeterWidth, 0, Constants.UIProgressMeterBarEnd, TodCurves.CURVE_LINEAR);
-		g.DrawImage(theSrcRect: new TRect(celWidth - num2 - 7, celHeight, num2, celHeight), theDestRect: new TRect(num + celWidth - num2 - 7, y, num2, celHeight), theImage: AtlasResources.IMAGE_FLAGMETER);
+		g.DrawImage(theSrcRect: new TRect(celWidth - num2 - 7, celHeight, num2, celHeight), theDestRect: new TRect(num + celWidth - num2 - 7, y, num2, celHeight), theImage: Resources.IMAGE_FLAGMETER);
 		SexyColor theColor = new SexyColor(224, 187, 98);
 		if (mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_BEGHOULED || mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_BEGHOULED_TWIST)
 		{
@@ -4596,14 +4596,14 @@ internal class Board : Widget, ButtonListener
 				int thePositionEnd = num + 6;
 				int thePositionStart = num + celWidth - 10;
 				int theX = TodCommon.TodAnimateCurve(0, mNumWaves, theTimeAge, thePositionStart, thePositionEnd, TodCurves.CURVE_LINEAR);
-				g.DrawImageCel(AtlasResources.IMAGE_FLAGMETERPARTS, theX, y - 4, 1, 0);
-				g.DrawImageCel(AtlasResources.IMAGE_FLAGMETERPARTS, theX, y - num5 - 3, 2, 0);
+				g.DrawImageCel(Resources.IMAGE_FLAGMETERPARTS, theX, y - 4, 1, 0);
+				g.DrawImageCel(Resources.IMAGE_FLAGMETERPARTS, theX, y - num5 - 3, 2, 0);
 			}
 		}
 		if (mApp.mGameMode != GameMode.GAMEMODE_CHALLENGE_BEGHOULED && mApp.mGameMode != GameMode.GAMEMODE_CHALLENGE_BEGHOULED_TWIST && !mApp.IsSquirrelLevel() && !mApp.IsSlotMachineLevel() && !mApp.IsIZombieLevel() && !mApp.IsFinalBossLevel())
 		{
 			int num6 = TodCommon.TodAnimateCurve(0, 150, mProgressMeterWidth, 0, Constants.UIProgressMeterHeadEnd, TodCurves.CURVE_LINEAR);
-			g.DrawImageCel(AtlasResources.IMAGE_FLAGMETERPARTS, num + celWidth - num6 - 20, y - 3, 0, 0);
+			g.DrawImageCel(Resources.IMAGE_FLAGMETERPARTS, num + celWidth - num6 - 20, y - 3, 0, 0);
 		}
 	}
 
@@ -4801,6 +4801,34 @@ internal class Board : Widget, ButtonListener
 			}
 		}
 		return num;
+	}
+
+	public int GetSeedPacketPositionX(int theIndex)
+	{
+		if (mApp.IsSlotMachineLevel())
+		{
+			return theIndex * 59 + 247;
+		}
+		if (HasConveyorBeltSeedBank())
+		{
+			return theIndex * 50 + 91;
+		}
+		if (mSeedBank.mNumPackets <= 7)
+		{
+			return theIndex * 59 + 85;
+		}
+		else if (mSeedBank.mNumPackets == 8)
+		{
+			return theIndex * 54 + 81;
+		}
+		else if (mSeedBank.mNumPackets == 9)
+		{
+			return theIndex * 52 + 80;
+		}
+		else
+		{
+			return theIndex * 51 + 79;
+		}
 	}
 
 	public int GetSeedPacketPositionY(int theIndex)
@@ -5008,7 +5036,7 @@ internal class Board : Widget, ButtonListener
 		if (mApp.mGameMode != GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN && mApp.mGameMode != GameMode.GAMEMODE_TREE_OF_WISDOM && mShowShovel)
 		{
 			TRect shovelButtonRect = GetShovelButtonRect();
-			g.DrawImage(AtlasResources.IMAGE_SHOVELBANK, shovelButtonRect.mX, shovelButtonRect.mY);
+			g.DrawImage(Resources.IMAGE_SHOVELBANK, shovelButtonRect.mX, shovelButtonRect.mY);
 			if (mCursorObject.mCursorType != CursorType.CURSOR_TYPE_SHOVEL)
 			{
 				if (mChallenge.mChallengeState == (ChallengeState)15)
@@ -5017,7 +5045,7 @@ internal class Board : Widget, ButtonListener
 					g.SetColorizeImages(colorizeImages: true);
 					g.SetColor(flashingColor);
 				}
-				g.DrawImage(AtlasResources.IMAGE_TINY_SHOVEL, shovelButtonRect.mX + 2, shovelButtonRect.mY + 3);
+				g.DrawImage(Resources.IMAGE_TINY_SHOVEL, shovelButtonRect.mX + 2, shovelButtonRect.mY + 3);
 				g.SetColorizeImages(colorizeImages: false);
 			}
 		}
@@ -5262,7 +5290,7 @@ internal class Board : Widget, ButtonListener
 		if ((mApp.mGameScene == GameScenes.SCENE_PLAYING || mApp.mCrazyDaveState != CrazyDaveState.CRAZY_DAVE_OFF) && mCoinBankFadeCount > 0)
 		{
 			int num = Constants.UICoinBankPosition.X;
-			int num2 = Constants.UICoinBankPosition.Y - AtlasResources.IMAGE_COINBANK.mHeight - 1;
+			int num2 = Constants.UICoinBankPosition.Y - Resources.IMAGE_COINBANK.mHeight - 1;
 			if (mApp.IsSlotMachineLevel())
 			{
 				num -= 50;
@@ -5278,7 +5306,7 @@ internal class Board : Widget, ButtonListener
 			g.SetColorizeImages(colorizeImages: true);
 			int theAlpha = TodCommon.ClampInt(255 * mCoinBankFadeCount / 15, 0, 255);
 			g.SetColor(new SexyColor(255, 255, 255, theAlpha));
-			g.DrawImage(AtlasResources.IMAGE_COINBANK, num, num2);
+			g.DrawImage(Resources.IMAGE_COINBANK, num, num2);
 			g.SetColor(new SexyColor(180, 255, 90, theAlpha));
 			g.SetFont(Resources.FONT_CONTINUUMBOLD14);
 			string moneyString = LawnApp.GetMoneyString(mApp.mPlayerInfo.mCoins);
@@ -5299,41 +5327,33 @@ internal class Board : Widget, ButtonListener
 		{
 			if (mApp.mGameMode == GameMode.GAMEMODE_SCARY_POTTER_ENDLESS && mChallenge.mSurvivalStage >= 14)
 			{
-				GrantAchievement(AchievementId.ChinaShop);
+				GrantAchievement(AchievementId.ACHIEVEMENT_CHINA_SHOP);
 			}
 		}
 		else if (mApp.IsIZombieLevel())
 		{
 			if (mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS && mChallenge.mSurvivalStage >= 9)
 			{
-				GrantAchievement(AchievementId.BetterOffDead);
+				GrantAchievement(AchievementId.ACHIEVEMENT_BETTER_OFF_DEAD);
 			}
 		}
 		else if (!mApp.IsQuickPlayMode() && !HasConveyorBeltSeedBank() && !mApp.IsWhackAZombieLevel())
 		{
-			if (AwardCloseShave())
-			{
-				GrantAchievement(AchievementId.CloseShave);
-			}
-			if (mNomNomNomAchievementTracker)
-			{
-				GrantAchievement(AchievementId.NomNomNom);
-			}
 			if (StageIsNight() && mNoFungusAmongUsAchievementTracker)
 			{
-				GrantAchievement(AchievementId.NoFungusAmongUs);
+				GrantAchievement(AchievementId.ACHIEVEMENT_NO_FUNGUS_AMONG_US);
 			}
 			if (StageHasPool() && !mPeaShooterUsed)
 			{
-				GrantAchievement(AchievementId.DontPeainthePool);
+				GrantAchievement(AchievementId.ACHIEVEMENT_DONT_PEA_IN_POOL);
 			}
 			if (StageHasRoof() && !mCatapultPlantsUsed)
 			{
-				GrantAchievement(AchievementId.Grounded);
+				GrantAchievement(AchievementId.ACHIEVEMENT_GROUNDED);
 			}
 			if (StageIsDayWithoutPool() && mMushroomAndCoffeeBeansOnly)
 			{
-				GrantAchievement(AchievementId.GoodMorning);
+				GrantAchievement(AchievementId.ACHIEVEMENT_GOOD_MORNING);
 			}
 		}
 		if (mLevel >= 3)
@@ -5455,23 +5475,6 @@ internal class Board : Widget, ButtonListener
 		}
 	}
 
-	public bool AwardCloseShave()
-	{
-		if (GetBottomLawnMower() != null)
-		{
-			return false;
-		}
-		if (mBackground == BackgroundType.BACKGROUND_5_ROOF && mApp.mPlayerInfo.mPurchases[23] == 0)
-		{
-			return false;
-		}
-		if (mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_BEGHOULED || mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_BEGHOULED_TWIST)
-		{
-			return false;
-		}
-		return true;
-	}
-
 	public void DrawFadeOut(Graphics g)
 	{
 		if (mBoardFadeOutCounter >= 0 && !IsSurvivalStageWithRepick())
@@ -5493,7 +5496,7 @@ internal class Board : Widget, ButtonListener
 	public void DrawIce(Graphics g, int y)
 	{
 		int theY = (int)((float)(GridToPixelY(8, y) + 20) * Constants.S);
-		int height = AtlasResources.IMAGE_ICE.GetHeight();
+		int height = Resources.IMAGE_ICE.GetHeight();
 		int num = TodCommon.ClampInt((int)((float)(255 * mIceTimer[y]) / 10f), 0, 255);
 		if (num < 255)
 		{
@@ -5503,7 +5506,7 @@ internal class Board : Widget, ButtonListener
 		int num2 = (int)((float)mIceMinX[y] * Constants.S);
 		int num3 = 8;
 		int num4 = num2 + num3;
-		int width = AtlasResources.IMAGE_ICE.GetWidth();
+		int width = Resources.IMAGE_ICE.GetWidth();
 		int bOARD_WIDTH = Constants.BOARD_WIDTH;
 		int num5;
 		for (int i = num4; i < bOARD_WIDTH; i += num5)
@@ -5520,9 +5523,9 @@ internal class Board : Widget, ButtonListener
 			{
 				num5 = width;
 			}
-			g.DrawImage(theSrcRect: new TRect(width - num5, 0, num5, height), theDestRect: new TRect(i, theY, num5, height), theImage: AtlasResources.IMAGE_ICE);
+			g.DrawImage(theSrcRect: new TRect(width - num5, 0, num5, height), theDestRect: new TRect(i, theY, num5, height), theImage: Resources.IMAGE_ICE);
 		}
-		g.DrawImage(AtlasResources.IMAGE_ICE_CAP, num2, theY);
+		g.DrawImage(Resources.IMAGE_ICE_CAP, num2, theY);
 		g.SetColorizeImages(colorizeImages: false);
 	}
 
@@ -7145,6 +7148,15 @@ internal class Board : Widget, ButtonListener
 		return false;
 	}
 
+	public static bool IsZombieTypeSpawnedOnly(ZombieType theZombieType)
+	{
+		if (theZombieType == ZombieType.ZOMBIE_BACKUP_DANCER || theZombieType == ZombieType.ZOMBIE_BOBSLED || theZombieType == ZombieType.ZOMBIE_IMP)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	public void DropLootPiece(int thePosX, int thePosY, int theDropFactor)
 	{
 		if (mApp.IsFirstTimeAdventureMode() && mLevel == 22 && mCurrentWave > 5 && !mApp.mPlayerInfo.mHasUnlockedMinigames && CountCoinByType(CoinType.COIN_PRESENT_MINIGAMES) == 0)
@@ -7227,7 +7239,7 @@ internal class Board : Widget, ButtonListener
 		if (mApp.IsFirstTimeAdventureMode() && mLevel == 11)
 		{
 			int num9 = Coin.GetCoinValue(CoinType.COIN_GOLD) * mLawnMowers.Count;
-			int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+			int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 			int num10 = mApp.mPlayerInfo.mCoins + CountCoinsBeingCollected();
 			if (Coin.GetCoinValue(coinType) + num10 + num9 >= itemCost)
 			{
@@ -8540,7 +8552,7 @@ internal class Board : Widget, ButtonListener
 
 	public TRect GetShovelButtonRect()
 	{
-		TRect result = new TRect(Constants.UIShovelButtonPosition.X - Constants.Board_Offset_AspectRatio_Correction, Constants.UIShovelButtonPosition.Y, AtlasResources.IMAGE_SHOVELBANK.mWidth, AtlasResources.IMAGE_SHOVELBANK.mHeight);
+		TRect result = new TRect(Constants.UIShovelButtonPosition.X - Constants.Board_Offset_AspectRatio_Correction, Constants.UIShovelButtonPosition.Y, Resources.IMAGE_SHOVELBANK.mWidth, Resources.IMAGE_SHOVELBANK.mHeight);
 		if (mApp.IsSquirrelLevel())
 		{
 			result.mX = 600;
@@ -8550,7 +8562,7 @@ internal class Board : Widget, ButtonListener
 
 	public TRect GetZenShovelButtonRect()
 	{
-		TRect result = new TRect(Constants.ZenGardenTopButtonStart, Constants.UIShovelButtonPosition.Y, AtlasResources.IMAGE_SHOVELBANK_ZEN.mWidth, AtlasResources.IMAGE_SHOVELBANK_ZEN.mHeight);
+		TRect result = new TRect(Constants.ZenGardenTopButtonStart, Constants.UIShovelButtonPosition.Y, Resources.IMAGE_SHOVELBANK_ZEN.mWidth, Resources.IMAGE_SHOVELBANK_ZEN.mHeight);
 		if (mApp.IsSlotMachineLevel() || mApp.IsSquirrelLevel())
 		{
 			result.mX = 600;
@@ -8584,7 +8596,7 @@ internal class Board : Widget, ButtonListener
 			GameObjectType theGameObject = (GameObjectType)j;
 			if (CanUseGameObject(theGameObject))
 			{
-				zenShovelButtonRect.mX += AtlasResources.IMAGE_SHOVELBANK_ZEN.GetWidth();
+				zenShovelButtonRect.mX += Resources.IMAGE_SHOVELBANK_ZEN.GetWidth();
 			}
 		}
 		return zenShovelButtonRect;
@@ -9351,11 +9363,11 @@ internal class Board : Widget, ButtonListener
 		{
 			if (mChallenge.mChallengeState == ChallengeState.STATECHALLENGE_ZEN_FADING)
 			{
-				g.DrawImage(AtlasResources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
+				g.DrawImage(Resources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
 			}
 			else
 			{
-				g.DrawImage(AtlasResources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
+				g.DrawImage(Resources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
 			}
 			if (pottedPlantInWheelbarrow.mPlantAge != PottedPlantAge.PLANTAGE_SMALL)
 			{
@@ -9366,7 +9378,7 @@ internal class Board : Widget, ButtonListener
 		}
 		else
 		{
-			g.DrawImage(AtlasResources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
+			g.DrawImage(Resources.IMAGE_ZEN_WHEELBARROW, zenButtonRect.mX + Constants.ZenGardenButton_Wheelbarrow_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Wheelbarrow_Offset.Y + theOffsetY);
 		}
 	}
 
@@ -9387,7 +9399,7 @@ internal class Board : Widget, ButtonListener
 			TRect zenButtonRect = GetZenButtonRect(gameObjectType);
 			if (gameObjectType != GameObjectType.OBJECT_TYPE_NEXT_GARDEN && (mApp.mPlayerInfo.mZenGardenTutorialComplete || gameObjectType != GameObjectType.OBJECT_TYPE_MONEY_SIGN))
 			{
-				g.DrawImage(AtlasResources.IMAGE_SHOVELBANK_ZEN, zenButtonRect.mX, zenButtonRect.mY + num);
+				g.DrawImage(Resources.IMAGE_SHOVELBANK_ZEN, zenButtonRect.mX, zenButtonRect.mY + num);
 				if (mCursorObject.mCursorType == (CursorType)(9 + i - 6))
 				{
 					continue;
@@ -9398,11 +9410,11 @@ internal class Board : Widget, ButtonListener
 			case GameObjectType.OBJECT_TYPE_WATERING_CAN:
 				if (mApp.mPlayerInfo.mPurchases[13] != 0)
 				{
-					g.DrawImage(AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1_GOLD, zenButtonRect.mX + Constants.ZenGardenButton_GoldenWateringCan_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_GoldenWateringCan_Offset.Y + num);
+					g.DrawImage(Resources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1_GOLD, zenButtonRect.mX + Constants.ZenGardenButton_GoldenWateringCan_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_GoldenWateringCan_Offset.Y + num);
 				}
 				else
 				{
-					g.DrawImage(AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1, zenButtonRect.mX + Constants.ZenGardenButton_NormalWateringCan_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_NormalWateringCan_Offset.Y + num);
+					g.DrawImage(Resources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1, zenButtonRect.mX + Constants.ZenGardenButton_NormalWateringCan_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_NormalWateringCan_Offset.Y + num);
 				}
 				continue;
 			case GameObjectType.OBJECT_TYPE_FERTILIZER:
@@ -9419,7 +9431,7 @@ internal class Board : Widget, ButtonListener
 					g.SetColorizeImages(colorizeImages: true);
 					g.SetColor(flashingColor);
 				}
-				g.DrawImage(AtlasResources.IMAGE_REANIM_ZENGARDEN_FERTILIZER_BAG2, zenButtonRect.mX + Constants.ZenGardenButton_Fertiliser_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Fertiliser_Offset.Y + num);
+				g.DrawImage(Resources.IMAGE_REANIM_ZENGARDEN_FERTILIZER_BAG2, zenButtonRect.mX + Constants.ZenGardenButton_Fertiliser_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Fertiliser_Offset.Y + num);
 				g.SetColorizeImages(colorizeImages: false);
 				if (!cachedChargesStringsFertilizer.TryGetValue(num2, out var value))
 				{
@@ -9437,7 +9449,7 @@ internal class Board : Widget, ButtonListener
 					g.SetColorizeImages(colorizeImages: true);
 					g.SetColor(new SexyColor(128, 128, 128));
 				}
-				g.DrawImage(AtlasResources.IMAGE_REANIM_ZENGARDEN_BUGSPRAY_BOTTLE, zenButtonRect.mX + Constants.ZenGardenButton_BugSpray_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_BugSpray_Offset.Y + num);
+				g.DrawImage(Resources.IMAGE_REANIM_ZENGARDEN_BUGSPRAY_BOTTLE, zenButtonRect.mX + Constants.ZenGardenButton_BugSpray_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_BugSpray_Offset.Y + num);
 				g.SetColorizeImages(colorizeImages: false);
 				if (!cachedChargesStringsBugSpray.TryGetValue(num4, out var value3))
 				{
@@ -9448,7 +9460,7 @@ internal class Board : Widget, ButtonListener
 				continue;
 			}
 			case GameObjectType.OBJECT_TYPE_PHONOGRAPH:
-				g.DrawImage(AtlasResources.IMAGE_PHONOGRAPH, zenButtonRect.mX + Constants.ZenGardenButton_Phonograph_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Phonograph_Offset.Y + num);
+				g.DrawImage(Resources.IMAGE_PHONOGRAPH, zenButtonRect.mX + Constants.ZenGardenButton_Phonograph_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Phonograph_Offset.Y + num);
 				continue;
 			case GameObjectType.OBJECT_TYPE_CHOCOLATE:
 			{
@@ -9458,7 +9470,7 @@ internal class Board : Widget, ButtonListener
 					g.SetColorizeImages(colorizeImages: true);
 					g.SetColor(new SexyColor(128, 128, 128));
 				}
-				g.DrawImage(AtlasResources.IMAGE_CHOCOLATE, zenButtonRect.mX + Constants.ZenGardenButton_Chocolate_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Chocolate_Offset.Y + num);
+				g.DrawImage(Resources.IMAGE_CHOCOLATE, zenButtonRect.mX + Constants.ZenGardenButton_Chocolate_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Chocolate_Offset.Y + num);
 				g.SetColorizeImages(colorizeImages: false);
 				if (!cachedChargesStringsChocolate.TryGetValue(num3, out var value2))
 				{
@@ -9471,14 +9483,14 @@ internal class Board : Widget, ButtonListener
 			case GameObjectType.OBJECT_TYPE_GLOVE:
 				if (mCursorObject.mCursorType != CursorType.CURSOR_TYPE_PLANT_FROM_GLOVE && mCursorObject.mCursorType != CursorType.CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW)
 				{
-					g.DrawImage(AtlasResources.IMAGE_ZEN_GARDENGLOVE, zenButtonRect.mX + Constants.ZenGardenButton_Glove_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Glove_Offset.Y + num);
+					g.DrawImage(Resources.IMAGE_ZEN_GARDENGLOVE, zenButtonRect.mX + Constants.ZenGardenButton_Glove_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_Glove_Offset.Y + num);
 					continue;
 				}
 				break;
 			}
 			if (gameObjectType == GameObjectType.OBJECT_TYPE_MONEY_SIGN && mApp.mPlayerInfo.mZenGardenTutorialComplete)
 			{
-				g.DrawImage(AtlasResources.IMAGE_ZEN_MONEYSIGN, zenButtonRect.mX + Constants.ZenGardenButton_MoneySign_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_MoneySign_Offset.Y + num);
+				g.DrawImage(Resources.IMAGE_ZEN_MONEYSIGN, zenButtonRect.mX + Constants.ZenGardenButton_MoneySign_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_MoneySign_Offset.Y + num);
 				continue;
 			}
 			switch (gameObjectType)
@@ -9489,7 +9501,7 @@ internal class Board : Widget, ButtonListener
 			case GameObjectType.OBJECT_TYPE_NEXT_GARDEN:
 				if (!mMenuButton.mBtnNoDraw)
 				{
-					g.DrawImage(AtlasResources.IMAGE_ZEN_NEXT_GARDEN, zenButtonRect.mX + Constants.ZenGardenButton_NextGarden_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_NextGarden_Offset.Y + num);
+					g.DrawImage(Resources.IMAGE_ZEN_NEXT_GARDEN, zenButtonRect.mX + Constants.ZenGardenButton_NextGarden_Offset.X, zenButtonRect.mY + Constants.ZenGardenButton_NextGarden_Offset.Y + num);
 				}
 				break;
 			case GameObjectType.OBJECT_TYPE_TREE_FOOD:

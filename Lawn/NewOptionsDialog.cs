@@ -49,11 +49,11 @@ internal class NewOptionsDialog : LawnDialog, SliderListener, CheckboxListener
 		mBackToGameButton = GameButton.MakeButton(1000, this, "[BACK_TO_GAME]");
 		mHelpButton = GameButton.MakeButton(6, this, "[HELP]");
 		mAboutButton = GameButton.MakeButton(7, this, "[ABOUT]");
-		mMusicVolumeSlider = new Slider(AtlasResources.IMAGE_OPTIONS_SLIDERSLOT, AtlasResources.IMAGE_OPTIONS_SLIDERKNOB2, 4, this);
+		mMusicVolumeSlider = new Slider(Resources.IMAGE_OPTIONS_SLIDERSLOT, Resources.IMAGE_OPTIONS_SLIDERKNOB2, 4, this);
 		double musicVolume = theApp.GetMusicVolume();
 		musicVolume = Math.Max(0.0, Math.Min(1.0, musicVolume));
 		mMusicVolumeSlider.SetValue(musicVolume);
-		mSfxVolumeSlider = new Slider(AtlasResources.IMAGE_OPTIONS_SLIDERSLOT, AtlasResources.IMAGE_OPTIONS_SLIDERKNOB2, 5, this);
+		mSfxVolumeSlider = new Slider(Resources.IMAGE_OPTIONS_SLIDERSLOT, Resources.IMAGE_OPTIONS_SLIDERKNOB2, 5, this);
 		mSfxVolumeSlider.SetValue(theApp.GetSfxVolume());
 		mVibrateCheckbox = LawnCommon.MakeNewCheckbox(8, this, mApp.mPlayerInfo.mDoVibration);
 		mRunWhileLocked = LawnCommon.MakeNewCheckbox(11, this, mApp.mPlayerInfo.mRunWhileLocked);
@@ -152,7 +152,7 @@ internal class NewOptionsDialog : LawnDialog, SliderListener, CheckboxListener
 	public override void Resize(int theX, int theY, int theWidth, int theHeight)
 	{
 		base.Resize(theX, theY, theWidth, theHeight);
-		int theHeight2 = AtlasResources.IMAGE_BUTTON_LEFT.mHeight;
+		int theHeight2 = Resources.IMAGE_BUTTON_LEFT.mHeight;
 		int theX2 = (int)Constants.InvertAndScale(244f);
 		mMusicVolumeSlider.Resize(theX2, (int)Constants.InvertAndScale(66f), (int)Constants.InvertAndScale(135f), (int)Constants.InvertAndScale(40f));
 		mSfxVolumeSlider.Resize(theX2, (int)Constants.InvertAndScale(93f), (int)Constants.InvertAndScale(135f), (int)Constants.InvertAndScale(40f));
@@ -304,7 +304,7 @@ internal class NewOptionsDialog : LawnDialog, SliderListener, CheckboxListener
 			break;
 		}
 		case 0:
-			mApp.DoAlmanacDialog(SeedType.SEED_NONE, ZombieType.ZOMBIE_INVALID, null);
+			mApp.DoAlmanacDialog().WaitForResult(true);
 			break;
 		case 10:
 			mApp.KillNewOptionsDialog();

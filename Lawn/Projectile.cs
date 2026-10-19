@@ -274,8 +274,8 @@ internal class Projectile : GameObject
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_COBBIG)
 		{
-			mWidth = (int)((float)AtlasResources.IMAGE_REANIM_COBCANNON_COB.GetWidth() * Constants.IS);
-			mHeight = (int)((float)AtlasResources.IMAGE_REANIM_COBCANNON_COB.GetHeight() * Constants.IS);
+			mWidth = (int)((float)Resources.IMAGE_REANIM_COBCANNON_COB.GetWidth() * Constants.IS);
+			mHeight = (int)((float)Resources.IMAGE_REANIM_COBCANNON_COB.GetHeight() * Constants.IS);
 			mRotation = (float)Math.PI / 2f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_PUFF)
@@ -359,12 +359,12 @@ internal class Projectile : GameObject
 		float num = 1f;
 		if (mProjectileType == ProjectileType.PROJECTILE_COBBIG)
 		{
-			image = AtlasResources.IMAGE_REANIM_COBCANNON_COB;
+			image = Resources.IMAGE_REANIM_COBCANNON_COB;
 			num = 0.9f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_PEA || mProjectileType == ProjectileType.PROJECTILE_ZOMBIE_PEA || mProjectileType == ProjectileType.PROJECTILE_ZOMBIE_PEA_MIND_CONTROL)
 		{
-			image = AtlasResources.IMAGE_PROJECTILEPEA;
+			image = Resources.IMAGE_PROJECTILEPEA;
 			if (mProjectileType == ProjectileType.PROJECTILE_ZOMBIE_PEA_MIND_CONTROL)
 			{
 				g.SetColorizeImages(colorizeImages: true);
@@ -373,7 +373,7 @@ internal class Projectile : GameObject
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_SNOWPEA)
 		{
-			image = AtlasResources.IMAGE_PROJECTILESNOWPEA;
+			image = Resources.IMAGE_PROJECTILESNOWPEA;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_FIREBALL)
 		{
@@ -381,45 +381,45 @@ internal class Projectile : GameObject
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_SPIKE)
 		{
-			image = AtlasResources.IMAGE_PROJECTILECACTUS;
+			image = Resources.IMAGE_PROJECTILECACTUS;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_STAR)
 		{
-			image = AtlasResources.IMAGE_PROJECTILE_STAR;
+			image = Resources.IMAGE_PROJECTILE_STAR;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_PUFF)
 		{
-			image = AtlasResources.IMAGE_PUFFSHROOM_PUFF1;
+			image = Resources.IMAGE_PUFFSHROOM_PUFF1;
 			num = TodCommon.TodAnimateCurveFloat(0, 30, mProjectileAge, 0.3f, 1f, TodCurves.CURVE_LINEAR);
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_BASKETBALL)
 		{
-			image = AtlasResources.IMAGE_REANIM_ZOMBIE_CATAPULT_BASKETBALL;
+			image = Resources.IMAGE_REANIM_ZOMBIE_CATAPULT_BASKETBALL;
 			num = 1.1f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_CABBAGE)
 		{
-			image = AtlasResources.IMAGE_REANIM_CABBAGEPULT_CABBAGE;
+			image = Resources.IMAGE_REANIM_CABBAGEPULT_CABBAGE;
 			num = 1f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_KERNEL)
 		{
-			image = AtlasResources.IMAGE_REANIM_CORNPULT_KERNAL;
+			image = Resources.IMAGE_REANIM_CORNPULT_KERNAL;
 			num = 0.95f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_BUTTER)
 		{
-			image = AtlasResources.IMAGE_REANIM_CORNPULT_BUTTER;
+			image = Resources.IMAGE_REANIM_CORNPULT_BUTTER;
 			num = 0.8f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_MELON)
 		{
-			image = AtlasResources.IMAGE_REANIM_MELONPULT_MELON;
+			image = Resources.IMAGE_REANIM_MELONPULT_MELON;
 			num = 1f;
 		}
 		else if (mProjectileType == ProjectileType.PROJECTILE_WINTERMELON)
 		{
-			image = AtlasResources.IMAGE_REANIM_WINTERMELON_PROJECTILE;
+			image = Resources.IMAGE_REANIM_WINTERMELON_PROJECTILE;
 			num = 1f;
 		}
 		else
@@ -532,7 +532,7 @@ internal class Projectile : GameObject
 			float num6 = 200f / (TodCommon.ClampFloat(0f - mPosZ, 0f, 200f) + 200f);
 			num3 *= num6;
 		}
-		TodCommon.TodDrawImageCelScaledF(g, AtlasResources.IMAGE_PEA_SHADOWS, num * Constants.S, (mShadowY - mPosY + num2) * Constants.S, theCelCol, 0, num3 * num4, num3);
+		TodCommon.TodDrawImageCelScaledF(g, Resources.IMAGE_PEA_SHADOWS, num * Constants.S, (mShadowY - mPosY + num2) * Constants.S, theCelCol, 0, num3 * num4, num3);
 	}
 
 	public void Die()

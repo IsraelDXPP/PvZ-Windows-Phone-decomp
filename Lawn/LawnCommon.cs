@@ -37,7 +37,7 @@ internal static class LawnCommon
 	public static void DrawEditBox(Graphics g, EditWidget theWidget)
 	{
 		TRect theDest = new TRect(theWidget.mX - (int)Constants.InvertAndScale(5f), theWidget.mY - (int)Constants.InvertAndScale(6f), theWidget.mWidth + (int)Constants.InvertAndScale(10f), theWidget.mHeight + (int)Constants.InvertAndScale(12f));
-		g.DrawImageBox(theDest, AtlasResources.IMAGE_EDITBOX);
+		g.DrawImageBox(theDest, Resources.IMAGE_EDITBOX);
 	}
 
 	public static void DrawCheckboxText(Graphics g, string theText, Widget theCheckbox)
@@ -65,7 +65,7 @@ internal static class LawnCommon
 
 	public static Checkbox MakeNewCheckbox(int theId, CheckboxListener theListener, bool theDefault)
 	{
-		Checkbox checkbox = new Checkbox(AtlasResources.IMAGE_OPTIONS_CHECKBOX0, AtlasResources.IMAGE_OPTIONS_CHECKBOX1, theId, theListener);
+		Checkbox checkbox = new Checkbox(Resources.IMAGE_OPTIONS_CHECKBOX0, Resources.IMAGE_OPTIONS_CHECKBOX1, theId, theListener);
 		checkbox.mChecked = theDefault;
 		checkbox.mHasAlpha = true;
 		checkbox.mHasTransparencies = true;

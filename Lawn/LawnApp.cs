@@ -48,6 +48,8 @@ internal class LawnApp : SexyAppBase
 
 	public CreditScreen mCreditScreen;
 
+	public string mDetails = string.Empty;
+
 	public TodFoley mSoundSystem;
 
 	public LinkedList<ButtonWidget> mControlButtonList = new LinkedList<ButtonWidget>();
@@ -102,6 +104,8 @@ internal class LawnApp : SexyAppBase
 	public int mAppCounter;
 
 	public Music mMusic;
+
+	public PoolEffect mPoolEffect;
 
 	public Reanimation mCrazyDaveReanimID;
 
@@ -191,7 +195,17 @@ internal class LawnApp : SexyAppBase
 
 	public ChallengeScreen mChallengeScreen;
 
-	public LeaderboardScreen mLeaderboardScreen;
+
+	public AchievementScreen mAchievementScreen;
+
+	public Achievements mAchievements;
+
+	public int mQuickLevel = 1;
+
+	public bool mCrazySeeds;
+
+	public bool mPlayingQuickplay;
+
 
 	private static Dictionary<string, string> noClickStringCache = new Dictionary<string, string>(10);
 
@@ -265,6 +279,11 @@ internal class LawnApp : SexyAppBase
 		mDaisyMode = false;
 		mSukhbirMode = false;
 		mGameScene = GameScenes.SCENE_LOADING;
+		if (mPoolEffect != null)
+		{
+			mPoolEffect.PoolEffectDispose();
+			mPoolEffect = null;
+		}
 		mZenGarden = null;
 		mEffectSystem = null;
 		mReanimatorCache = null;
@@ -367,17 +386,6 @@ internal class LawnApp : SexyAppBase
 		return true;
 	}
 
-	public bool KillLeaderboardDialog()
-	{
-		LeaderboardDialog leaderboardDialog = (LeaderboardDialog)GetDialog(Dialogs.DIALOG_LEADERBOARD);
-		if (leaderboardDialog == null)
-		{
-			return false;
-		}
-		KillDialog(59);
-		mLeaderboardScreen.SetGrayed(aGray: false);
-		return true;
-	}
 
 	public override void GotFocus()
 	{
@@ -459,7 +467,6 @@ internal class LawnApp : SexyAppBase
 		SexyAppBase.LoadLog("step ExtractLoaderBar");
 		Resources.ExtractLoaderBarFontResources(mResourceManager);
 		Resources.ExtractLoaderBarResources(mResourceManager);
-		AtlasResources.mAtlasResources.UnpackLoadingAtlasImages();
 		Resources.LinkUpResArray();
 		ReanimationParams[] theReanimationParamArray = new ReanimationParams[2]
 		{
@@ -495,10 +502,9 @@ internal class LawnApp : SexyAppBase
 		SexyAppBase.LoadLog("step delay mainmenu ok, LoadAllResources");
 		mResourceManager.LoadAllResources();
 		SexyAppBase.LoadLog("step LoadAllResources ok, ExtractResources");
-		Resources.ExtractResources(mResourceManager, AtlasResources.mAtlasResources);
-		AtlasResources.mAtlasResources.ExtractResources();
+		Resources.ExtractResources(mResourceManager);
 		SexyAppBase.LoadLog("step ExtractResources ok, lawn reanims");
-		ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, 119);
+		ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, GameConstants.gLawnReanimationArray.Length);
 		TodStringFile.TodStringListSetColors(GameConstants.gLawnStringFormats, GameConstants.gLawnStringFormatCount);
 		SexyAppBase.LoadLog("step reanims ok");
 		if (!mLoadingFailed && !mShutdown && !mCloseRequest)
@@ -506,6 +512,8 @@ internal class LawnApp : SexyAppBase
 			SexyAppBase.LoadLog("step MusicInit");
 			mMusic.MusicInit();
 			SexyAppBase.LoadLog("step MusicInit ok");
+			mPoolEffect = new PoolEffect();
+			mPoolEffect.PoolEffectInitialize();
 			mZenGarden = new ZenGarden();
 			mReanimatorCache = new ReanimatorCache();
 			mReanimatorCache.ReanimatorCacheInitialize();
@@ -514,7 +522,7 @@ internal class LawnApp : SexyAppBase
 			SexyAppBase.LoadLog("step foley ok");
 			GlobalMembersTrail.TrailLoadDefinitions(GameConstants.gLawnTrailArray, 1);
 			SexyAppBase.LoadLog("step trails ok");
-			TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, 102);
+			TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, GameConstants.gLawnParticleArray.Length);
 			SexyAppBase.LoadLog("step particles ok");
 			PreloadForUser();
 			SexyAppBase.LoadLog("step preload ok DONE");
@@ -876,7 +884,7 @@ internal class LawnApp : SexyAppBase
 		KillDialog(51);
 		if (isYes)
 		{
-			int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+			int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 			mPlayerInfo.AddCoins(-itemCost);
 			mPlayerInfo.mPurchases[21]++;
 			WriteCurrentUserConfig();
@@ -1103,7 +1111,7 @@ internal class LawnApp : SexyAppBase
 		}
 		mGameScene = GameScenes.SCENE_MENU;
 		mGameSelector = new GameSelector(this);
-		mGameSelector.Resize(0, 0, Constants.GameSelector_Width, Constants.GameSelector_Height);
+		mGameSelector.Resize(0, 0, mWidth, mHeight);
 		mWidgetManager.AddWidget(mGameSelector);
 		mWidgetManager.BringToBack(mGameSelector);
 		mWidgetManager.SetFocus(mGameSelector);
@@ -1126,8 +1134,6 @@ internal class LawnApp : SexyAppBase
 	public void ShowGameSelectorQuickPlay(bool theDoFadeIn, GameSelectorButtons theButton)
 	{
 		ShowGameSelector();
-		mGameSelector.mNeedToPlayRollIn = false;
-		mGameSelector.MoveToQuickplay(theDoFadeIn, theButton);
 	}
 
 	public void ShowGameSelectorQuickPlay(bool theDoFadeIn)
@@ -1268,6 +1274,19 @@ internal class LawnApp : SexyAppBase
 		lawnDialog.CalcSize(0, 0);
 	}
 
+	public void DoChallengePagesDialog()
+	{
+		if (mChallengeScreen == null)
+		{
+			return;
+		}
+		KillDialog((int)Dialogs.DIALOG_CHALLENGE_PAGES);
+		ChallengePagesDialog aDialog = new ChallengePagesDialog(this);
+		CenterDialog(aDialog, aDialog.mWidth, aDialog.mHeight);
+		AddDialog((int)Dialogs.DIALOG_CHALLENGE_PAGES, aDialog);
+		mWidgetManager.SetFocus(aDialog);
+	}
+
 	public void DoNewOptions(bool theFromGameSelector)
 	{
 		FinishModelessDialogs();
@@ -1279,17 +1298,6 @@ internal class LawnApp : SexyAppBase
 		mWidgetManager.SetFocus(newOptionsDialog);
 	}
 
-	public void ShowLeaderboardDialog(LeaderBoardType aType)
-	{
-		FinishModelessDialogs();
-		LeaderboardDialog leaderboardDialog = new LeaderboardDialog(this, aType);
-		int theWidth = (int)Constants.InvertAndScale(420f);
-		int preferredHeight = leaderboardDialog.GetPreferredHeight(theWidth);
-		CenterDialog(leaderboardDialog, theWidth, preferredHeight);
-		AddDialog(59, leaderboardDialog);
-		mLeaderboardScreen.SetGrayed(aGray: true);
-		mWidgetManager.SetFocus(leaderboardDialog);
-	}
 
 	public void DoRegister()
 	{
@@ -1342,7 +1350,7 @@ internal class LawnApp : SexyAppBase
 	public void DoLockedAchievementDialog(AchievementId theId)
 	{
 		string fmt = TodStringFile.TodStringTranslate("[UNLOCK_TO_EARN]");
-		string theDialogLines = Common.StrFormat_(fmt, Achievements.GetAchievementItem(theId).Name);
+		string theDialogLines = Common.StrFormat_(fmt, Sexy.Achievements.GetAchievementItem(theId).Name);
 		LawnDialog lawnDialog = DoDialog(55, isModal: true, "[ACHIEVEMENT_UNLOCKED]", theDialogLines, "", 2);
 		lawnDialog.mLawnYesButton.mLabel = TodStringFile.TodStringTranslate("[CONTINUE_BUTTON]");
 		lawnDialog.mLawnNoButton.mLabel = TodStringFile.TodStringTranslate("[GET_FULL_VERSION_BUTTON]");
@@ -1542,6 +1550,7 @@ internal class LawnApp : SexyAppBase
 		perfTimer.Start();
 		mMusic = new Music();
 		mSoundSystem = new TodFoley();
+		mAchievements = new Achievements(this);
 		mEffectSystem = new EffectSystem();
 		mEffectSystem.EffectSystemInitialize();
 		mKonamiCheck = new TypingCheck();
@@ -1750,10 +1759,8 @@ internal class LawnApp : SexyAppBase
 				FinishPacketSlotPurchaseDialog(isYes: true);
 				break;
 			case 46:
-				((StoreScreen)GetDialog(4)).PurchasePendingItem();
-				break;
+						break;
 			case 47:
-				((StoreScreen)GetDialog(4)).FinishTreeOfWisdomDialog(isYes: true);
 				break;
 			case 28:
 			case 49:
@@ -1825,7 +1832,6 @@ internal class LawnApp : SexyAppBase
 				FinishPacketSlotPurchaseDialog(isYes: false);
 				break;
 			case 47:
-				((StoreScreen)GetDialog(4)).FinishTreeOfWisdomDialog(isYes: false);
 				break;
 			case 28:
 			case 49:
@@ -1910,14 +1916,6 @@ internal class LawnApp : SexyAppBase
 		return false;
 	}
 
-	public bool IsQuickPlayMode()
-	{
-		if (mGameMode >= GameMode.GAMEMODE_QUICKPLAY_1 && mGameMode <= GameMode.GAMEMODE_QUICKPLAY_50)
-		{
-			return true;
-		}
-		return false;
-	}
 
 	public bool IsSurvivalMode()
 	{
@@ -2058,26 +2056,39 @@ internal class LawnApp : SexyAppBase
 		mWidgetManager.SetFocus(mChallengeScreen);
 	}
 
-	public void ShowLeaderboardScreen()
+
+
+	public void StartQuickPlay()
 	{
-		mGameScene = GameScenes.SCENE_LEADERBOARD;
-		mLeaderboardScreen = new LeaderboardScreen(this);
-		mLeaderboardScreen.Resize(0, 0, mWidth, mHeight);
-		mWidgetManager.AddWidget(mLeaderboardScreen);
-		mWidgetManager.BringToBack(mLeaderboardScreen);
-		mWidgetManager.SetFocus(mLeaderboardScreen);
+		mPlayingQuickplay = true;
+		GameMode theGameMode = (GameMode)(mQuickLevel - 1 + 72);
+		PreNewGame(theGameMode, theLookForSavedGame: true);
 	}
 
-	public void KillLeaderboardScreen()
+	public void KillAchievementScreen()
 	{
-		if (mLeaderboardScreen != null)
+		if (mAchievementScreen != null)
 		{
-			mLeaderboardScreen.UnloadResources();
-			mWidgetManager.RemoveWidget(mLeaderboardScreen);
-			SafeDeleteWidget(mLeaderboardScreen);
-			mLeaderboardScreen = null;
+			mWidgetManager.RemoveWidget(mAchievementScreen);
+			SafeDeleteWidget(mAchievementScreen);
+			mAchievementScreen = null;
 		}
 	}
+
+	public void ShowAchievementScreen()
+	{
+		if (mAchievementScreen != null)
+		{
+			KillAchievementScreen();
+		}
+		mAchievementScreen = new AchievementScreen(this);
+		mAchievementScreen.Resize(0, 0, mWidth, mHeight);
+		mWidgetManager.AddWidget(mAchievementScreen);
+		mWidgetManager.BringToBack(mAchievementScreen);
+		mWidgetManager.SetFocus(mAchievementScreen);
+	}
+
+
 
 	public void CheckForGameEnd()
 	{
@@ -2188,13 +2199,11 @@ internal class LawnApp : SexyAppBase
 		return false;
 	}
 
-	public AlmanacDialog DoAlmanacDialog(SeedType theSeedType, ZombieType theZombieType, AlmanacListener theListener)
+	public AlmanacDialog DoAlmanacDialog(SeedType theSeedType = SeedType.SEED_NONE, ZombieType theZombieType = ZombieType.ZOMBIE_INVALID)
 	{
 		default(PerfTimer).Start();
-		FinishModelessDialogs();
-		AlmanacDialog almanacDialog = new AlmanacDialog(this, theListener);
-		almanacDialog.Resize(0, 0, Constants.BackBufferSize.Y, Constants.BackBufferSize.X);
-		AddDialog(3, almanacDialog);
+		AlmanacDialog almanacDialog = new AlmanacDialog(this);
+		AddDialog((int)Dialogs.DIALOG_ALMANAC, almanacDialog);
 		mWidgetManager.SetFocus(almanacDialog);
 		if (theSeedType != SeedType.SEED_NONE)
 		{
@@ -2306,19 +2315,6 @@ internal class LawnApp : SexyAppBase
 		ParticleTryToGet(theParticleID)?.ParticleSystemDie();
 	}
 
-	public StoreScreen ShowStoreScreen(StoreListener theListener)
-	{
-		DelayLoadGamePlayResources(doLoad: false);
-		DelayLoadCachedResources(doLoad: true);
-		DelayLoadMainMenuResource(doLoad: true);
-		DelayLoadZenGardenResources(doLoad: true);
-		FinishModelessDialogs();
-		Debug.ASSERT(GetDialog(Dialogs.DIALOG_STORE) == null);
-		StoreScreen storeScreen = new StoreScreen(this, theListener);
-		AddDialog(4, storeScreen);
-		mWidgetManager.SetFocus(storeScreen);
-		return storeScreen;
-	}
 
 	public UpsellScreen ShowUpsellScreen()
 	{
@@ -2546,7 +2542,7 @@ internal class LawnApp : SexyAppBase
 		string theText = Common.StrFormat_("[CRAZY_DAVE_{0}]", theMessageIndex);
 		theText = TodCommon.TodReplaceString(theText, "{PLAYER_NAME}", mPlayerInfo.mName);
 		theText = TodCommon.TodReplaceString(theText, "{MONEY}", GetMoneyString(mPlayerInfo.mCoins));
-		int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+		int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 		return TodCommon.TodReplaceString(theText, "{UPGRADE_COST}", GetMoneyString(itemCost));
 	}
 
@@ -2701,6 +2697,24 @@ internal class LawnApp : SexyAppBase
 		return false;
 	}
 
+	public bool SeedTypeAvailable(SeedType theSeedType)
+	{
+		return (theSeedType == SeedType.SEED_GATLINGPEA && mPlayerInfo.mPurchases[(int)StoreItem.STORE_ITEM_PLANT_GATLINGPEA] != 0) || HasSeedType(theSeedType);
+	}
+
+	public bool HasAllUpgrades()
+	{
+		int availablePlants = 0;
+		for (SeedType seed = SeedType.SEED_GATLINGPEA; seed <= SeedType.SEED_IMITATER; seed++)
+		{
+			if (SeedTypeAvailable(seed))
+			{
+				availablePlants++;
+			}
+		}
+		return availablePlants == 9;
+	}
+
 	public bool HasFinishedAdventure()
 	{
 		if (mPlayerInfo != null && mPlayerInfo.mFinishedAdventure > 0)
@@ -2797,22 +2811,22 @@ internal class LawnApp : SexyAppBase
 		{
 			if (mCrazyDaveMessageText.IndexOf("{MOUTH_BIG_SMILE}") != -1)
 			{
-				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, AtlasResources.IMAGE_REANIM_CRAZYDAVE_MOUTH1);
+				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, Resources.IMAGE_REANIM_CRAZYDAVE_MOUTH1);
 				mCrazyDaveMessageText = mCrazyDaveMessageText.Replace("{MOUTH_BIG_SMILE}", "");
 			}
 			else if (mCrazyDaveMessageText.IndexOf("{MOUTH_SMALL_SMILE}") != -1)
 			{
-				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, AtlasResources.IMAGE_REANIM_CRAZYDAVE_MOUTH5);
+				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, Resources.IMAGE_REANIM_CRAZYDAVE_MOUTH5);
 				mCrazyDaveMessageText = mCrazyDaveMessageText.Replace("{MOUTH_SMALL_SMILE}", "");
 			}
 			else if (mCrazyDaveMessageText.IndexOf("{MOUTH_BIG_OH}") != -1)
 			{
-				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, AtlasResources.IMAGE_REANIM_CRAZYDAVE_MOUTH4);
+				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, Resources.IMAGE_REANIM_CRAZYDAVE_MOUTH4);
 				mCrazyDaveMessageText = mCrazyDaveMessageText.Replace("{MOUTH_BIG_OH}", "");
 			}
 			else if (mCrazyDaveMessageText.IndexOf("{MOUTH_SMALL_OH}") != -1)
 			{
-				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, AtlasResources.IMAGE_REANIM_CRAZYDAVE_MOUTH6);
+				theAttachReanim.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_dave_mouths, Resources.IMAGE_REANIM_CRAZYDAVE_MOUTH6);
 				mCrazyDaveMessageText = mCrazyDaveMessageText.Replace("{MOUTH_SMALL_OH}", "");
 			}
 		}
@@ -3045,7 +3059,7 @@ internal class LawnApp : SexyAppBase
 		{
 			int num = (int)Constants.InvertAndScale(285f);
 			int num2 = (int)Constants.InvertAndScale(80f);
-			Image iMAGE_STORE_SPEECHBUBBLE = AtlasResources.IMAGE_STORE_SPEECHBUBBLE;
+			Image iMAGE_STORE_SPEECHBUBBLE = Resources.IMAGE_STORE_SPEECHBUBBLE;
 			if (GetDialog(Dialogs.DIALOG_STORE) != null)
 			{
 				num += Constants.RetardedDave_Bubble_Offset_Shop.X;
@@ -3067,7 +3081,7 @@ internal class LawnApp : SexyAppBase
 				num2 += Constants.RetardedDave_Bubble_Offset_Board.Y;
 				g.DrawImage(iMAGE_STORE_SPEECHBUBBLE, num, num2);
 			}
-			g.DrawImage(AtlasResources.IMAGE_STORE_SPEECHBUBBLE_TIP, num + (int)Constants.InvertAndScale(30f), num2 - Constants.RetardedDave_Bubble_Tip_Offset + iMAGE_STORE_SPEECHBUBBLE.mHeight);
+			g.DrawImage(Resources.IMAGE_STORE_SPEECHBUBBLE_TIP, num + (int)Constants.InvertAndScale(30f), num2 - Constants.RetardedDave_Bubble_Tip_Offset + iMAGE_STORE_SPEECHBUBBLE.mHeight);
 			string text = mCrazyDaveMessageText;
 			TRect theRect = new TRect(num + Constants.RetardedDave_Bubble_Rect.mX, num2 + Constants.RetardedDave_Bubble_Rect.mY, theWidth, Constants.RetardedDave_Bubble_Rect.mHeight);
 			int mX = theRect.mX;
@@ -3172,6 +3186,8 @@ internal class LawnApp : SexyAppBase
 		mCompletedLoadingThreadTasks += 68;
 		ReanimatorXnaHelpers.ReanimatorEnsureDefinitionLoaded(ReanimationType.REANIM_SELECTOR_SCREEN, theIsPreloading: true);
 		mCompletedLoadingThreadTasks += 340;
+		ReanimatorXnaHelpers.ReanimatorEnsureDefinitionLoaded(ReanimationType.REANIM_ZOMBIE_HAND, theIsPreloading: true);
+		mCompletedLoadingThreadTasks += 68;
 		mCompletedLoadingThreadTasks += 68;
 		if (mPlayerInfo != null)
 		{
@@ -3334,6 +3350,74 @@ internal class LawnApp : SexyAppBase
 			}
 		}
 		return num;
+	}
+
+	private static readonly GameMode[] NoTrophyModes = new GameMode[]
+	{
+		GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_1,
+		GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_2,
+		GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_3,
+		GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_4,
+		GameMode.GAMEMODE_SURVIVAL_ENDLESS_STAGE_5,
+		GameMode.GAMEMODE_CHALLENGE_ART_CHALLENGE_1,
+		GameMode.GAMEMODE_CHALLENGE_SUNNY_DAY,
+		GameMode.GAMEMODE_CHALLENGE_RESODDED,
+		GameMode.GAMEMODE_CHALLENGE_BIG_TIME,
+		GameMode.GAMEMODE_CHALLENGE_ART_CHALLENGE_2,
+		GameMode.GAMEMODE_CHALLENGE_AIR_RAID,
+		GameMode.GAMEMODE_CHALLENGE_ICE,
+		GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN,
+		GameMode.GAMEMODE_CHALLENGE_HIGH_GRAVITY,
+		GameMode.GAMEMODE_CHALLENGE_GRAVE_DANGER,
+		GameMode.GAMEMODE_CHALLENGE_SHOVEL,
+		GameMode.GAMEMODE_CHALLENGE_STORMY_NIGHT,
+		GameMode.GAMEMODE_CHALLENGE_BUNGEE_BLITZ,
+		GameMode.GAMEMODE_CHALLENGE_SQUIRREL,
+		GameMode.GAMEMODE_TREE_OF_WISDOM,
+		GameMode.GAMEMODE_SCARY_POTTER_ENDLESS,
+		GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS,
+		GameMode.GAMEMODE_UPSELL,
+		GameMode.GAMEMODE_INTRO
+	};
+
+	public int GetTotalTrophies(ChallengePage thePage)
+	{
+		int total = 0;
+		ChallengeDefinition[] defs = ChallengeScreen.gChallengeDefs;
+		for (int i = 0; i < defs.Length; i++)
+		{
+			ChallengeDefinition def = defs[i];
+			if (def == null)
+			{
+				continue;
+			}
+			bool hasTrophy = true;
+			for (int j = 0; j < NoTrophyModes.Length; j++)
+			{
+				if (def.mChallengeMode == NoTrophyModes[j])
+				{
+					hasTrophy = false;
+					break;
+				}
+			}
+			if (def.mPage == thePage && hasTrophy)
+			{
+				total++;
+			}
+		}
+		return total;
+	}
+
+	public string mDiscordState = string.Empty;
+
+	public void UpdateDiscordState(string theState)
+	{
+		mDiscordState = theState;
+	}
+
+	public void UpdateDiscordState()
+	{
+		mDiscordState = string.Empty;
 	}
 
 	public bool EarnedGoldTrophy()
@@ -3672,14 +3756,12 @@ internal class LawnApp : SexyAppBase
 		{
 			GC.Collect();
 			TodCommon.TodLoadResources("DelayLoad_GamePlay");
-			AtlasResources.mAtlasResources.UnpackPlantsZombiesAtlasImages();
-			AtlasResources.mAtlasResources.UnpackParticlesAtlasImages();
 			if (Main.LOW_MEMORY_DEVICE)
 			{
 				ResourceManager.mReanimContentManager.Unload();
-				ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, 119);
+				ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, GameConstants.gLawnReanimationArray.Length);
 				ResourceManager.mParticleContentManager.Unload();
-				TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, 102);
+				TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, GameConstants.gLawnParticleArray.Length);
 			}
 		}
 		else if (gamePlayLoaded && !doLoad)
@@ -3697,7 +3779,6 @@ internal class LawnApp : SexyAppBase
 			{
 				GC.Collect();
 				TodCommon.TodLoadResources("DelayLoad_Cached");
-				AtlasResources.mAtlasResources.UnpackCachedAtlasImages();
 			}
 			else if (cachedLoaded && !doLoad)
 			{
@@ -3717,13 +3798,12 @@ internal class LawnApp : SexyAppBase
 		{
 			GC.Collect();
 			TodCommon.TodLoadResources("DelayLoad_ZenGarden");
-			AtlasResources.mAtlasResources.UnpackZengardenAtlasImages();
 			if (Main.LOW_MEMORY_DEVICE)
 			{
 				ResourceManager.mReanimContentManager.Unload();
-				ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, 119);
+				ReanimatorXnaHelpers.ReanimatorLoadDefinitions(ref GameConstants.gLawnReanimationArray, GameConstants.gLawnReanimationArray.Length);
 				ResourceManager.mParticleContentManager.Unload();
-				TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, 102);
+				TodParticleGlobal.TodParticleLoadDefinitions(ref GameConstants.gLawnParticleArray, GameConstants.gLawnParticleArray.Length);
 			}
 		}
 		else if (zenGardenLoaded && !doLoad)
@@ -3740,9 +3820,6 @@ internal class LawnApp : SexyAppBase
 			if (doLoad && !mainMenuLoaded)
 			{
 				TodCommon.TodLoadResources("DelayLoad_MainMenu");
-				AtlasResources.mAtlasResources.UnpackGoodiesAtlasImages();
-				AtlasResources.mAtlasResources.UnpackQuickplayAtlasImages();
-				AtlasResources.mAtlasResources.UnpackMiniGamesAtlasImages();
 			}
 			else if (mainMenuLoaded && !doLoad)
 			{
@@ -3759,7 +3836,6 @@ internal class LawnApp : SexyAppBase
 			if (doLoad && !pileLoaded)
 			{
 				TodCommon.TodLoadResources("DelayLoad_Pile");
-				AtlasResources.mAtlasResources.UnpackPileAtlasImages();
 			}
 			else if (pileLoaded && !doLoad)
 			{
@@ -3984,7 +4060,7 @@ internal class LawnApp : SexyAppBase
 		int numTrophies3 = GetNumTrophies(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
 		if (numTrophies3 == 19)
 		{
-			ReportAchievement.GiveAchievement(AchievementId.BeyondTheGrave);
+			ReportAchievement.GiveAchievement(AchievementId.ACHIEVEMENT_BEYOND_THE_GRAVE);
 		}
 		WriteCurrentUserConfig();
 		return flag;
@@ -4093,13 +4169,53 @@ internal class LawnApp : SexyAppBase
 					name = Sexy.Achievements.GetAchievementKey(id);
 					desc = string.Empty;
 				}
-				Sexy.Achievements.AddAchievement(new Sexy.AchievementItem(id, Sexy.Achievements.GetAchievementKey(id), name, desc, 0, earned, AtlasResources.IMAGE_TROPHY_HI_RES));
+				Sexy.Achievements.AddAchievement(new Sexy.AchievementItem(id, Sexy.Achievements.GetAchievementKey(id), name, desc, 0, earned, Resources.IMAGE_TROPHY_HI_RES));
 			}
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine("EnsureOfflineAchievements: " + ex.Message);
 		}
+	}
+
+	// ---------------------------------------------------------------------
+	// QuickPlay / Leaderboard / Tienda: subsistemas eliminados al migrar al
+	// resources.xml sin atlas (PvZ-Quality-Enhanced no los trae). Se conservan
+	// los metodos como no-op para no romper las llamadas del resto del juego.
+	// ---------------------------------------------------------------------
+
+	public void KillQuickPlayScreen()
+	{
+	}
+
+	public void ShowQuickPlayScreen()
+	{
+	}
+
+	public void ShowLeaderboardScreen()
+	{
+	}
+
+	public void KillLeaderboardScreen()
+	{
+	}
+
+	public void ShowLeaderboardDialog(LeaderBoardType aType)
+	{
+	}
+
+	public bool KillLeaderboardDialog()
+	{
+		return true;
+	}
+
+	public bool IsQuickPlayMode()
+	{
+		return false;
+	}
+
+	public void ShowStoreScreen(StoreListener theListener)
+	{
 	}
 
 	public override bool ShouldAutorotateToInterfaceOrientation(UI_ORIENTATION theOrientation)

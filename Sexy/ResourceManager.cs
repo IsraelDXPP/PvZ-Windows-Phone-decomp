@@ -181,15 +181,75 @@ internal class ResourceManager : IDisposable
 
 	public bool LoadReanimation(string filename, ref ReanimatorDefinition def)
 	{
-		def = mReanimContentManager.Load<ReanimatorDefinition>(filename);
-		def.ExtractImages();
-		return true;
+		string baseName = filename.Replace("reanim/", "").Replace("reanim\\", "").ToLowerInvariant();
+		string rel = ("Content/reanim" + Constants.ReanimSubPath.Replace('\\', '/') + baseName + ".reanim.compiled").Replace("//", "/");
+		bool hasCompiled = false;
+		try
+		{
+			using (Stream s = TitleContainer.OpenStream(rel))
+			{
+			}
+			hasCompiled = true;
+		}
+		catch
+		{
+		}
+		if (hasCompiled)
+		{
+			if (ReanimCompiledReader.LoadCompiledReanimation(rel, ref def))
+			{
+				def.ExtractImages();
+				return true;
+			}
+			mHasFailed = true;
+			return false;
+		}
+		SexyAppBase.LoadLog("ReanimCompiled falta: " + rel);
+		mHasFailed = true;
+		return false;
 	}
 
 	public bool LoadParticle(string filename, ref TodParticleDefinition def)
 	{
-		def = mParticleContentManager.Load<TodParticleDefinition>(filename);
-		return true;
+		def = null;
+		string baseName = filename.Replace("particles/", "").Replace("particles\\", "");
+		string rel = ("Content/particles/" + baseName + ".compiled").Replace("//", "/");
+
+		// Las particulas de la cinematica de creditos no tienen XNB: se cargan del binario
+		// ".xml.compiled" que genera el editor original (ver Definition.cpp).
+		bool hasCompiled = false;
+		try
+		{
+			using (Stream s = TitleContainer.OpenStream(rel))
+			{
+			}
+			hasCompiled = true;
+		}
+		catch
+		{
+		}
+		if (hasCompiled)
+		{
+			if (ParticleCompiledReader.LoadCompiledParticle(rel, ref def))
+			{
+				return true;
+			}
+			mHasFailed = true;
+			return false;
+		}
+
+		try
+		{
+			def = mParticleContentManager.Load<TodParticleDefinition>(filename);
+			return def != null;
+		}
+		catch (Exception ex)
+		{
+			SexyAppBase.LoadLog("LoadParticle fallo: " + filename + " " + ex.Message);
+		}
+		def = null;
+		mHasFailed = true;
+		return false;
 	}
 
 	public bool LoadTrail(string filename, ref TrailDefinition def)
@@ -983,6 +1043,21 @@ internal class ResourceManager : IDisposable
 		return null;
 	}
 
+	// La version sin atlas (referencia: Resources.cpp del mod) expone cada imagen como recurso
+	// individual. En vez de mantener a mano un GetImageThrow por cada una, se recorren las ya
+	// cargadas y se asignan por reflexion al campo estatico homonimo de Resources.
+	internal void ForEachLoadedImage(Action<string, Image> theCallback)
+	{
+		foreach (KeyValuePair<string, BaseRes> aPair in mImageMap)
+		{
+			ImageRes anImageRes = aPair.Value as ImageRes;
+			if (anImageRes != null && anImageRes.mImage != null)
+			{
+				theCallback(aPair.Key, anImageRes.mImage);
+			}
+		}
+	}
+
 	public int GetSoundThrow(string theRes)
 	{
 		if (mSoundMap.ContainsKey(theRes))
@@ -1352,6 +1427,76 @@ internal class ResourceManager : IDisposable
 		c.B = (byte)((float)(c.B * c.A) / 255f);
 	}
 
+	private static void LoadAlphaGridTexture(string thePath, ImageRes.TextureFormat theFormat, out Texture2D theTexture)
+	{
+		theTexture = null;
+		ImageRes.TextureFormat[] aFormats = theFormat == ImageRes.TextureFormat.Png ? new ImageRes.TextureFormat[2] { ImageRes.TextureFormat.Png, ImageRes.TextureFormat.Jpg } : new ImageRes.TextureFormat[2] { ImageRes.TextureFormat.Jpg, ImageRes.TextureFormat.Png };
+		for (int i = 0; i < aFormats.Length; i++)
+		{
+			try
+			{
+				using (Stream stream = TitleContainer.OpenStream(("Content/" + Path.GetDirectoryName(thePath) + Constants.ImageSubPath + Path.GetFileName(thePath) + "." + aFormats[i].ToString().ToLowerInvariant()).Replace('\\', '/')))
+				{
+					theTexture = Texture2D.FromStream(GlobalStaticVars.g.GraphicsDevice, stream);
+				}
+				return;
+			}
+			catch (Exception)
+			{
+				theTexture = null;
+			}
+		}
+	}
+
+	private bool LoadAlphaGridImage(ImageRes theRes, Image theImage)
+	{
+		LoadAlphaGridTexture(theRes.mAlphaGridImage, theRes.mFormat, out Texture2D anAlphaTexture);
+		if (anAlphaTexture == null)
+		{
+			return Fail("Failed to load image: " + theRes.mAlphaGridImage);
+		}
+		int aNumRows = theRes.mRows;
+		int aNumCols = theRes.mCols;
+		int aCelWidth = theImage.mWidth / aNumCols;
+		int aCelHeight = theImage.mHeight / aNumRows;
+		if (anAlphaTexture.Width != aCelWidth || anAlphaTexture.Height != aCelHeight)
+		{
+			anAlphaTexture.Dispose();
+			return Fail("GridAlphaImage size mismatch between " + theRes.mPath + " and " + theRes.mAlphaGridImage);
+		}
+		Color[] anAlphaBits = new Color[anAlphaTexture.Width * anAlphaTexture.Height];
+		anAlphaTexture.GetData(anAlphaBits);
+		anAlphaTexture.Dispose();
+		Texture2D aTexture = theImage.Texture;
+		Color[] aBits = new Color[aTexture.Width * aTexture.Height];
+		aTexture.GetData(aBits);
+		for (int i = 0; i < aNumRows; i++)
+		{
+			for (int j = 0; j < aNumCols; j++)
+			{
+				int aCellX = j * aCelWidth;
+				int aCellY = i * aCelHeight;
+				for (int y = 0; y < aCelHeight; y++)
+				{
+					int aDestIndex = (aCellY + y) * aTexture.Width + aCellX;
+					int anAlphaIndex = y * aCelWidth;
+					for (int x = 0; x < aCelWidth; x++)
+					{
+						byte anAlpha = anAlphaBits[anAlphaIndex].A;
+						Color aPixel = aBits[aDestIndex];
+						aPixel.A = anAlpha;
+						PremultiplyPixel(ref aPixel);
+						aBits[aDestIndex] = aPixel;
+						aDestIndex++;
+						anAlphaIndex++;
+					}
+				}
+			}
+		}
+		aTexture.SetData(aBits);
+		return true;
+	}
+
 	private bool DoLoadImage(ImageRes theRes)
 	{
 		Texture2D texture2D;
@@ -1365,6 +1510,13 @@ internal class ResourceManager : IDisposable
 			return Fail("Failed to load image: " + theRes.mPath + ex.Message);
 		}
 		theRes.mImage = new Image(texture2D, 0, 0, texture2D.Width, texture2D.Height);
+		if (!string.IsNullOrEmpty(theRes.mAlphaGridImage))
+		{
+			if (!LoadAlphaGridImage(theRes, theRes.mImage))
+			{
+				return false;
+			}
+		}
 		if (theRes.mAnimInfo.mAnimType != AnimType.AnimType_None)
 		{
 			theRes.mImage.mAnimInfo = new AnimInfo(theRes.mAnimInfo);

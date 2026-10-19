@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Xna.Framework;
 using Sexy;
 using Sexy.TodLib;
 
@@ -175,7 +176,7 @@ internal class SeedPacket : GameObject
 			int num = tRect.mY + Constants.Challenge_SlotMachine_Y_Offset;
 			float num2 = 0.9f;
 			int challenge_SlotMachine_ClipHeight = Constants.Challenge_SlotMachine_ClipHeight;
-			float num3 = (float)AtlasResources.IMAGE_SEEDPACKETS.GetCelWidth() * num2;
+			float num3 = (float)Resources.IMAGE_SEEDPACKETS.GetCelWidth() * num2;
 			int num4 = num - Constants.Challenge_SlotMachine_Y_Pos + TodCommon.FloatRoundToInt(mSlotMachiningPosition * (float)(-challenge_SlotMachine_ClipHeight));
 			Graphics graphics = Graphics.GetNew(g);
 			graphics.mTransY = 0;
@@ -188,7 +189,7 @@ internal class SeedPacket : GameObject
 			if (mSlotMachineCountDown > 0)
 			{
 				DrawSeedPacketSlotMachine(graphics, num5, num4, mPacketType, SeedType.SEED_NONE, theGrayness, num2);
-				DrawSeedPacketSlotMachine(graphics, num5, (float)num4 + (float)AtlasResources.IMAGE_SEEDPACKETS.GetCelHeight() * num2 - (float)challenge_SlotMachine_Shadow_Offset, mSlotMachiningNextSeed, SeedType.SEED_NONE, theGrayness, num2);
+				DrawSeedPacketSlotMachine(graphics, num5, (float)num4 + (float)Resources.IMAGE_SEEDPACKETS.GetCelHeight() * num2 - (float)challenge_SlotMachine_Shadow_Offset, mSlotMachiningNextSeed, SeedType.SEED_NONE, theGrayness, num2);
 			}
 			else
 			{
@@ -235,7 +236,7 @@ internal class SeedPacket : GameObject
 			DrawSmallSeedPacket(g, 0f, mOffsetY, mPacketType, mImitaterType, thePercentDark, theGrayness, theDrawCost: false, theUseCurrentCost: true, theDrawBackground: false, theDrawCostBackground: false);
 			if (flag)
 			{
-				g.DrawImage(AtlasResources.IMAGE_SELECTED_PACKET, Constants.SeedPacket_Selector_Pos.X, mOffsetY - Constants.SeedPacket_Selector_Pos.Y);
+				g.DrawImage(Resources.IMAGE_SELECTED_PACKET, Constants.SeedPacket_Selector_Pos.X, mOffsetY - Constants.SeedPacket_Selector_Pos.Y);
 			}
 		}
 	}
@@ -273,22 +274,22 @@ internal class SeedPacket : GameObject
 			switch (theSeedType)
 			{
 			case SeedType.SEED_SLOT_MACHINE_SUN:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_SUN, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_SUN, x, y);
 				break;
 			case SeedType.SEED_SLOT_MACHINE_DIAMOND:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_DIAMOND, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_DIAMOND, x, y);
 				break;
 			case SeedType.SEED_ZOMBIQUARIUM_SNORKEL:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_ZOMBIEQUARIUM, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_ZOMBIEQUARIUM, x, y);
 				break;
 			case SeedType.SEED_ZOMBIQUARIUM_TROPHY:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_TROPHY, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_TROPHY, x, y);
 				break;
 			case SeedType.SEED_BEGHOULED_BUTTON_SHUFFLE:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_SHUFFLE, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_SHUFFLE, x, y);
 				break;
 			case SeedType.SEED_BEGHOULED_BUTTON_CRATER:
-				g.DrawImage(AtlasResources.IMAGE_SEEDPACKET_CRATER, x, y);
+				g.DrawImage(Resources.IMAGE_SEEDPACKET_CRATER, x, y);
 				break;
 			default:
 				if (GlobalStaticVars.gLawnApp.IsIZombieLevel())
@@ -296,7 +297,7 @@ internal class SeedPacket : GameObject
 					DrawIZombieSeedPacket(GlobalStaticVars.gLawnApp, g, x, y, seedType, thePercentDark, theGrayness, theDrawCost, theUseCurrentCost, theDrawBackground, theDrawCostBackground);
 					break;
 				}
-				g.DrawImageCel(AtlasResources.IMAGE_SEEDPACKETS, (int)x, (int)y, (int)seedType);
+				g.DrawImageCel(Resources.IMAGE_SEEDPACKETS, (int)x, (int)y, (int)seedType);
 				if (theSeedType == SeedType.SEED_IMITATER)
 				{
 					g.SetColor(new SexyColor(0, 255, 0, 128));
@@ -307,7 +308,7 @@ internal class SeedPacket : GameObject
 		}
 		if (theDrawCostBackground)
 		{
-			Image theImage = ((theSeedType == SeedType.SEED_IMITATER) ? AtlasResources.IMAGE_SEEDPACKETS_GRAY_TAB : ((theSeedType >= SeedType.SEED_GATLINGPEA) ? AtlasResources.IMAGE_SEEDPACKETS_PURPLE_TAB : AtlasResources.IMAGE_SEEDPACKETS_GREEN_TAB));
+			Image theImage = ((theSeedType == SeedType.SEED_IMITATER) ? Resources.IMAGE_SEEDPACKETS_GRAY_TAB : ((theSeedType >= SeedType.SEED_GATLINGPEA) ? Resources.IMAGE_SEEDPACKETS_PURPLE_TAB : Resources.IMAGE_SEEDPACKETS_GREEN_TAB));
 			int x2;
 			int y2;
 			if (GlobalStaticVars.gLawnApp.IsIZombieLevel())
@@ -371,7 +372,7 @@ internal class SeedPacket : GameObject
 		if (iZombieTypeFromSeed != ZombieType.ZOMBIE_INVALID)
 		{
 			g.SetScale(0.75f, 0.5f, 0f, 0f);
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_ZOMBIEWINDOW, x + (float)Constants.IZombie_SeedOffset.X, y + (float)Constants.IZombie_SeedOffset.Y);
+			g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW, x + (float)Constants.IZombie_SeedOffset.X, y + (float)Constants.IZombie_SeedOffset.Y);
 			Graphics graphics = Graphics.GetNew(g);
 			graphics.SetScale(1f);
 			graphics.ClipRect((int)x + Constants.IZombie_ClipOffset.X, (int)y + Constants.IZombie_ClipOffset.Y, Constants.IZombie_ClipOffset.Width, Constants.IZombie_ClipOffset.Height);
@@ -380,7 +381,7 @@ internal class SeedPacket : GameObject
 			graphics.SetColorizeImages(colorizeImages: false);
 			graphics.EndHardwareClip();
 			graphics.PrepareForReuse();
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_ZOMBIEWINDOW2, x, y);
+			g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW2, x, y);
 			g.SetScale(1f, 1f, 0f, 0f);
 		}
 	}
@@ -427,16 +428,16 @@ internal class SeedPacket : GameObject
 		switch (theSeedType)
 		{
 		case SeedType.SEED_SLOT_MACHINE_SUN:
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_SEEDPACKET_SUN, x, y, scale, scale);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_SEEDPACKET_SUN, x, y, scale, scale);
 			break;
 		case SeedType.SEED_SLOT_MACHINE_DIAMOND:
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_SEEDPACKET_DIAMOND, x, y, scale, scale);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_SEEDPACKET_DIAMOND, x, y, scale, scale);
 			break;
 		default:
 		{
-			int theCelCol = (int)seedType % AtlasResources.IMAGE_SEEDPACKETS.mNumCols;
-			int theCelRow = (int)seedType / AtlasResources.IMAGE_SEEDPACKETS.mNumCols;
-			TodCommon.TodDrawImageCelScaledF(g, AtlasResources.IMAGE_SEEDPACKETS, x, y, theCelCol, theCelRow, scale, scale);
+			int theCelCol = (int)seedType % Resources.IMAGE_SEEDPACKETS.mNumCols;
+			int theCelRow = (int)seedType / Resources.IMAGE_SEEDPACKETS.mNumCols;
+			TodCommon.TodDrawImageCelScaledF(g, Resources.IMAGE_SEEDPACKETS, x, y, theCelCol, theCelRow, scale, scale);
 			break;
 		}
 		}
@@ -840,8 +841,388 @@ internal class SeedPacket : GameObject
 		return mY + mOffsetY + mHeight / 2;
 	}
 
-	public override string ToString()
+public override string ToString()
+{
+return $"X:{mX}, Y:{mY},Seed:{mPacketType}";
+}
+
+public static void SeedPacketDrawSeed(Graphics g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float theOffsetX, float theOffsetY, float theScale)
+{
+	Image aImage = Resources.IMAGE_PACKET_PLANTS;
+	SeedType aSeedType = theSeedType;
+	if (theSeedType == SeedType.SEED_IMITATER && theImitaterType != SeedType.SEED_NONE)
 	{
-		return $"X:{mX}, Y:{mY},Seed:{mPacketType}";
+		aSeedType = theImitaterType;
+		FilterEffect theFilter = FilterEffect.FILTER_EFFECT_WASHED_OUT;
+		if (theImitaterType == SeedType.SEED_HYPNOSHROOM || theImitaterType == SeedType.SEED_SQUASH || theImitaterType == SeedType.SEED_POTATOMINE || theImitaterType == SeedType.SEED_GARLIC || theImitaterType == SeedType.SEED_LILYPAD)
+		{
+			theFilter = FilterEffect.FILTER_EFFECT_LESS_WASHED_OUT;
+		}
+		aImage = FilterEffectHelper.FilterEffectGetImage(aImage, theFilter);
 	}
+	if (aSeedType == SeedType.SEED_POTATOMINE && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 0, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_CHOMPER && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 1, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_HYPNOSHROOM && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 2, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_TALLNUT && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 3, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_BLOVER && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 4, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_PUMPKINSHELL && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 5, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_TWINSUNFLOWER && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 6, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_COBCANNON && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 7, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_CABBAGEPULT && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 8, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_KERNELPULT && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 9, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_MELONPULT && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 10, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_WINTERMELON && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 11, 0, g.mScaleX, g.mScaleY);
+	}
+	else if (aSeedType == SeedType.SEED_SPIKEROCK && g.mScaleX <= 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, aImage, x, y, 12, 0, g.mScaleX, g.mScaleY);
+	}
+	else
+	{
+		Graphics aSeedG = Graphics.GetNew(g);
+		aSeedG.mScaleX = theScale * g.mScaleX;
+		aSeedG.mScaleY = theScale * g.mScaleY;
+		Plant.DrawSeedType(aSeedG, theSeedType, theImitaterType, DrawVariation.VARIATION_NORMAL, x + theOffsetX, y + theOffsetY);
+		aSeedG.PrepareForReuse();
+	}
+}
+
+public static void DrawSeedPacket(Graphics g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost)
+{
+	SeedType aSeedType = theSeedType;
+	if (aSeedType == SeedType.SEED_IMITATER && theImitaterType != SeedType.SEED_NONE)
+	{
+		aSeedType = theImitaterType;
+	}
+	if (theGrayness != 255)
+	{
+		g.SetColor(new SexyColor(theGrayness, theGrayness, theGrayness));
+		g.SetColorizeImages(colorizeImages: true);
+	}
+	else if (thePercentDark > 0f)
+	{
+		g.SetColor(new SexyColor(128, 128, 128, 255));
+		g.SetColorizeImages(colorizeImages: true);
+	}
+	int aPacketBackground;
+	if (theSeedType == SeedType.SEED_IMITATER)
+	{
+		aPacketBackground = 0;
+	}
+	else if (Plant.IsUpgrade(aSeedType))
+	{
+		aPacketBackground = 1;
+	}
+	else if (theSeedType == SeedType.SEED_BEGHOULED_BUTTON_CRATER)
+	{
+		aPacketBackground = 3;
+	}
+	else if (theSeedType == SeedType.SEED_BEGHOULED_BUTTON_SHUFFLE)
+	{
+		aPacketBackground = 4;
+	}
+	else if (theSeedType == SeedType.SEED_SLOT_MACHINE_SUN)
+	{
+		aPacketBackground = 5;
+	}
+	else if (theSeedType == SeedType.SEED_SLOT_MACHINE_DIAMOND)
+	{
+		aPacketBackground = 6;
+	}
+	else if (theSeedType == SeedType.SEED_ZOMBIQUARIUM_SNORKEL)
+	{
+		aPacketBackground = 7;
+	}
+	else if (theSeedType == SeedType.SEED_ZOMBIQUARIUM_TROPHY)
+	{
+		aPacketBackground = 8;
+	}
+	else if (theSeedType >= SeedType.SEED_ZOMBIE_NORMAL && theSeedType < SeedType.NUM_ZOMBIE_SEEDS)
+	{
+		aPacketBackground = 9;
+	}
+	else
+	{
+		aPacketBackground = 2;
+	}
+	if (g.mScaleX > 1f)
+	{
+		TodCommon.TodDrawImageCelScaledF(g, Resources.IMAGE_SEEDPACKET_LARGER, x, y, 0, 0, g.mScaleX * 0.5f, g.mScaleY * 0.5f);
+	}
+	else
+	{
+		TodCommon.TodDrawImageCelScaledF(g, Resources.IMAGE_SEEDS, x, y, aPacketBackground, 0, g.mScaleX, g.mScaleY);
+	}
+	float aScale = 0.5f;
+	bool aDrawSeedInMiddle = true;
+	float aOffsetX = 5f;
+	float aOffsetY = 8f;
+	switch (aSeedType)
+	{
+	case SeedType.SEED_TALLNUT:
+		aScale = 0.3f;
+		aOffsetX = 12f;
+		aOffsetY = 22f;
+		break;
+	case SeedType.SEED_INSTANT_COFFEE:
+		aScale = 0.55f;
+		aOffsetX = 0f;
+		aOffsetY = 9f;
+		break;
+	case SeedType.SEED_COBCANNON:
+		aScale = 0.26f;
+		aOffsetX = 6f;
+		aOffsetY = 22f;
+		break;
+	case SeedType.SEED_CACTUS:
+		aOffsetX = 9f;
+		aOffsetY = 13f;
+		break;
+	case SeedType.SEED_POTATOMINE:
+	case SeedType.SEED_FUMESHROOM:
+	case SeedType.SEED_PUMPKINSHELL:
+	case SeedType.SEED_CHOMPER:
+	case SeedType.SEED_DOOMSHROOM:
+	case SeedType.SEED_SQUASH:
+	case SeedType.SEED_HYPNOSHROOM:
+	case SeedType.SEED_SPIKEWEED:
+	case SeedType.SEED_SPIKEROCK:
+	case SeedType.SEED_PLANTERN:
+	case SeedType.SEED_TORCHWOOD:
+	case SeedType.SEED_TANGLEKELP:
+		aScale = 0.4f;
+		aOffsetX = 8f;
+		aOffsetY = 12f;
+		break;
+	case SeedType.SEED_TWINSUNFLOWER:
+	case SeedType.SEED_GLOOMSHROOM:
+		aScale = 0.45f;
+		aOffsetX = 7f;
+		aOffsetY = 14f;
+		break;
+	case SeedType.SEED_CATTAIL:
+		aScale = 0.45f;
+		aOffsetX = 8f;
+		aOffsetY = 13f;
+		break;
+	case SeedType.SEED_UMBRELLA:
+		aScale = 0.5f;
+		aOffsetX = 5f;
+		aOffsetY = 10f;
+		break;
+	case SeedType.SEED_KERNELPULT:
+		aScale = 0.4f;
+		aOffsetX = 13f;
+		aOffsetY = 14f;
+		break;
+	case SeedType.SEED_CABBAGEPULT:
+		aScale = 0.4f;
+		aOffsetX = 15f;
+		aOffsetY = 14f;
+		break;
+	case SeedType.SEED_MELONPULT:
+	case SeedType.SEED_WINTERMELON:
+		aScale = 0.35f;
+		aOffsetX = 18f;
+		aOffsetY = 19f;
+		break;
+	case SeedType.SEED_GRAVEBUSTER:
+		aScale = 0.4f;
+		aOffsetX = 10f;
+		aOffsetY = 15f;
+		break;
+	case SeedType.SEED_SPLITPEA:
+		aScale = 0.45f;
+		aOffsetX = 12f;
+		aOffsetY = 12f;
+		break;
+	case SeedType.SEED_BLOVER:
+		aScale = 0.4f;
+		aOffsetX = 8f;
+		aOffsetY = 17f;
+		break;
+	case SeedType.SEED_STARFRUIT:
+		aScale = 0.5f;
+		aOffsetX = 6f;
+		aOffsetY = 8f;
+		break;
+	case SeedType.SEED_THREEPEATER:
+		aScale = 0.5f;
+		aOffsetX = 5f;
+		aOffsetY = 10f;
+		break;
+	case SeedType.SEED_GATLINGPEA:
+		aScale = 0.5f;
+		aOffsetX = 2f;
+		aOffsetY = 8f;
+		break;
+	case SeedType.SEED_ZOMBIE_NORMAL:
+	case SeedType.SEED_ZOMBIE_TRAFFIC_CONE:
+	case SeedType.SEED_ZOMBIE_PAIL:
+	case SeedType.SEED_ZOMBIE_DANCER:
+		aScale = 0.35f;
+		aOffsetX = -3f;
+		aOffsetY = -7f;
+		break;
+	case SeedType.SEED_ZOMBIE_POLEVAULTER:
+		aScale = 0.35f;
+		aOffsetX = -8f;
+		aOffsetY = -12f;
+		break;
+	case SeedType.SEED_ZOMBIE_LADDER:
+	case SeedType.SEED_ZOMBIE_DIGGER:
+	case SeedType.SEED_ZOMBIE_SCREEN_DOOR:
+	case SeedType.SEED_ZOMBIE_POGO:
+		aScale = 0.35f;
+		aOffsetX = -3f;
+		aOffsetY = -10f;
+		break;
+	case SeedType.SEED_ZOMBIE_BUNGEE:
+		aScale = 0.3f;
+		aOffsetX = 1f;
+		aOffsetY = -1f;
+		break;
+	case SeedType.SEED_ZOMBIE_FOOTBALL:
+		aScale = 0.33f;
+		aOffsetX = -7f;
+		aOffsetY = -9f;
+		break;
+	case SeedType.SEED_ZOMBIE_BALLOON:
+		aScale = 0.35f;
+		aOffsetX = -3f;
+		aOffsetY = -5f;
+		break;
+	case SeedType.SEED_ZOMBIE_IMP:
+		aScale = 0.4f;
+		aOffsetX = -12f;
+		aOffsetY = -17f;
+		break;
+	case SeedType.SEED_ZOMBONI:
+		aScale = 0.23f;
+		aOffsetX = 12f;
+		aOffsetY = 3f;
+		break;
+	case SeedType.SEED_ZOMBIE_GARGANTUAR:
+		aScale = 0.23f;
+		aOffsetX = 4f;
+		aOffsetY = 3f;
+		break;
+	case SeedType.SEED_BEGHOULED_BUTTON_SHUFFLE:
+	case SeedType.SEED_BEGHOULED_BUTTON_CRATER:
+	case SeedType.SEED_SLOT_MACHINE_SUN:
+	case SeedType.SEED_SLOT_MACHINE_DIAMOND:
+	case SeedType.SEED_ZOMBIQUARIUM_SNORKEL:
+	case SeedType.SEED_ZOMBIQUARIUM_TROPHY:
+		aDrawSeedInMiddle = false;
+		break;
+	}
+	LawnApp gLawnApp = (LawnApp)GlobalStaticVars.gSexyAppBase;
+	if (gLawnApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_BIG_TIME)
+	{
+		if (aSeedType == SeedType.SEED_WALLNUT || aSeedType == SeedType.SEED_SUNFLOWER || aSeedType == SeedType.SEED_MARIGOLD)
+		{
+			aOffsetX = 16f;
+			aOffsetY = 34f;
+		}
+	}
+	if (aSeedType == SeedType.SEED_GIANT_WALLNUT)
+	{
+		aScale *= 0.75f;
+		aOffsetX = 52f;
+		aOffsetY = 58f;
+	}
+	aOffsetX = g.mScaleX * aOffsetX;
+	aOffsetY = g.mScaleY * (aOffsetY + 1f);
+	if (aDrawSeedInMiddle)
+	{
+		SeedPacketDrawSeed(g, x, y, theSeedType, theImitaterType, aOffsetX, aOffsetY, aScale);
+	}
+	if (thePercentDark > 0f)
+	{
+		int aDarknessHeight = TodCommon.FloatRoundToInt(68f * thePercentDark) + 2;
+		Graphics aPlantG = Graphics.GetNew(g);
+		aPlantG.SetColor(new SexyColor(64, 64, 64, 255));
+		aPlantG.SetColorizeImages(colorizeImages: true);
+		aPlantG.ClipRect((int)x, (int)y, Constants.SEED_PACKET_WIDTH, aDarknessHeight);
+		TodCommon.TodDrawImageCelScaledF(aPlantG, Resources.IMAGE_SEEDS, x, y, aPacketBackground, 0, aPlantG.mScaleX, aPlantG.mScaleY);
+		if (aDrawSeedInMiddle)
+		{
+			SeedPacketDrawSeed(aPlantG, x, y, theSeedType, theImitaterType, aOffsetX, aOffsetY, aScale);
+		}
+		aPlantG.PrepareForReuse();
+	}
+	if (theDrawCost)
+	{
+		string aCostStr;
+		if (gLawnApp.mBoard != null && gLawnApp.mBoard.PlantUsesAcceleratedPricing(aSeedType))
+		{
+			if (theUseCurrentCost)
+			{
+				aCostStr = gLawnApp.mBoard.GetCurrentPlantCost(theSeedType, theImitaterType).ToString();
+			}
+			else
+			{
+				aCostStr = Plant.GetCost(theSeedType, theImitaterType).ToString() + "+";
+			}
+		}
+		else
+		{
+			aCostStr = Plant.GetCost(theSeedType, theImitaterType).ToString();
+		}
+		Font aTextFont = Resources.FONT_BRIANNETOD12;
+		int aTextOffsetX = 32 - aTextFont.StringWidth(aCostStr);
+		int aTextOffsetY = aTextFont.GetAscent() + 52;
+		if (g.mScaleX == 1f && g.mScaleY == 1f)
+		{
+			TodCommon.TodDrawString(g, aCostStr, (int)(x + aTextOffsetX), (int)(y + aTextOffsetY), aTextFont, SexyColor.Black, DrawStringJustification.DS_ALIGN_LEFT);
+		}
+		else
+		{
+			Matrix aMatrix = default(Matrix);
+			TodCommon.TodScaleTransformMatrix(ref aMatrix, aTextOffsetX * g.mScaleX + x, aTextOffsetY * g.mScaleY + y, g.mScaleX, g.mScaleY);
+			if (g.mScaleX > 1.8f)
+			{
+				g.SetLinearBlend(linear: false);
+			}
+			TodCommon.TodDrawStringMatrix(g, aTextFont, aMatrix, aCostStr, SexyColor.Black);
+			g.SetLinearBlend(linear: true);
+		}
+	}
+	g.SetColorizeImages(colorizeImages: false);
+}
 }

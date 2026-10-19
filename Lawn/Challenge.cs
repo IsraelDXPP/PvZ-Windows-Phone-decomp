@@ -1297,19 +1297,19 @@ internal class Challenge : StoreListener
 		}
 		if (mApp.IsWallnutBowlingLevel() && mShowBowlingLine)
 		{
-			g.DrawImage(AtlasResources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(200f), 77f * Constants.S);
+			g.DrawImage(Resources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(200f), 77f * Constants.S);
 		}
 		if (mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_1 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_2 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_3 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_4 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_5)
 		{
-			g.DrawImage(AtlasResources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(244f), 73f * Constants.S);
+			g.DrawImage(Resources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(244f), 73f * Constants.S);
 		}
 		if (mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_6 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_7 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_8 || mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_ENDLESS)
 		{
-			g.DrawImage(AtlasResources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(284f), 73f * Constants.S);
+			g.DrawImage(Resources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(284f), 73f * Constants.S);
 		}
 		if (mApp.mGameMode == GameMode.GAMEMODE_PUZZLE_I_ZOMBIE_9)
 		{
-			g.DrawImage(AtlasResources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(330f), 73f * Constants.S);
+			g.DrawImage(Resources.IMAGE_WALLNUT_BOWLINGSTRIPE, Constants.InvertAndScale(330f), 73f * Constants.S);
 		}
 		if (mApp.mGameMode == GameMode.GAMEMODE_CHALLENGE_ICE)
 		{
@@ -1486,7 +1486,7 @@ internal class Challenge : StoreListener
 				{
 					int num = mBoard.GridToPixelX(j, i) - 8;
 					int num2 = mBoard.GridToPixelY(j, i) + 40;
-					g.DrawImageCel(AtlasResources.IMAGE_CRATER, (int)((float)num * Constants.S), (int)((float)num2 * Constants.S), 1, 0);
+					g.DrawImageCel(Resources.IMAGE_CRATER, (int)((float)num * Constants.S), (int)((float)num2 * Constants.S), 1, 0);
 				}
 			}
 		}
@@ -4692,7 +4692,7 @@ internal class Challenge : StoreListener
 			{
 				int theX = num2 + i * 100 + num;
 				int theY = num3 + j * 100;
-				g.DrawImage(AtlasResources.IMAGE_RAIN, theX, theY);
+				g.DrawImage(Resources.IMAGE_RAIN, theX, theY);
 			}
 		}
 		int num4 = TodCommon.TodAnimateCurve(0, 161, mBoard.mEffectCounter % 161, 0, -100, TodCurves.CURVE_LINEAR);
@@ -4704,7 +4704,7 @@ internal class Challenge : StoreListener
 				float num6 = 1.7f;
 				float thePosX = ((float)num4 + (float)k * 100f) * num6 + (float)num;
 				float thePosY = ((float)num5 + (float)l * 100f) * num6;
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_RAIN, thePosX, thePosY, num6, num6);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_RAIN, thePosX, thePosY, num6, num6);
 			}
 		}
 	}

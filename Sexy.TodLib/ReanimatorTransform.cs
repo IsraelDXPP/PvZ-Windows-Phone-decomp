@@ -91,7 +91,7 @@ internal class ReanimatorTransform
 	{
 		if (!string.IsNullOrEmpty(mImageName))
 		{
-			mImage = AtlasResources.GetImageInAtlasById(AtlasResources.GetAtlasIdByStringId(mImageName));
+			mImage = Resources.GetImageByStringId(mImageName);
 			if (mImage == null && mImageName == "IMAGE_REANIM_ZOMBIESWON")
 			{
 				mImage = Resources.IMAGE_REANIM_ZOMBIESWON;

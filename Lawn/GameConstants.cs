@@ -5,6 +5,10 @@ namespace Lawn;
 
 internal class GameConstants
 {
+	public const bool HAS_QUICKPLAY = true;
+
+	public const bool HAS_ACHIEVEMENTS = true;
+
 	public const int SURVIVAL_NORMAL_FLAGS = 5;
 
 	public const int SURVIVAL_HARD_FLAGS = 10;
@@ -290,6 +294,8 @@ internal class GameConstants
 
 	public static int ZOMBIE_WAVE_WINNER;
 
+	public static int NUM_ZOMBIES_IN_ALMANAC;
+
 	public static int RENDER_GROUP_SHIELD;
 
 	public static int RENDER_GROUP_ARMS;
@@ -422,7 +428,7 @@ internal class GameConstants
 			{ 80, 80, 80 },
 			{ 255, 255, 255 }
 		};
-		gLawnParticleArray = new ParticleParams[102]
+		gLawnParticleArray = new ParticleParams[106]
 		{
 			new ParticleParams(ParticleEffect.PARTICLE_MELONSPLASH, "particles/melonimpact"),
 			new ParticleParams(ParticleEffect.PARTICLE_WINTERMELON, "particles/wintermelonimpact"),
@@ -524,10 +530,14 @@ internal class GameConstants
 			new ParticleParams(ParticleEffect.PARTICLE_DUST_SQUASH, "particles/dust_squash"),
 			new ParticleParams(ParticleEffect.PARTICLE_DUST_FOOT, "particles/dust_foot"),
 			new ParticleParams(ParticleEffect.PARTICLE_DAISY, "particles/daisy"),
+			new ParticleParams(ParticleEffect.PARTICLE_CREDIT_STROBE, "particles/credits_strobe.xml"),
+			new ParticleParams(ParticleEffect.PARTICLE_CREDITS_RAYSWIPE, "particles/credits_rayswipe.xml"),
+			new ParticleParams(ParticleEffect.PARTICLE_CREDITS_ZOMBIEHEADWIPE, "particles/credits_zombieheadwipe.xml"),
 			new ParticleParams(ParticleEffect.PARTICLE_STARBURST, "particles/starburst"),
+			new ParticleParams(ParticleEffect.PARTICLE_CREDITS_FOG, "particles/credits_fog.xml"),
 			new ParticleParams(ParticleEffect.PARTICLE_UPSELL_ARROW, "particles/upsellarrow")
 		};
-		gLawnReanimationArray = new ReanimationParams[119]
+		gLawnReanimationArray = new ReanimationParams[138]
 		{
 			new ReanimationParams(ReanimationType.REANIM_LOADBAR_SPROUT, "reanim/loadbar_sprout", 1),
 			new ReanimationParams(ReanimationType.REANIM_LOADBAR_ZOMBIEHEAD, "reanim/loadbar_zombiehead", 1),
@@ -639,6 +649,7 @@ internal class GameConstants
 			new ReanimationParams(ReanimationType.REANIM_ZENGARDEN_BUGSPRAY, "reanim/zengarden_bugspray", 1),
 			new ReanimationParams(ReanimationType.REANIM_ZENGARDEN_PHONOGRAPH, "reanim/zengarden_phonograph", 1),
 			new ReanimationParams(ReanimationType.REANIM_DIAMOND, "reanim/diamond", 0),
+			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_HAND, "reanim/Zombie_hand", 1),
 			new ReanimationParams(ReanimationType.REANIM_STINKY, "reanim/Stinky", 0),
 			new ReanimationParams(ReanimationType.REANIM_RAKE, "reanim/rake", 0),
 			new ReanimationParams(ReanimationType.REANIM_RAIN_CIRCLE, "reanim/rain_circle", 0),
@@ -646,8 +657,26 @@ internal class GameConstants
 			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_SURPRISE, "reanim/zombie_surprise", 0),
 			new ReanimationParams(ReanimationType.REANIM_COIN_GOLD, "reanim/coin_gold", 0),
 			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_FLAGPOLE, "reanim/zombie_flagpole"),
-			new ReanimationParams(ReanimationType.REANIM_WOODSIGN, "reanim/woodsign"),
-			new ReanimationParams(ReanimationType.REANIM_ASTRONAUT, "reanim/astronaut")
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_MAIN, "reanim/credits_main", 3),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_MAIN2, "reanim/credits_main2", 3),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_MAIN3, "reanim/credits_main3", 3),
+			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_CREDITS_DANCE, "reanim/zombie_credits_dance", 0),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_STAGE, "reanim/credits_stage", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_BIGBRAIN, "reanim/credits_bigbrain", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_FLOWER_PETALS, "reanim/credits_flower_petals", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_INFANTRY, "reanim/credits_infantry", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_THROAT, "reanim/credits_throat", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_CRAZYDAVE, "reanim/credits_crazydave", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_BOSSDANCE, "reanim/credits_bossdance", 1),
+			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_CREDITS_SCREEN_DOOR, "reanim/zombie_credits_screendoor", 1),
+			new ReanimationParams(ReanimationType.REANIM_ZOMBIE_CREDITS_CONEHEAD, "reanim/zombie_credits_conehead", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_ZOMBIEARMY1, "reanim/credits_zombiearmy1", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_ZOMBIEARMY2, "reanim/credits_zombiearmy2", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_TOMBSTONES, "reanim/credits_tombstones", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_SOLARPOWER, "reanim/credits_solarpower", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_ANYHOUR, "reanim/credits_anyhour", 3),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_WEARETHEUNDEAD, "reanim/credits_wearetheundead", 1),
+			new ReanimationParams(ReanimationType.REANIM_CREDITS_DISCOLIGHTS, "reanim/credits_discolights", 1)
 		};
 		gLawnTrailArray = new TrailParams[1]
 		{
@@ -1038,6 +1067,7 @@ internal class GameConstants
 		ZOMBIE_WAVE_CUTSCENE = -2;
 		ZOMBIE_WAVE_UI = -3;
 		ZOMBIE_WAVE_WINNER = -4;
+		NUM_ZOMBIES_IN_ALMANAC = (int)ZombieType.ZOMBIE_BOSS + 1;
 		RENDER_GROUP_SHIELD = 1;
 		RENDER_GROUP_ARMS = 2;
 		RENDER_GROUP_OVER_SHIELD = 3;

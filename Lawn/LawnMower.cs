@@ -288,13 +288,13 @@ internal class LawnMower
 			{
 				int num5 = 2;
 				int num6 = -2;
-				TodCommon.TodDrawImageCelCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW, num3 * Constants.S + (float)num5 * Constants.IS, num4 * Constants.S + (float)num6 * Constants.IS, 0, theScaleX, theScaleY);
+				TodCommon.TodDrawImageCelCenterScaledF(g, Resources.IMAGE_PLANTSHADOW, num3 * Constants.S + (float)num5 * Constants.IS, num4 * Constants.S + (float)num6 * Constants.IS, 0, theScaleX, theScaleY);
 			}
 			else
 			{
 				int num7 = 2;
 				int num8 = -2;
-				TodCommon.TodDrawImageCelCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW2, num3 * Constants.S + (float)num7 * Constants.IS, num4 * Constants.S + (float)num8 * Constants.IS, 0, theScaleX, theScaleY);
+				TodCommon.TodDrawImageCelCenterScaledF(g, Resources.IMAGE_PLANTSHADOW2, num3 * Constants.S + (float)num7 * Constants.IS, num4 * Constants.S + (float)num8 * Constants.IS, 0, theScaleX, theScaleY);
 			}
 		}
 		Graphics graphics = Graphics.GetNew(g);

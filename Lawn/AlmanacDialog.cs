@@ -1,67 +1,72 @@
+using System;
 using Sexy;
 using Sexy.TodLib;
 
 namespace Lawn;
 
-internal class AlmanacDialog : LawnDialog
+internal class AlmanacDialog : LawnDialog, SliderListener
 {
-	public static TPoint[] ZombieOffsets = new TPoint[26]
-	{
-		new TPoint(20, 11),
-		new TPoint(13, 15),
-		new TPoint(22, 14),
-		new TPoint(3, 13),
-		new TPoint(20, 13),
-		new TPoint(18, 13),
-		new TPoint(19, 13),
-		new TPoint(4, 11),
-		new TPoint(14, 13),
-		new TPoint(19, 12),
-		new TPoint(20, 13),
-		new TPoint(16, 10),
-		new TPoint(1, 11),
-		new TPoint(16, 10),
-		new TPoint(16, 15),
-		new TPoint(14, 10),
-		new TPoint(13, 12),
-		new TPoint(10, 13),
-		new TPoint(20, 12),
-		new TPoint(11, 12),
-		new TPoint(0, 9),
-		new TPoint(15, 14),
-		new TPoint(4, 12),
-		new TPoint(18, 10),
-		new TPoint(23, 27),
-		new TPoint(1, 15)
-	};
+	public static readonly float ALMANAC_PLANT_POSITION_X = 578f + Constants.Board_Additional_Width;
 
-	public static bool[] gZombieDefeated = new bool[33];
+	public static readonly float ALMANAC_PLANT_POSITION_Y = 140f + Constants.Board_Background_Offset_Y;
+
+	public static readonly float ALMANAC_ZOMBIE_POSITION_X = 559f + Constants.Board_Additional_Width;
+
+	public static readonly float ALMANAC_ZOMBIE_POSITION_Y = 175f + Constants.Board_Background_Offset_Y;
+
+	public static readonly int ALMANAC_INDEXPLANT_POSITION_X = 167 + Constants.Board_Additional_Width;
+
+	public static readonly int ALMANAC_INDEXPLANT_POSITION_Y = 255 + Constants.Board_Background_Offset_Y;
+
+	public static readonly float ALMANAC_INDEXZOMBIE_POSITION_X = 535f + Constants.Board_Additional_Width;
+
+	public static readonly float ALMANAC_INDEXZOMBIE_POSITION_Y = 215f + Constants.Board_Background_Offset_Y;
+
+	public const int ALMANAC_DESCRIPTION_MIN_HEIGHT = 20;
+
+	private const int ALMANAC_BUTTON_CLOSE = 0;
+
+	private const int ALMANAC_BUTTON_PLANT = 1;
+
+	private const int ALMANAC_BUTTON_ZOMBIE = 2;
+
+	private const int ALMANAC_BUTTON_INDEX = 3;
+
+	private const int cSeedPacketRows = 8;
+
+	private const int cSeedPacketYOffset = 8;
+
+	private const int cSeedPacketYStartOffset = 14;
+
+	private const int cZombieHeight = 80;
+
+	private const int cZombieYStartOffset = 6;
+
+	private const int cZombieRows = 5;
+
+	private const float mBaseScrollSpeed = 1f;
+
+	private const float mScrollAccel = 0.1f;
+
+	private static readonly string[] cWeirdCharacters = new string[1] { "®" };
+
+	public static bool[] gZombieDefeated = new bool[(int)ZombieType.NUM_ZOMBIE_TYPES];
 
 	public new LawnApp mApp;
-
-	public TRect mViewPlantsRect = default(TRect);
-
-	public TRect mViewZombiesRect = default(TRect);
-
-	public ScrollWidget mPlantsScrollWidget;
-
-	public ScrollWidget mZombiesScrollWidget;
-
-	public ScrollWidget mDescriptionScrollWidget;
-
-	public DescriptionWidget mDescriptionWidget;
-
-	public PlantGalleryWidget mPlantGalleryWidget;
-
-	public ZombieGalleryWidget mZombieGalleryWidget;
 
 	public GameButton mCloseButton;
 
 	public GameButton mIndexButton;
 
-	public AlmanacPage mOpenPage;
+	public GameButton mPlantButton;
 
-	public Reanimation[] mReanim = new Reanimation[GameConstants.NUM_ALMANAC_REANIMS];
+	public GameButton mZombieButton;
+
+	public Slider mPlantSlider;
+
+	public Slider mZombieSlider;
+
+	public AlmanacPage mOpenPage;
 
 	public SeedType mSelectedSeed;
 
@@ -71,10 +76,48 @@ internal class AlmanacDialog : LawnDialog
 
 	public Zombie mZombie;
 
-	public AlmanacListener mListener;
+	public Zombie[] mZombiePerfTest = new Zombie[400];
+
+	public float mScrollPosition;
+
+	public float mScrollAmount;
+
+	public float mMaxScrollPosition;
+
+	public int mLastMouseX;
+
+	public int mLastMouseY;
+
+	public bool mIsOverDescription;
+
+	public int mDescriptionLineSpacing;
+
+	public float mDescriptionScroll;
+
+	public float mDescriptionMaxScroll;
+
+	public float mDescriptionOffsetScroll;
+
+	public float mDescriptionYOffset;
+
+	public bool mDescriptionOverfill;
+
+	public TRect mDescriptionRect;
+
+	public TRect mDescriptionSliderRect;
+
+	public bool mDescriptionSliderDragging;
+
+	private TRect cSeedClipRect;
+
+	private TRect cZombieClipRect;
 
 	public static void AlmanacInitForPlayer()
 	{
+		for (int i = 0; i < (int)ZombieType.NUM_ZOMBIE_TYPES; i++)
+		{
+			gZombieDefeated[i] = false;
+		}
 	}
 
 	public static void AlmanacPlayerDefeatedZombie(ZombieType theZombieType)
@@ -82,70 +125,87 @@ internal class AlmanacDialog : LawnDialog
 		gZombieDefeated[(int)theZombieType] = true;
 	}
 
-	public AlmanacDialog(LawnApp theApp, AlmanacListener theListener)
-		: base(theApp, null, 3, isModal: true, "[ALMANAC_HEADER]", "", "", 0)
+	public AlmanacDialog(LawnApp theApp)
+		: base(theApp, null, (int)Dialogs.DIALOG_ALMANAC, isModal: true, "Almanac", "", "", 0)
 	{
 		mApp = (LawnApp)GlobalStaticVars.gSexyAppBase;
-		mListener = theListener;
 		mOpenPage = AlmanacPage.ALMANAC_PAGE_INDEX;
 		mSelectedSeed = SeedType.SEED_PEASHOOTER;
 		mSelectedZombie = ZombieType.ZOMBIE_NORMAL;
 		mZombie = null;
 		mPlant = null;
 		mDrawStandardBack = false;
-		mViewPlantsRect = Constants.Almanac_PlantsButtonRect;
-		mViewZombiesRect = Constants.Almanac_ZombiesButtonRect;
-		mPlantGalleryWidget = new PlantGalleryWidget(this);
-		mPlantsScrollWidget = new ScrollWidget();
-		mPlantsScrollWidget.Resize(Constants.Almanac_PlantScrollRect.mX, Constants.Almanac_PlantScrollRect.mY, Constants.Almanac_PlantScrollRect.mWidth, Constants.Almanac_PlantScrollRect.mHeight);
-		mPlantsScrollWidget.AddWidget(mPlantGalleryWidget);
-		mPlantGalleryWidget.Move(0, 0);
-		AddWidget(mPlantsScrollWidget);
-		mPlantsScrollWidget.SetVisible(isVisible: false);
-		mPlantsScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		mZombieGalleryWidget = new ZombieGalleryWidget(this);
-		mZombiesScrollWidget = new ScrollWidget();
-		mZombiesScrollWidget.Resize(Constants.Almanac_ZombieScrollRect.mX, Constants.Almanac_ZombieScrollRect.mY, Constants.Almanac_ZombieScrollRect.mWidth, Constants.Almanac_ZombieScrollRect.mHeight);
-		mZombiesScrollWidget.AddWidget(mZombieGalleryWidget);
-		mZombieGalleryWidget.Move(0, 0);
-		AddWidget(mZombiesScrollWidget);
-		mZombiesScrollWidget.SetVisible(isVisible: false);
-		mZombiesScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		mDescriptionWidget = new DescriptionWidget();
-		mDescriptionScrollWidget = new ScrollWidget();
-		mDescriptionScrollWidget.Resize(Constants.Almanac_DescriptionScrollRect.mX, Constants.Almanac_DescriptionScrollRect.mY, Constants.Almanac_DescriptionScrollRect.mWidth, Constants.Almanac_DescriptionScrollRect.mHeight);
-		mDescriptionWidget.mWidth = mDescriptionScrollWidget.mWidth;
-		mDescriptionScrollWidget.AddWidget(mDescriptionWidget);
-		mDescriptionWidget.Move(0, 0);
-		mDescriptionScrollWidget.EnableIndicators(AtlasResources.IMAGE_SCROLL_INDICATOR);
-		AddWidget(mDescriptionScrollWidget);
+		mScrollAmount = 0f;
+		mScrollPosition = 0f;
+		mDescriptionScroll = 0f;
+		mDescriptionOverfill = false;
+		mDescriptionSliderDragging = false;
+		mMaxScrollPosition = 0f;
+		cSeedClipRect = new TRect(0, Constants.SEED_PACKET_HEIGHT + cSeedPacketYOffset + cSeedPacketYStartOffset + Constants.Board_Background_Offset_Y, Constants.BOARD_WIDTH, 460);
+		cZombieClipRect = new TRect(0, cZombieHeight + cZombieYStartOffset + Constants.Board_Background_Offset_Y, Constants.BOARD_WIDTH, 474);
+		TodCommon.TodLoadResources("DelayLoad_Almanac");
+		for (int i = 0; i < mZombiePerfTest.Length; i++)
+		{
+			mZombiePerfTest[i] = null;
+		}
 		Resize(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
-		mCloseButton = new GameButton(0, this);
-		mCloseButton.mButtonImage = AtlasResources.IMAGE_ALMANAC_CLOSEBUTTON;
-		mCloseButton.mOverImage = null;
+		SexyColor aColor = new SexyColor(42, 42, 90);
+		mCloseButton = new GameButton(ALMANAC_BUTTON_CLOSE, null);
+		mCloseButton.mLabel = "[CLOSE_BUTTON]";
+		mCloseButton.mButtonImage = Resources.IMAGE_ALMANAC_CLOSEBUTTON;
+		mCloseButton.mOverImage = Resources.IMAGE_ALMANAC_CLOSEBUTTONHIGHLIGHT;
 		mCloseButton.mDownImage = null;
 		mCloseButton.SetFont(Resources.FONT_BRIANNETOD12);
-		ref SexyColor reference = ref mCloseButton.mColors[0];
-		reference = new SexyColor(42, 42, 90);
-		ref SexyColor reference2 = ref mCloseButton.mColors[1];
-		reference2 = new SexyColor(42, 42, 90);
-		mCloseButton.Resize(Constants.Almanac_CloseButtonRect.mX, Constants.Almanac_CloseButtonRect.mY, Constants.Almanac_CloseButtonRect.mWidth, Constants.Almanac_CloseButtonRect.mHeight);
-		mCloseButton.mParentWidget = this;
+		mCloseButton.mColors[0] = aColor;
+		mCloseButton.mColors[1] = aColor;
+		mCloseButton.Resize(676 + Constants.Board_Additional_Width, 567 + Constants.Board_Background_Offset_Y, 89, 26);
 		mCloseButton.mTextOffsetX = -8;
 		mCloseButton.mTextOffsetY = 1;
-		mIndexButton = new GameButton(3, this);
-		mIndexButton.mButtonImage = AtlasResources.IMAGE_ALMANAC_BACKBUTTON;
-		mIndexButton.mOverImage = null;
+		mCloseButton.mParentWidget = this;
+		mIndexButton = new GameButton(ALMANAC_BUTTON_INDEX, null);
+		mIndexButton.mLabel = "[ALMANAC_INDEX]";
+		mIndexButton.mButtonImage = Resources.IMAGE_ALMANAC_INDEXBUTTON;
+		mIndexButton.mOverImage = Resources.IMAGE_ALMANAC_INDEXBUTTONHIGHLIGHT;
 		mIndexButton.mDownImage = null;
 		mIndexButton.SetFont(Resources.FONT_BRIANNETOD12);
-		ref SexyColor reference3 = ref mIndexButton.mColors[0];
-		reference3 = new SexyColor(42, 42, 90);
-		ref SexyColor reference4 = ref mIndexButton.mColors[1];
-		reference4 = new SexyColor(42, 42, 90);
-		mIndexButton.Resize(Constants.Almanac_IndexButtonRect.mX, Constants.Almanac_IndexButtonRect.mY, Constants.Almanac_IndexButtonRect.mWidth, Constants.Almanac_IndexButtonRect.mHeight);
-		mIndexButton.mParentWidget = this;
+		mIndexButton.mColors[0] = aColor;
+		mIndexButton.mColors[1] = aColor;
+		mIndexButton.Resize(32 + Constants.Board_Additional_Width, 567 + Constants.Board_Background_Offset_Y, 164, 26);
 		mIndexButton.mTextOffsetX = 8;
 		mIndexButton.mTextOffsetY = 1;
+		mIndexButton.mParentWidget = this;
+		mPlantButton = new GameButton(ALMANAC_BUTTON_PLANT, null);
+		mPlantButton.mLabel = "[VIEW_PLANTS]";
+		mPlantButton.mButtonImage = Resources.IMAGE_SEEDCHOOSER_BUTTON;
+		mPlantButton.mOverImage = null;
+		mPlantButton.mDownImage = null;
+		mPlantButton.mDisabledImage = Resources.IMAGE_SEEDCHOOSER_BUTTON_DISABLED;
+		mPlantButton.mOverOverlayImage = Resources.IMAGE_SEEDCHOOSER_BUTTON_GLOW;
+		mPlantButton.SetFont(Resources.FONT_DWARVENTODCRAFT18YELLOW);
+		mPlantButton.mColors[0] = SexyColor.White;
+		mPlantButton.mColors[1] = SexyColor.White;
+		mPlantButton.Resize(130 + Constants.Board_Additional_Width, 345 + Constants.Board_Background_Offset_Y, 156, 42);
+		mPlantButton.mTextOffsetY = -1;
+		mPlantButton.mParentWidget = this;
+		mZombieButton = new GameButton(ALMANAC_BUTTON_ZOMBIE, null);
+		mZombieButton.mLabel = "[VIEW_ZOMBIES]";
+		mZombieButton.Resize(487 + Constants.Board_Additional_Width, 345 + Constants.Board_Background_Offset_Y, 210, 48);
+		mZombieButton.mDrawStoneButton = true;
+		mZombieButton.mParentWidget = this;
+		mPlantSlider = new Slider(Resources.IMAGE_OPTIONS_SLIDERSLOT_PLANT, Resources.IMAGE_OPTIONS_SLIDERKNOB_PLANT, 0, this);
+		mPlantSlider.SetValue(Math.Max(0.0, Math.Min(mMaxScrollPosition, mScrollPosition)));
+		mPlantSlider.mHorizontal = false;
+		mPlantSlider.Resize(10 + Constants.Board_Additional_Width, cSeedClipRect.mY, 20, cSeedClipRect.mHeight);
+		mPlantSlider.mThumbOffsetX = -5;
+		mPlantSlider.mVisible = false;
+		mZombieSlider = new Slider(Resources.IMAGE_CHALLENGE_SLIDERSLOT, Resources.IMAGE_OPTIONS_SLIDERKNOB2, 0, this);
+		mZombieSlider.SetValue(Math.Max(0.0, Math.Min(mMaxScrollPosition, mScrollPosition)));
+		mZombieSlider.mHorizontal = false;
+		mZombieSlider.Resize(10 + Constants.Board_Additional_Width, cZombieClipRect.mY, 20, cZombieClipRect.mHeight);
+		mZombieSlider.mThumbOffsetX = -1;
+		mZombieSlider.mVisible = false;
+		AddWidget(mPlantSlider);
+		AddWidget(mZombieSlider);
 		SetPage(AlmanacPage.ALMANAC_PAGE_INDEX);
 		if (mApp.mBoard == null || !mApp.mBoard.mPaused)
 		{
@@ -157,15 +217,153 @@ internal class AlmanacDialog : LawnDialog
 	{
 		mCloseButton.Dispose();
 		mIndexButton.Dispose();
-		ClearPlantsAndZombies();
+		mPlantButton.Dispose();
+		mZombieButton.Dispose();
+		ClearObjects();
 		RemoveAllWidgets(doDelete: true);
 		base.Dispose();
 	}
 
+	public void ClearObjects()
+	{
+		if (mPlant != null)
+		{
+			mPlant.Die();
+			mPlant.PrepareForReuse();
+			mPlant = null;
+		}
+		if (mZombie != null)
+		{
+			mZombie.DieNoLoot(giveAchievements: false);
+			mZombie.Dispose();
+			mZombie = null;
+		}
+		for (int i = 0; i < mZombiePerfTest.Length; i++)
+		{
+			if (mZombiePerfTest[i] != null)
+			{
+				mZombiePerfTest[i].DieNoLoot(giveAchievements: false);
+				mZombiePerfTest[i].Dispose();
+				mZombiePerfTest[i] = null;
+			}
+		}
+	}
+
+	public override void RemovedFromManager(WidgetManager theWidgetManager)
+	{
+		base.RemovedFromManager(theWidgetManager);
+		ClearObjects();
+		RemoveWidget(mPlantSlider);
+		RemoveWidget(mZombieSlider);
+	}
+
+	public void SetupPlant()
+	{
+		ClearObjects();
+		float aPosX = ALMANAC_PLANT_POSITION_X;
+		float aPosY = ALMANAC_PLANT_POSITION_Y;
+		if (mSelectedSeed == SeedType.SEED_TALLNUT)
+		{
+			aPosY += 18f;
+		}
+		else if (mSelectedSeed == SeedType.SEED_COBCANNON)
+		{
+			aPosX -= 40f;
+		}
+		else if (mSelectedSeed == SeedType.SEED_FLOWERPOT)
+		{
+			aPosY -= 20f;
+		}
+		else if (mSelectedSeed == SeedType.SEED_INSTANT_COFFEE)
+		{
+			aPosY += 20f;
+		}
+		else if (mSelectedSeed == SeedType.SEED_GRAVEBUSTER)
+		{
+			aPosY += 55f;
+		}
+		mPlant = Plant.GetNewPlant();
+		mPlant.mBoard = null;
+		mPlant.mIsOnBoard = false;
+		mPlant.PlantInitialize(0, 0, mSelectedSeed, SeedType.SEED_NONE);
+		mPlant.mX = (int)aPosX;
+		mPlant.mY = (int)aPosY;
+	}
+
+	public void SetupZombie()
+	{
+		ClearObjects();
+		mZombie = Zombie.GetNewZombie();
+		mZombie.mBoard = null;
+		mZombie.ZombieInitialize(0, mSelectedZombie, theVariant: false, null, GameConstants.ZOMBIE_WAVE_UI);
+		mZombie.mPosX = (int)ALMANAC_ZOMBIE_POSITION_X;
+		mZombie.mPosY = (int)ALMANAC_ZOMBIE_POSITION_Y;
+	}
+
+	public void SetPage(AlmanacPage thePage)
+	{
+		mOpenPage = thePage;
+		mPlantSlider.SetValue(0.1);
+		mZombieSlider.SetValue(0.1);
+		ClearObjects();
+		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX)
+		{
+			ClearObjects();
+			mPlant = Plant.GetNewPlant();
+			mPlant.mBoard = null;
+			mPlant.mIsOnBoard = false;
+			mPlant.PlantInitialize(0, 0, SeedType.SEED_SUNFLOWER, SeedType.SEED_NONE);
+			mPlant.mX = ALMANAC_INDEXPLANT_POSITION_X;
+			mPlant.mY = ALMANAC_INDEXPLANT_POSITION_Y;
+			mZombie = Zombie.GetNewZombie();
+			mZombie.mBoard = null;
+			mZombie.ZombieInitialize(0, ZombieType.ZOMBIE_NORMAL, theVariant: false, null, GameConstants.ZOMBIE_WAVE_UI);
+			mZombie.mPosX = (int)ALMANAC_INDEXZOMBIE_POSITION_X;
+			mZombie.mPosY = (int)ALMANAC_INDEXZOMBIE_POSITION_Y;
+			mIndexButton.mBtnNoDraw = true;
+			mPlantButton.mBtnNoDraw = false;
+			mZombieButton.mBtnNoDraw = false;
+		}
+		else
+		{
+			if (mOpenPage == AlmanacPage.ALMANAC_PAGE_PLANTS)
+			{
+				SetupPlant();
+			}
+			else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_ZOMBIES)
+			{
+				SetupZombie();
+			}
+			else
+			{
+				return;
+			}
+			mIndexButton.mBtnNoDraw = false;
+			mPlantButton.mBtnNoDraw = true;
+			mZombieButton.mBtnNoDraw = true;
+		}
+	}
+
+	public void ShowPlant(SeedType theSeedType)
+	{
+		mSelectedSeed = theSeedType;
+		SetPage(AlmanacPage.ALMANAC_PAGE_PLANTS);
+	}
+
+	public void ShowZombie(ZombieType theZombieType)
+	{
+		mSelectedZombie = theZombieType;
+		SetPage(AlmanacPage.ALMANAC_PAGE_ZOMBIES);
+	}
+
 	public override void Update()
 	{
+		mLastMouseX = mApp.mWidgetManager.mLastMouseX;
+		mLastMouseY = mApp.mWidgetManager.mLastMouseY;
 		mCloseButton.Update();
 		mIndexButton.Update();
+		mPlantButton.Update();
+		mZombieButton.Update();
 		if (mPlant != null)
 		{
 			mPlant.Update();
@@ -174,28 +372,445 @@ internal class AlmanacDialog : LawnDialog
 		{
 			mZombie.Update();
 		}
+		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_PLANTS)
+		{
+			mMaxScrollPosition = Math.Max(0, ((((int)SeedType.NUM_SEEDS_IN_CHOOSER - 2) / cSeedPacketRows) * (Constants.SEED_PACKET_HEIGHT + cSeedPacketYOffset)) + Constants.SEED_PACKET_HEIGHT - cSeedClipRect.mHeight);
+			float aScrollSpeed = mBaseScrollSpeed + Math.Abs(mScrollAmount) * mScrollAccel;
+			mScrollPosition = Math.Max(0f, Math.Min(mMaxScrollPosition, mScrollPosition += mScrollAmount * aScrollSpeed));
+			mScrollAmount *= 1f - mScrollAccel;
+			mPlantSlider.mVisible = mMaxScrollPosition != 0;
+		}
+		else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_ZOMBIES)
+		{
+			mMaxScrollPosition = Math.Max(0, (((GameConstants.NUM_ZOMBIES_IN_ALMANAC - 1) / cZombieRows) * cZombieHeight) + cZombieHeight - cZombieYStartOffset - cZombieClipRect.mHeight);
+			float aScrollSpeed = mBaseScrollSpeed + Math.Abs(mScrollAmount) * mScrollAccel;
+			mScrollPosition += mScrollAmount * aScrollSpeed;
+			mScrollPosition = Math.Max(0f, Math.Min(mMaxScrollPosition, mScrollPosition));
+			mScrollAmount *= 1f - mScrollAccel;
+			mZombieSlider.mVisible = mMaxScrollPosition != 0;
+		}
+		else
+		{
+			mScrollAmount = 0f;
+			mScrollPosition = 0f;
+			mPlantSlider.mVisible = false;
+			mZombieSlider.mVisible = false;
+		}
+		if (mMaxScrollPosition != 0f)
+		{
+			double aValue = Math.Max(0f, Math.Min(mMaxScrollPosition, mScrollPosition)) / mMaxScrollPosition;
+			mPlantSlider.SetValue(aValue);
+			mZombieSlider.SetValue(aValue);
+		}
+		for (int i = 0; i < mZombiePerfTest.Length; i++)
+		{
+			if (mZombiePerfTest[i] != null)
+			{
+				mZombiePerfTest[i].Update();
+			}
+		}
+		if (!(mPlantSlider.mIsOver || mPlantSlider.mDragging) && !(mZombieSlider.mIsOver || mZombieSlider.mDragging))
+		{
+			ZombieType aZombieType = ZombieHitTest(mLastMouseX, mLastMouseY);
+			if (SeedHitTest(mLastMouseX, mLastMouseY) != SeedType.SEED_NONE || (aZombieType != ZombieType.ZOMBIE_INVALID && ZombieIsShown(aZombieType)) || mCloseButton.IsMouseOver() || mIndexButton.IsMouseOver() || mPlantButton.IsMouseOver() || mZombieButton.IsMouseOver())
+			{
+				mApp.SetCursor(SexyAppBase.CURSOR_HAND);
+			}
+			else
+			{
+				mApp.SetCursor(SexyAppBase.CURSOR_POINTER);
+			}
+		}
+		mApp.mPoolEffect.PoolEffectUpdate();
 		MarkDirty();
 	}
 
-	public override bool BackButtonPress()
+	public static ZombieType GetZombieType(int theIndex)
 	{
-		switch (mOpenPage)
+		return theIndex < (int)ZombieType.NUM_ZOMBIE_TYPES ? (ZombieType)theIndex : ZombieType.ZOMBIE_INVALID;
+	}
+
+	public void DrawIndex(Graphics g)
+	{
+		g.DrawImage(Resources.IMAGE_ALMANAC_INDEXBACK, 0f, 0f);
+		TodCommon.TodDrawString(g, "[SUBURBAN_ALMANAC_INDEX]", Constants.BOARD_WIDTH / 2, 60 + Constants.Board_Background_Offset_Y, Resources.FONT_HOUSEOFTERROR28, new SexyColor(220, 220, 220), DrawStringJustification.DS_ALIGN_CENTER);
+		if (mPlant != null)
 		{
-		case AlmanacPage.ALMANAC_PAGE_INDEX:
-			mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
-			mApp.KillAlmanacDialog();
-			if (mListener != null)
-			{
-				mListener.BackFromAlmanac();
-			}
-			break;
-		case AlmanacPage.ALMANAC_PAGE_PLANTS:
-		case AlmanacPage.ALMANAC_PAGE_ZOMBIES:
-			mApp.PlaySample(Resources.SOUND_TAP);
-			SetPage(AlmanacPage.ALMANAC_PAGE_INDEX);
-			break;
+			Graphics aPlantGraphics = Graphics.GetNew(g);
+			aPlantGraphics.mTransX += mPlant.mX;
+			aPlantGraphics.mTransY += mPlant.mY;
+			mPlant.Draw(aPlantGraphics);
+			aPlantGraphics.PrepareForReuse();
 		}
-		return true;
+		if (mZombie != null)
+		{
+			Graphics aZombieGraphics = Graphics.GetNew(g);
+			aZombieGraphics.mTransX += (int)mZombie.mPosX;
+			aZombieGraphics.mTransY += (int)mZombie.mPosY;
+			mZombie.Draw(aZombieGraphics);
+			aZombieGraphics.PrepareForReuse();
+		}
+	}
+
+	public void DrawPlants(Graphics g)
+	{
+		g.DrawImage(Resources.IMAGE_ALMANAC_PLANTBACK, 0f, 0f);
+		TodCommon.TodDrawString(g, "[SUBURBAN_ALMANAC_PLANTS]", Constants.BOARD_WIDTH / 2, 48 + Constants.Board_Background_Offset_Y, Resources.FONT_HOUSEOFTERROR20, new SexyColor(213, 159, 43), DrawStringJustification.DS_ALIGN_CENTER);
+		SeedType aSeedMouseOn = SeedHitTest(mLastMouseX, mLastMouseY);
+		for (SeedType aSeedType = SeedType.SEED_PEASHOOTER; aSeedType < SeedType.NUM_SEEDS_IN_CHOOSER; aSeedType++)
+		{
+			GetSeedPosition(aSeedType, out int aPosX, out int aPosY);
+			if (!mApp.SeedTypeAvailable(aSeedType))
+			{
+				if (aSeedType != SeedType.SEED_IMITATER)
+				{
+					g.SetClipRect(cSeedClipRect);
+					g.DrawImage(Resources.IMAGE_ALMANAC_PLANTBLANK, aPosX, aPosY);
+				}
+				g.ClearClipRect();
+			}
+			else if (aSeedType == SeedType.SEED_IMITATER)
+			{
+				g.ClearClipRect();
+				if (aSeedType == aSeedMouseOn)
+				{
+					g.DrawImage(Resources.IMAGE_ALMANAC_IMITATER, aPosX, aPosY);
+				}
+				g.DrawImage(Resources.IMAGE_ALMANAC_IMITATER, aPosX, aPosY);
+			}
+			else
+			{
+				g.SetClipRect(cSeedClipRect);
+				SeedPacket.DrawSeedPacket(g, aPosX, aPosY, aSeedType, SeedType.SEED_NONE, 0f, 255, true, false);
+				if (aSeedType == aSeedMouseOn)
+				{
+					g.DrawImage(Resources.IMAGE_SEEDPACKETFLASH, aPosX, aPosY);
+				}
+			}
+		}
+		g.ClearClipRect();
+		if (mSelectedSeed == SeedType.SEED_LILYPAD || mSelectedSeed == SeedType.SEED_TANGLEKELP || mSelectedSeed == SeedType.SEED_CATTAIL || mSelectedSeed == SeedType.SEED_SEASHROOM)
+		{
+			bool aNight = mSelectedSeed == SeedType.SEED_SEASHROOM;
+			g.DrawImage(aNight ? Resources.IMAGE_ALMANAC_GROUNDNIGHTPOOL : Resources.IMAGE_ALMANAC_GROUNDPOOL, 521 + Constants.Board_Additional_Width, 107 + Constants.Board_Background_Offset_Y);
+			if (mApp.Is3DAccelerated())
+			{
+				g.SetClipRect(475, 0, 397, 500);
+				g.mTransY -= 85;
+				g.mTransX += Constants.Board_Additional_Width;
+				mApp.mPoolEffect.PoolEffectDraw(g, aNight);
+				g.mTransY += 85;
+				g.mTransX -= Constants.Board_Additional_Width;
+				g.ClearClipRect();
+			}
+		}
+		else if (Plant.IsNocturnal(mSelectedSeed) || mSelectedSeed == SeedType.SEED_GRAVEBUSTER || mSelectedSeed == SeedType.SEED_PLANTERN)
+		{
+			g.DrawImage(Resources.IMAGE_ALMANAC_GROUNDNIGHT, 521 + Constants.Board_Additional_Width, 107 + Constants.Board_Background_Offset_Y);
+		}
+		else if (mSelectedSeed == SeedType.SEED_FLOWERPOT)
+		{
+			g.DrawImage(Resources.IMAGE_ALMANAC_GROUNDROOF, 521 + Constants.Board_Additional_Width, 107 + Constants.Board_Background_Offset_Y);
+		}
+		else
+		{
+			g.DrawImage(Resources.IMAGE_ALMANAC_GROUNDDAY, 521 + Constants.Board_Additional_Width, 107 + Constants.Board_Background_Offset_Y);
+		}
+		if (mPlant != null)
+		{
+			Graphics aPlantGraphics = Graphics.GetNew(g);
+			aPlantGraphics.mTransX += mPlant.mX;
+			aPlantGraphics.mTransY += mPlant.mY;
+			mPlant.Draw(aPlantGraphics);
+			aPlantGraphics.PrepareForReuse();
+		}
+		g.DrawImage(Resources.IMAGE_ALMANAC_PLANTCARD, 459 + Constants.Board_Additional_Width, 86 + Constants.Board_Background_Offset_Y);
+		PlantDefinition aPlantDef = Plant.GetPlantDefinition(mSelectedSeed);
+		string aName = Plant.GetNameString(mSelectedSeed, SeedType.SEED_NONE);
+		TodCommon.TodDrawString(g, aName, 617 + Constants.Board_Additional_Width, 288 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18YELLOW, SexyColor.White, DrawStringJustification.DS_ALIGN_CENTER);
+		Font descriptionFont = Resources.FONT_BRIANNETOD12;
+		SexyColor descriptionColor = new SexyColor(40, 50, 90);
+		mDescriptionRect = new TRect(485 + Constants.Board_Additional_Width, 309 + Constants.Board_Background_Offset_Y, 258, 210);
+		DrawStringJustification descriptionJustification = DrawStringJustification.DS_ALIGN_LEFT;
+		string descriptionHeader = TranslateAndSanitize(Common.StrFormat_("[{0}_DESCRIPTION_HEADER]", aPlantDef.mPlantName));
+		TodStringFile.TodDrawStringWrapped(g, descriptionHeader, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification);
+		int textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, descriptionHeader, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+		mDescriptionRect.mY += textSpacing;
+		mDescriptionRect.mHeight -= textSpacing;
+		string description = TranslateAndSanitize(Common.StrFormat_("[{0}_DESCRIPTION]", aPlantDef.mPlantName));
+		textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, description, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+		int rectHeight;
+		if (mDescriptionRect.mHeight < textSpacing)
+		{
+			mIsOverDescription = mDescriptionRect.Contains(mLastMouseX, mLastMouseY);
+			mDescriptionLineSpacing = descriptionFont.GetLineSpacing();
+			int barWidth = 8;
+			int barX = mDescriptionRect.mX + mDescriptionRect.mWidth - barWidth / 2;
+			mDescriptionRect.mWidth -= barWidth;
+			textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, description, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+			g.SetColor(new SexyColor(143, 67, 27, 75));
+			g.FillRect(new TRect(barX, mDescriptionRect.mY, barWidth, mDescriptionRect.mHeight));
+			mDescriptionMaxScroll = textSpacing - mDescriptionRect.mHeight;
+			g.SetColor(new SexyColor(143, 67, 27));
+			int barHeight = mDescriptionRect.mHeight - (int)mDescriptionMaxScroll;
+			float posY = mDescriptionScroll;
+			mDescriptionOverfill = barHeight < ALMANAC_DESCRIPTION_MIN_HEIGHT;
+			if (mDescriptionOverfill)
+			{
+				barHeight = ALMANAC_DESCRIPTION_MIN_HEIGHT;
+				posY = mDescriptionScroll / mDescriptionMaxScroll * (mDescriptionRect.mHeight - barHeight);
+			}
+			mDescriptionSliderRect = new TRect(barX, mDescriptionRect.mY + (int)posY, barWidth, barHeight);
+			g.FillRect(mDescriptionSliderRect);
+			rectHeight = textSpacing;
+		}
+		else
+		{
+			mIsOverDescription = false;
+			mDescriptionLineSpacing = 0;
+			mDescriptionScroll = 0f;
+			mDescriptionMaxScroll = 0f;
+			rectHeight = mDescriptionRect.mHeight;
+		}
+		g.SetClipRect(mDescriptionRect);
+		TodStringFile.TodDrawStringWrapped(g, description, new TRect(mDescriptionRect.mX, mDescriptionRect.mY - (int)mDescriptionScroll, mDescriptionRect.mWidth, rectHeight), descriptionFont, descriptionColor, descriptionJustification);
+		g.ClearClipRect();
+		if (mSelectedSeed != SeedType.SEED_IMITATER)
+		{
+			string aCostStr = TodCommon.TodReplaceString(Common.StrFormat_("{KEYWORD}{COST}:{STAT} %d", aPlantDef.mSeedCost), "{COST}", "[COST]");
+			TodStringFile.TodDrawStringWrapped(g, aCostStr, new TRect(485 + Constants.Board_Additional_Width, 520 + Constants.Board_Background_Offset_Y, 134, 50), Resources.FONT_BRIANNETOD12, SexyColor.White, DrawStringJustification.DS_ALIGN_LEFT);
+			string aRechargeStr = TodCommon.TodReplaceString("{KEYWORD}{WAIT_TIME}:{STAT} {WAIT_TIME_LENGTH}", "{WAIT_TIME_LENGTH}", aPlantDef.mRefreshTime == 750 ? "[WAIT_TIME_SHORT]" : aPlantDef.mRefreshTime == 3000 ? "[WAIT_TIME_LONG]" : "[WAIT_TIME_VERY_LONG]");
+			aRechargeStr = TodCommon.TodReplaceString(aRechargeStr, "{WAIT_TIME}", "[WAIT_TIME]");
+			TodStringFile.TodDrawStringWrapped(g, aRechargeStr, new TRect(600 + Constants.Board_Additional_Width, 520 + Constants.Board_Background_Offset_Y, 139, 50), Resources.FONT_BRIANNETOD12, descriptionColor, DrawStringJustification.DS_ALIGN_RIGHT);
+		}
+	}
+
+	public void DrawZombies(Graphics g)
+	{
+		g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEBACK, 0f, 0f);
+		TodCommon.TodDrawString(g, "[SUBURBAN_ALMANAC_ZOMBIES]", Constants.BOARD_WIDTH / 2, 54 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT24, new SexyColor(0, 196, 0), DrawStringJustification.DS_ALIGN_CENTER);
+		ZombieType aZombieMouseOn = ZombieHitTest(mLastMouseX, mLastMouseY);
+		g.SetClipRect(cZombieClipRect);
+		for (int i = 0; i < GameConstants.NUM_ZOMBIES_IN_ALMANAC; i++)
+		{
+			ZombieType aZombieType = GetZombieType(i);
+			GetZombiePosition(aZombieType, out int aPosX, out int aPosY);
+			if (aZombieType != ZombieType.ZOMBIE_INVALID)
+			{
+				if (!ZombieIsShown(aZombieType))
+				{
+					g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEBLANK, aPosX, aPosY);
+				}
+				else
+				{
+					g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW, aPosX, aPosY);
+					if (aZombieType == aZombieMouseOn)
+					{
+						g.SetDrawMode(Graphics.DrawMode.DRAWMODE_ADDITIVE);
+						g.SetColor(new SexyColor(255, 255, 255, 48));
+						g.SetColorizeImages(colorizeImages: true);
+						g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW, aPosX, aPosY);
+						g.SetDrawMode(Graphics.DrawMode.DRAWMODE_NORMAL);
+						g.SetColorizeImages(colorizeImages: false);
+					}
+					ZombieType aZombieTypeToDraw = aZombieType;
+					Graphics aZombieGraphics = Graphics.GetNew(g);
+					aZombieGraphics.ClipRect(aPosX + 2, aPosY + 2, 72, 72);
+					aZombieGraphics.Translate(aPosX + 1, aPosY - 6);
+					aZombieGraphics.mScaleX = 0.5f;
+					aZombieGraphics.mScaleY = 0.5f;
+					switch (aZombieType)
+					{
+					case ZombieType.ZOMBIE_POLEVAULTER:
+						aZombieGraphics.Translate(2, -3);
+						aZombieTypeToDraw = ZombieType.ZOMBIE_CACHED_POLEVAULTER_WITH_POLE;
+						break;
+					case ZombieType.ZOMBIE_FLAG:
+						aZombieGraphics.Translate(2, 10);
+						break;
+					case ZombieType.ZOMBIE_TRAFFIC_CONE:
+					case ZombieType.ZOMBIE_TALLNUT_HEAD:
+						aZombieGraphics.Translate(0, 12);
+						break;
+					case ZombieType.ZOMBIE_PAIL:
+						aZombieGraphics.Translate(0, 9);
+						break;
+					case ZombieType.ZOMBIE_FOOTBALL:
+						aZombieGraphics.Translate(-8, 5);
+						break;
+					case ZombieType.ZOMBIE_ZAMBONI:
+						aZombieGraphics.Translate(0, 3);
+						break;
+					case ZombieType.ZOMBIE_DOLPHIN_RIDER:
+						aZombieGraphics.Translate(-2, -10);
+						break;
+					case ZombieType.ZOMBIE_POGO:
+						aZombieGraphics.Translate(0, -3);
+						break;
+					case ZombieType.ZOMBIE_GARGANTUAR:
+					case ZombieType.ZOMBIE_REDEYE_GARGANTUAR:
+						aZombieGraphics.Translate(15, 17);
+						break;
+					case ZombieType.ZOMBIE_IMP:
+						aZombieGraphics.Translate(-8, -7);
+						break;
+					case ZombieType.ZOMBIE_BUNGEE:
+						aZombieGraphics.Translate(-4, 3);
+						break;
+					case ZombieType.ZOMBIE_BACKUP_DANCER:
+						aZombieGraphics.Translate(-8, 5);
+						break;
+					case ZombieType.ZOMBIE_SNORKEL:
+						aZombieGraphics.Translate(-10, 0);
+						break;
+					case ZombieType.ZOMBIE_YETI:
+						aZombieGraphics.Translate(0, 4);
+						break;
+					case ZombieType.ZOMBIE_CATAPULT:
+						aZombieGraphics.Translate(-24, -1);
+						break;
+					case ZombieType.ZOMBIE_BOBSLED:
+						aZombieGraphics.Translate(0, -8);
+						break;
+					case ZombieType.ZOMBIE_LADDER:
+						aZombieGraphics.Translate(0, -3);
+						break;
+					}
+					if (ZombieHasSilhouette(aZombieType))
+					{
+						aZombieGraphics.SetColor(new SexyColor(0, 0, 0, 40));
+						aZombieGraphics.SetColorizeImages(colorizeImages: true);
+					}
+					mApp.mReanimatorCache.DrawCachedZombie(aZombieGraphics, 0f, 0f, aZombieTypeToDraw);
+					aZombieGraphics.SetColorizeImages(colorizeImages: false);
+					g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW2, aPosX, aPosY);
+					if (aZombieType == aZombieMouseOn)
+					{
+						g.SetDrawMode(Graphics.DrawMode.DRAWMODE_ADDITIVE);
+						g.SetColor(new SexyColor(255, 255, 255, 48));
+						g.SetColorizeImages(colorizeImages: true);
+						g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIEWINDOW2, aPosX, aPosY);
+						g.SetDrawMode(Graphics.DrawMode.DRAWMODE_NORMAL);
+						g.SetColorizeImages(colorizeImages: false);
+					}
+				}
+			}
+		}
+		g.ClearClipRect();
+		g.DrawImage(mZombie == null || (mZombie.mZombieType != ZombieType.ZOMBIE_ZAMBONI && mZombie.mZombieType != ZombieType.ZOMBIE_BOBSLED) ? Resources.IMAGE_ALMANAC_GROUNDDAY : Resources.IMAGE_ALMANAC_GROUNDICE, 518 + Constants.Board_Additional_Width, 110 + Constants.Board_Background_Offset_Y);
+		if (mZombie != null && !ZombieHasSilhouette(mZombie.mZombieType))
+		{
+			Graphics aZombieGraphics = Graphics.GetNew(g);
+			aZombieGraphics.mTransX += (int)mZombie.mPosX;
+			aZombieGraphics.mTransY += (int)mZombie.mPosY;
+			aZombieGraphics.SetClipRect(-42, -51, 197, 187);
+			switch (mZombie.mZombieType)
+			{
+			case ZombieType.ZOMBIE_ZAMBONI:
+				aZombieGraphics.Translate(-30, 5);
+				break;
+			case ZombieType.ZOMBIE_GARGANTUAR:
+			case ZombieType.ZOMBIE_REDEYE_GARGANTUAR:
+				aZombieGraphics.Translate(0, 30);
+				break;
+			case ZombieType.ZOMBIE_FOOTBALL:
+				aZombieGraphics.Translate(-17, 5);
+				break;
+			case ZombieType.ZOMBIE_BALLOON:
+				aZombieGraphics.Translate(0, -20);
+				break;
+			case ZombieType.ZOMBIE_BUNGEE:
+				aZombieGraphics.Translate(15, 0);
+				break;
+			case ZombieType.ZOMBIE_CATAPULT:
+				aZombieGraphics.Translate(-10, 0);
+				break;
+			case ZombieType.ZOMBIE_BOSS:
+				aZombieGraphics.Translate(-540, -175);
+				break;
+			}
+			if (mZombie.mZombieType != ZombieType.ZOMBIE_BUNGEE && mZombie.mZombieType != ZombieType.ZOMBIE_BOSS && mZombie.mZombieType != ZombieType.ZOMBIE_ZAMBONI && mZombie.mZombieType != ZombieType.ZOMBIE_CATAPULT)
+			{
+				mZombie.DrawShadow(aZombieGraphics);
+			}
+			mZombie.Draw(aZombieGraphics);
+			aZombieGraphics.PrepareForReuse();
+		}
+		g.DrawImage(Resources.IMAGE_ALMANAC_ZOMBIECARD, 455 + Constants.Board_Additional_Width, 78 + Constants.Board_Background_Offset_Y);
+		ZombieDefinition aZombieDef = Zombie.GetZombieDefinition(mSelectedZombie);
+		string aName = ZombieHasSilhouette(mSelectedZombie) ? "???" : Common.StrFormat_("[{0}]", aZombieDef.mZombieName);
+		TodCommon.TodDrawString(g, aName, 613 + Constants.Board_Additional_Width, 362 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18GREENINSET, new SexyColor(190, 255, 235, 255), DrawStringJustification.DS_ALIGN_CENTER);
+		Font descriptionFont = Resources.FONT_BRIANNETOD12;
+		for (int i = 0; i < GameConstants.gLawnStringFormatCount; i++)
+		{
+			TodStringListFormat aFormat = GameConstants.gLawnStringFormats[i];
+			if (TodCommon.TestBit(aFormat.mFormatFlags, 1))
+			{
+				if (mApp.HasSeedType(SeedType.SEED_MAGNETSHROOM))
+				{
+					aFormat.mNewColor.mAlpha = 255;
+					aFormat.mLineSpacingOffset = 0;
+				}
+				else
+				{
+					aFormat.mNewColor.mAlpha = 0;
+					aFormat.mLineSpacingOffset = -(descriptionFont.GetLineSpacing() / 2);
+				}
+			}
+		}
+		SexyColor descriptionColor = new SexyColor(40, 50, 90);
+		mDescriptionRect = new TRect(485 + Constants.Board_Additional_Width, 377 + Constants.Board_Background_Offset_Y, 257, 160);
+		if (ZombieHasDescription(mSelectedZombie))
+		{
+			DrawStringJustification descriptionJustification = DrawStringJustification.DS_ALIGN_LEFT;
+			string descriptionHeader = TranslateAndSanitize(Common.StrFormat_("[{0}_DESCRIPTION_HEADER]", aZombieDef.mZombieName));
+			TodStringFile.TodDrawStringWrapped(g, descriptionHeader, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification);
+			int textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, descriptionHeader, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+			mDescriptionRect.mY += textSpacing;
+			mDescriptionRect.mHeight -= textSpacing;
+			string description = TranslateAndSanitize(Common.StrFormat_("[{0}_DESCRIPTION]", aZombieDef.mZombieName));
+			textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, description, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+			int rectHeight;
+			if (mDescriptionRect.mHeight < textSpacing)
+			{
+				mIsOverDescription = mDescriptionRect.Contains(mLastMouseX, mLastMouseY);
+				mDescriptionLineSpacing = descriptionFont.GetLineSpacing();
+				int barWidth = 8;
+				int barX = mDescriptionRect.mX + mDescriptionRect.mWidth - barWidth / 2;
+				mDescriptionRect.mWidth -= barWidth;
+				textSpacing = TodStringFile.TodDrawStringWrappedHelper(g, description, mDescriptionRect, descriptionFont, descriptionColor, descriptionJustification, drawString: false, widowSuppression: false);
+				g.SetColor(new SexyColor(95, 97, 129, 75));
+				g.FillRect(new TRect(barX, mDescriptionRect.mY, barWidth, mDescriptionRect.mHeight));
+				mDescriptionMaxScroll = textSpacing - mDescriptionRect.mHeight;
+				g.SetColor(new SexyColor(95, 97, 129));
+				int barHeight = mDescriptionRect.mHeight - (int)mDescriptionMaxScroll;
+				float posY = mDescriptionScroll;
+				mDescriptionOverfill = barHeight < ALMANAC_DESCRIPTION_MIN_HEIGHT;
+				if (mDescriptionOverfill)
+				{
+					barHeight = ALMANAC_DESCRIPTION_MIN_HEIGHT;
+					posY = mDescriptionScroll / mDescriptionMaxScroll * (mDescriptionRect.mHeight - barHeight);
+				}
+				mDescriptionSliderRect = new TRect(barX, mDescriptionRect.mY + (int)posY, barWidth, barHeight);
+				g.FillRect(mDescriptionSliderRect);
+				rectHeight = textSpacing;
+			}
+			else
+			{
+				mIsOverDescription = false;
+				mDescriptionLineSpacing = 0;
+				mDescriptionScroll = 0f;
+				mDescriptionMaxScroll = 0f;
+				rectHeight = mDescriptionRect.mHeight;
+			}
+			g.SetClipRect(mDescriptionRect);
+			TodStringFile.TodDrawStringWrapped(g, description, new TRect(mDescriptionRect.mX, mDescriptionRect.mY - (int)mDescriptionScroll, mDescriptionRect.mWidth, rectHeight), descriptionFont, descriptionColor, descriptionJustification);
+			g.ClearClipRect();
+		}
+		else
+		{
+			TodStringFile.TodDrawStringWrapped(g, "[NOT_ENCOUNTERED_YET]", mDescriptionRect, descriptionFont, descriptionColor, DrawStringJustification.DS_ALIGN_CENTER_VERTICAL_MIDDLE);
+		}
 	}
 
 	public override void Draw(Graphics g)
@@ -213,440 +828,102 @@ internal class AlmanacDialog : LawnDialog
 		{
 			DrawZombies(g);
 		}
+		for (int i = 0; i < mZombiePerfTest.Length; i++)
+		{
+			if (mZombiePerfTest[i] != null)
+			{
+				Graphics aTestGraphics = Graphics.GetNew(g);
+				mZombiePerfTest[i].Draw(aTestGraphics);
+				aTestGraphics.PrepareForReuse();
+			}
+		}
 		mCloseButton.Draw(g);
 		mIndexButton.Draw(g);
-		if (mOpenPage != AlmanacPage.ALMANAC_PAGE_INDEX)
-		{
-			DeferOverlay();
-		}
+		mPlantButton.Draw(g);
+		mZombieButton.Draw(g);
 	}
 
-	public override void DrawOverlay(Graphics g)
+	public void GetSeedPosition(SeedType theSeedType, out int x, out int y)
 	{
-		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_PLANTS)
+		SeedType aPlantIndex = theSeedType;
+		if (aPlantIndex > SeedType.SEED_IMITATER)
 		{
-			g.SetColorizeImages(colorizeImages: true);
-			g.SetColor(Constants.Almanac_Paper_Colour);
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT, mPlantsScrollWidget.mX, Constants.Almanac_PlantTopGradientY, Constants.Almanac_PlantGradientWidth, AtlasResources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT.mHeight);
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT, mPlantsScrollWidget.mX, Constants.Almanac_BottomGradientY, Constants.Almanac_PlantGradientWidth, AtlasResources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT.mHeight);
-			g.SetColorizeImages(colorizeImages: false);
+			aPlantIndex = aPlantIndex - 1;
 		}
-		else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_ZOMBIES)
+		if (aPlantIndex == SeedType.SEED_IMITATER)
 		{
-			g.SetColorizeImages(colorizeImages: true);
-			g.SetColor(Constants.Almanac_Paper_Colour);
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT, mZombiesScrollWidget.mX, Constants.Almanac_ZombieTopGradientY, Constants.Almanac_ZombieGradientWidth, AtlasResources.IMAGE_ALMANAC_PLANTS_TOPGRADIENT.mHeight);
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT, mZombiesScrollWidget.mX, Constants.Almanac_BottomGradientY, Constants.Almanac_ZombieGradientWidth, AtlasResources.IMAGE_ALMANAC_PLANTS_BOTTOMGRADIENT.mHeight);
-			g.SetColorizeImages(colorizeImages: false);
-		}
-	}
-
-	public override void MouseUp(int x, int y, int theClickCount)
-	{
-		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX && mViewPlantsRect.Contains(new TPoint(x, y)))
-		{
-			SetPage(AlmanacPage.ALMANAC_PAGE_PLANTS);
-		}
-		else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX && mViewZombiesRect.Contains(new TPoint(x, y)))
-		{
-			mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
-			SetPage(AlmanacPage.ALMANAC_PAGE_ZOMBIES);
-		}
-		else if (mCloseButton.IsMouseOver())
-		{
-			mApp.KillAlmanacDialog();
-			if (mListener != null)
-			{
-				mListener.BackFromAlmanac();
-			}
-		}
-		else if (mIndexButton.IsMouseOver())
-		{
-			SetPage(AlmanacPage.ALMANAC_PAGE_INDEX);
-		}
-	}
-
-	public override void MouseDown(int x, int y, int theClickCount)
-	{
-		mCloseButton.Update();
-		mIndexButton.Update();
-		if ((mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX && mViewPlantsRect.Contains(new TPoint(x, y))) || mCloseButton.IsMouseOver() || mIndexButton.IsMouseOver())
-		{
-			mApp.PlaySample(Resources.SOUND_TAP);
-		}
-		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX && mViewZombiesRect.Contains(new TPoint(x, y)))
-		{
-			mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
-		}
-	}
-
-	public virtual void KeyChar(char theChar)
-	{
-	}
-
-	public override void RemovedFromManager(WidgetManager theWidgetManager)
-	{
-		base.RemovedFromManager(theWidgetManager);
-		ClearPlantsAndZombies();
-	}
-
-	public void DrawIndex(Graphics g)
-	{
-		g.SetClipRect(0, 0, Constants.BackBufferSize.Y, Constants.BackBufferSize.X);
-		LawnCommon.DrawImageBox(g, new TRect(0, 0, mWidth, mHeight), AtlasResources.IMAGE_ALMANAC_ROUNDED_OUTLINE);
-		g.DrawImage(AtlasResources.IMAGE_ALMANAC_INDEX_HEADER, mWidth / 2 - AtlasResources.IMAGE_ALMANAC_INDEX_HEADER.mWidth / 2, Constants.AlmanacHeaderY);
-		float almanac_Text_Scale = Constants.Almanac_Text_Scale;
-		if (mPlant != null)
-		{
-			Graphics graphics = Graphics.GetNew(g);
-			LawnCommon.DrawImageBox(g, mViewPlantsRect, AtlasResources.IMAGE_ALMANAC_CLAY_BORDER);
-			graphics.mTransX += mPlant.mX;
-			graphics.mTransY += mPlant.mY;
-			mPlant.Draw(graphics);
-			TodCommon.TodDrawString(g, "[VIEW_PLANTS]", Constants.Almanac_IndexPlantTextPos.X, Constants.Almanac_IndexPlantTextPos.Y, Resources.FONT_DWARVENTODCRAFT15, Constants.YellowFontColour, DrawStringJustification.DS_ALIGN_CENTER, almanac_Text_Scale);
-			graphics.PrepareForReuse();
-		}
-		if (mZombie != null)
-		{
-			Graphics graphics2 = Graphics.GetNew(g);
-			LawnCommon.DrawImageBox(g, mViewZombiesRect, AtlasResources.IMAGE_ALMANAC_STONE_BORDER);
-			graphics2.mTransX += mZombie.mX;
-			graphics2.mTransY += mZombie.mY;
-			mZombie.Draw(graphics2);
-			TodCommon.TodDrawString(g, "[VIEW_ZOMBIES]", Constants.Almanac_IndexZombieTextPos.X, Constants.Almanac_IndexZombieTextPos.Y, Resources.FONT_DWARVENTODCRAFT15, Constants.GreenFontColour, DrawStringJustification.DS_ALIGN_CENTER, almanac_Text_Scale);
-			graphics2.PrepareForReuse();
-		}
-	}
-
-	public void SetPage(AlmanacPage thePage)
-	{
-		mOpenPage = thePage;
-		ClearPlantsAndZombies();
-		if (mOpenPage == AlmanacPage.ALMANAC_PAGE_INDEX)
-		{
-			mPlantsScrollWidget.SetVisible(isVisible: false);
-			mZombiesScrollWidget.SetVisible(isVisible: false);
-			mDescriptionScrollWidget.SetVisible(isVisible: false);
-			mPlant = Plant.GetNewPlant();
-			mPlant.mBoard = null;
-			mPlant.mIsOnBoard = false;
-			mPlant.PlantInitialize(0, 0, SeedType.SEED_SUNFLOWER, SeedType.SEED_NONE);
-			mPlant.mX = Constants.Almanac_IndexPlantPos.X;
-			mPlant.mY = Constants.Almanac_IndexPlantPos.Y;
-			if (mZombie != null)
-			{
-				mZombie.PrepareForReuse();
-			}
-			mZombie = Zombie.GetNewZombie();
-			mZombie.mBoard = null;
-			mZombie.ZombieInitialize(0, ZombieType.ZOMBIE_NORMAL, theVariant: false, null, GameConstants.ZOMBIE_WAVE_UI);
-			mZombie.mPosX = Constants.Almanac_IndexZombiePos.X;
-			mZombie.mPosY = Constants.Almanac_IndexZombiePos.Y;
-			mIndexButton.mBtnNoDraw = true;
-		}
-		else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_PLANTS)
-		{
-			SetupPlant();
-			mPlantsScrollWidget.SetVisible(isVisible: true);
-			mZombiesScrollWidget.SetVisible(isVisible: false);
-			mPlantsScrollWidget.ScrollToMin(animated: false);
-			mDescriptionScrollWidget.SetVisible(isVisible: true);
-			mDescriptionScrollWidget.ScrollToMin(animated: false);
-			mIndexButton.mBtnNoDraw = false;
-		}
-		else if (mOpenPage == AlmanacPage.ALMANAC_PAGE_ZOMBIES)
-		{
-			SetupZombie();
-			mPlantsScrollWidget.SetVisible(isVisible: false);
-			mZombiesScrollWidget.SetVisible(isVisible: true);
-			mZombiesScrollWidget.ScrollToMin(animated: false);
-			mDescriptionScrollWidget.SetVisible(isVisible: true);
-			mDescriptionScrollWidget.ScrollToMin(animated: false);
-			mIndexButton.mBtnNoDraw = false;
+			x = 20;
+			y = 23;
 		}
 		else
 		{
-			Debug.ASSERT(value: false);
+			int aSeedPacketWidth = Constants.SEED_PACKET_WIDTH + 2;
+			int aSeedPacketHeight = Constants.SEED_PACKET_HEIGHT + cSeedPacketYOffset;
+			x = (int)aPlantIndex % cSeedPacketRows * aSeedPacketWidth + aSeedPacketWidth / 2 + Constants.Board_Additional_Width;
+			y = (int)aPlantIndex / cSeedPacketRows * aSeedPacketHeight + aSeedPacketHeight + cSeedPacketYStartOffset - (int)mScrollPosition + Constants.Board_Background_Offset_Y;
 		}
 	}
 
-	public void DrawZombies(Graphics g)
+	public SeedType SeedHitTest(int x, int y)
 	{
-		LawnCommon.DrawImageBox(g, new TRect(0, 0, mWidth, mHeight), AtlasResources.IMAGE_ALMANAC_ROUNDED_OUTLINE);
-		g.DrawImage(AtlasResources.IMAGE_ALMANAC_ZOMBIES_HEADER, Constants.Almanac_ZombieHeader_Pos.X, Constants.Almanac_ZombieHeader_Pos.Y);
-		LawnCommon.DrawImageBox(g, Constants.Almanac_ZombieStoneRect, AtlasResources.IMAGE_ALMANAC_STONE_TABLET);
-		int x = Constants.Almanac_BackgroundPosition.X;
-		int y = Constants.Almanac_BackgroundPosition.Y;
-		if (mZombie.mZombieType == ZombieType.ZOMBIE_ZAMBONI || mZombie.mZombieType == ZombieType.ZOMBIE_BOBSLED)
+		if (mMouseVisible && mOpenPage == AlmanacPage.ALMANAC_PAGE_PLANTS)
 		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDICE, x, y);
-		}
-		else
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDDAY, x, y);
-		}
-		if (mZombie != null && !ZombieHasSilhouette(mZombie.mZombieType))
-		{
-			Graphics graphics = Graphics.GetNew(g);
-			graphics.mTransX += (int)((float)mZombie.mX * Constants.S);
-			graphics.mTransY += (int)((float)mZombie.mY * Constants.S);
-			graphics.SetClipRect(ref Constants.Almanac_ZombieClipRect);
-			if (mZombie.mZombieType == ZombieType.ZOMBIE_ZAMBONI)
+			for (SeedType aSeedType = SeedType.SEED_PEASHOOTER; aSeedType < SeedType.NUM_SEEDS_IN_CHOOSER; aSeedType++)
 			{
-				graphics.mTransX += (int)(-30f * Constants.S);
-				graphics.mTransY += (int)(5f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_GARGANTUAR)
-			{
-				graphics.mTransY += (int)(30f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_FOOTBALL)
-			{
-				graphics.mTransX += (int)(-10f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_BALLOON)
-			{
-				graphics.mTransY += (int)(-20f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_BUNGEE)
-			{
-				graphics.mTransX += (int)Constants.InvertAndScale(12f);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_CATAPULT)
-			{
-				graphics.mTransX += (int)(-10f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_BOSS)
-			{
-				graphics.mTransX += (int)(-540f * Constants.S);
-				graphics.mTransY += (int)(-175f * Constants.S);
-			}
-			else if (mZombie.mZombieType == ZombieType.ZOMBIE_POLEVAULTER)
-			{
-				graphics.mTransX += (int)Constants.InvertAndScale(17f);
-			}
-			if (mZombie.mZombieType != ZombieType.ZOMBIE_BUNGEE && mZombie.mZombieType != ZombieType.ZOMBIE_BOSS && mZombie.mZombieType != ZombieType.ZOMBIE_ZAMBONI && mZombie.mZombieType != ZombieType.ZOMBIE_CATAPULT)
-			{
-				mZombie.DrawShadow(graphics);
-			}
-			graphics.HardwareClip();
-			mZombie.Draw(graphics);
-			graphics.EndHardwareClip();
-			graphics.PrepareForReuse();
-		}
-		LawnCommon.DrawImageBox(g, Constants.Almanac_NavyRect, AtlasResources.IMAGE_ALMANAC_NAVY_RECT, theDrawCenter: false);
-		ZombieDefinition zombieDefinition = Zombie.GetZombieDefinition(mSelectedZombie);
-		string theText = ((!ZombieHasSilhouette(mSelectedZombie)) ? Common.StrFormat_("[{0}]", zombieDefinition.mZombieName) : TodStringFile.TodStringTranslate("[NOT_ENCOUNTERED_YET_NAME]"));
-		TodCommon.TodDrawString(g, theText, Constants.Almanac_NamePosition.X, Constants.Almanac_NamePosition.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(0, 196, 0), Constants.Almanac_ItemName_MaxWidth, DrawStringJustification.DS_ALIGN_CENTER);
-		TRect rect = mDescriptionScrollWidget.GetRect();
-		rect.Inflate((int)Constants.InvertAndScale(6f), (int)Constants.InvertAndScale(6f));
-		DrawPaper(g, rect, new SexyColor(171, 159, 207));
-	}
-
-	public void DrawPlants(Graphics g)
-	{
-		LawnCommon.DrawImageBox(g, new TRect(0, 0, mWidth, mHeight), AtlasResources.IMAGE_ALMANAC_ROUNDED_OUTLINE);
-		g.DrawImage(AtlasResources.IMAGE_ALMANAC_PLANTS_HEADER, Constants.Almanac_PlantsHeader_Pos.X, Constants.Almanac_PlantsHeader_Pos.Y);
-		LawnCommon.DrawImageBox(g, Constants.Almanac_ClayRect, AtlasResources.IMAGE_ALMANAC_CLAY_TABLET);
-		int x = Constants.Almanac_BackgroundPosition.X;
-		int y = Constants.Almanac_BackgroundPosition.Y;
-		if (mSelectedSeed == SeedType.SEED_LILYPAD || mSelectedSeed == SeedType.SEED_TANGLEKELP || mSelectedSeed == SeedType.SEED_CATTAIL)
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDPOOL, x, y);
-		}
-		else if (mSelectedSeed == SeedType.SEED_SEASHROOM)
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDNIGHTPOOL, x, y);
-		}
-		else if (Plant.IsNocturnal(mSelectedSeed) || mSelectedSeed == SeedType.SEED_GRAVEBUSTER || mSelectedSeed == SeedType.SEED_PLANTERN)
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDNIGHT, x, y);
-		}
-		else if (mSelectedSeed == SeedType.SEED_FLOWERPOT)
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDROOF, x, y);
-		}
-		else
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDDAY, x, y);
-		}
-		if (mPlant != null)
-		{
-			Graphics graphics = Graphics.GetNew(g);
-			graphics.mTransX += mPlant.mX;
-			graphics.mTransY += mPlant.mY;
-			mPlant.Draw(graphics);
-			graphics.PrepareForReuse();
-		}
-		LawnCommon.DrawImageBox(g, Constants.Almanac_BrownRect, AtlasResources.IMAGE_ALMANAC_BROWN_RECT, theDrawCenter: false);
-		string nameString = Plant.GetNameString(mSelectedSeed, SeedType.SEED_NONE);
-		TodCommon.TodDrawString(g, nameString, Constants.Almanac_NamePosition.X, Constants.Almanac_NamePosition.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(213, 159, 43), Constants.Almanac_ItemName_MaxWidth, DrawStringJustification.DS_ALIGN_CENTER);
-		TRect rect = mDescriptionScrollWidget.GetRect();
-		rect.Inflate((int)Constants.InvertAndScale(6f), (int)Constants.InvertAndScale(6f));
-		DrawPaper(g, rect, new SexyColor(253, 186, 117));
-	}
-
-	public void SetupPlant()
-	{
-		ClearPlantsAndZombies();
-		float num = Constants.Almanac_PlantPosition.X;
-		float num2 = Constants.Almanac_PlantPosition.Y;
-		if (mSelectedSeed == SeedType.SEED_TALLNUT)
-		{
-			num2 += (float)(int)Constants.InvertAndScale(18f);
-		}
-		if (mSelectedSeed == SeedType.SEED_COBCANNON)
-		{
-			num += (float)(int)Constants.InvertAndScale(-20f);
-		}
-		if (mSelectedSeed == SeedType.SEED_FLOWERPOT)
-		{
-			num2 += (float)(int)Constants.InvertAndScale(-20f);
-		}
-		if (mSelectedSeed == SeedType.SEED_INSTANT_COFFEE)
-		{
-			num2 += (float)(int)Constants.InvertAndScale(20f);
-		}
-		if (mSelectedSeed == SeedType.SEED_GRAVEBUSTER)
-		{
-			num2 += (float)(int)Constants.InvertAndScale(35f);
-		}
-		mPlant = Plant.GetNewPlant();
-		mPlant.mBoard = null;
-		mPlant.mIsOnBoard = false;
-		mPlant.PlantInitialize(0, 0, mSelectedSeed, SeedType.SEED_NONE);
-		mPlant.mX = (int)num;
-		mPlant.mY = (int)num2;
-		PlantDefinition plantDefinition = Plant.GetPlantDefinition(mSelectedSeed);
-		string text = "";
-		if (TodStringFile.TodStringListExists("[" + plantDefinition.mPlantName + "_DESCRIPTION_HEADER]"))
-		{
-			text = TodStringFile.TodStringTranslate("[" + plantDefinition.mPlantName + "_DESCRIPTION_HEADER]");
-		}
-		string text2 = TodStringFile.TodStringTranslate("[" + plantDefinition.mPlantName + "_DESCRIPTION]");
-		if (text != string.Empty)
-		{
-			text2 = "{NORMAL}" + text + "\n" + text2 + "\n";
-		}
-		string theText = "{KEYWORD}{COST}:{STAT} " + plantDefinition.mSeedCost;
-		theText = TodCommon.TodReplaceString(theText, "{COST}", "[COST]");
-		string theText2;
-		if (plantDefinition.mRefreshTime == 750)
-		{
-			theText2 = "{KEYWORD}{WAIT_TIME}:{STAT} {WAIT_TIME_LENGTH}";
-			theText2 = TodCommon.TodReplaceString(theText2, "{WAIT_TIME_LENGTH}", "[WAIT_TIME_SHORT]");
-		}
-		else if (plantDefinition.mRefreshTime == 3000)
-		{
-			theText2 = "{KEYWORD}{WAIT_TIME}:{STAT} {WAIT_TIME_LENGTH}";
-			theText2 = TodCommon.TodReplaceString(theText2, "{WAIT_TIME_LENGTH}", "[WAIT_TIME_LONG]");
-		}
-		else
-		{
-			theText2 = "{KEYWORD}{WAIT_TIME}:{STAT} {WAIT_TIME_LENGTH}";
-			theText2 = TodCommon.TodReplaceString(theText2, "{WAIT_TIME_LENGTH}", "[WAIT_TIME_VERY_LONG]");
-		}
-		theText2 = TodCommon.TodReplaceString(theText2, "{WAIT_TIME}", "[WAIT_TIME]");
-		text2 += "{NORMAL}";
-		if (mSelectedSeed != SeedType.SEED_IMITATER)
-		{
-			string text3 = text2;
-			text2 = text3 + "\n" + theText2 + "\n" + theText;
-		}
-		mDescriptionWidget.SetText(ref text2);
-		mDescriptionScrollWidget.ClientSizeChanged();
-		mDescriptionScrollWidget.ScrollToMin(animated: false);
-	}
-
-	public void ClearPlantsAndZombies()
-	{
-		if (mPlant != null)
-		{
-			mPlant.Die();
-			mPlant.PrepareForReuse();
-			mPlant = null;
-		}
-		if (mZombie != null)
-		{
-			mZombie.DieNoLoot(giveAchievements: false);
-			mZombie.Dispose();
-			mZombie = null;
-		}
-	}
-
-	public void SetupZombie()
-	{
-		ClearPlantsAndZombies();
-		if (mZombie != null)
-		{
-			mZombie.PrepareForReuse();
-		}
-		mZombie = Zombie.GetNewZombie();
-		mZombie.mBoard = null;
-		mZombie.ZombieInitialize(0, mSelectedZombie, theVariant: false, null, GameConstants.ZOMBIE_WAVE_UI);
-		mZombie.mScaleZombie = 1f;
-		mZombie.mPosX = Constants.Almanac_ZombiePosition.X;
-		mZombie.mPosY = Constants.Almanac_ZombiePosition.Y;
-		string text = "";
-		ZombieDefinition zombieDefinition = Zombie.GetZombieDefinition(mSelectedZombie);
-		string theText;
-		if (ZombieHasDescription(mSelectedZombie))
-		{
-			string theString = Common.StrFormat_("[{0}_DESCRIPTION]", zombieDefinition.mZombieName);
-			theText = TodStringFile.TodStringTranslate(theString);
-			if (TodStringFile.TodStringListExists(Common.StrFormat_("[{0}_DESCRIPTION_HEADER]", zombieDefinition.mZombieName)))
-			{
-				text = TodStringFile.TodStringTranslate(Common.StrFormat_("[{0}_DESCRIPTION_HEADER]", zombieDefinition.mZombieName));
-			}
-		}
-		else
-		{
-			theText = "[NOT_ENCOUNTERED_YET]";
-		}
-		if (text != string.Empty)
-		{
-			theText = "{NORMAL}" + text + "\n" + theText + "\n";
-		}
-		for (int i = 0; i < GameConstants.gLawnStringFormatCount; i++)
-		{
-			TodStringListFormat todStringListFormat = GameConstants.gLawnStringFormats[i];
-			if (TodCommon.TestBit(todStringListFormat.mFormatFlags, 1))
-			{
-				if (!mApp.HasSeedType(SeedType.SEED_MAGNETSHROOM))
+				if (mApp.SeedTypeAvailable(aSeedType))
 				{
-					todStringListFormat.mNewColor = todStringListFormat.mBaseColor;
-					todStringListFormat.mNewColor.mAlpha = 0;
-					todStringListFormat.mLineSpacingOffset = -17;
-				}
-				else
-				{
-					todStringListFormat.mNewColor = todStringListFormat.mBaseColor;
-					todStringListFormat.mNewColor.mAlpha = 255;
-					todStringListFormat.mLineSpacingOffset = 0;
+					GetSeedPosition(aSeedType, out int aSeedX, out int aSeedY);
+					TRect aSeedRect = aSeedType != SeedType.SEED_IMITATER ? new TRect(aSeedX, aSeedY, Constants.SEED_PACKET_WIDTH, Constants.SEED_PACKET_HEIGHT) : new TRect(aSeedX, aSeedY, Resources.IMAGE_ALMANAC_IMITATER.GetWidth(), Resources.IMAGE_ALMANAC_IMITATER.GetHeight());
+					if ((cSeedClipRect.Contains(x, y) || aSeedType == SeedType.SEED_IMITATER) && aSeedRect.Contains(x, y))
+					{
+						return aSeedType;
+					}
 				}
 			}
 		}
-		mDescriptionWidget.SetText(ref theText);
-		mDescriptionScrollWidget.ClientSizeChanged();
-		mDescriptionScrollWidget.ScrollToMin(animated: false);
+		return SeedType.SEED_NONE;
 	}
 
-	public void ShowZombie(ZombieType theZombieType)
+	public bool ZombieHasSilhouette(ZombieType theZombieType)
 	{
-		mSelectedZombie = theZombieType;
-		SetPage(AlmanacPage.ALMANAC_PAGE_ZOMBIES);
+		if (theZombieType != ZombieType.ZOMBIE_YETI || mApp.CanSpawnYetis())
+		{
+			return false;
+		}
+		return mApp.HasFinishedAdventure() || mApp.mPlayerInfo.GetLevel() > Zombie.GetZombieDefinition(ZombieType.ZOMBIE_YETI).mStartingLevel;
 	}
 
-	public void ShowPlant(SeedType theSeedType)
+	public bool ZombieIsShown(ZombieType theZombieType)
 	{
-		mSelectedSeed = theSeedType;
-		SetPage(AlmanacPage.ALMANAC_PAGE_PLANTS);
+		if (mApp.IsTrialStageLocked() && theZombieType > ZombieType.ZOMBIE_SNORKEL)
+		{
+			return false;
+		}
+		if (theZombieType == ZombieType.ZOMBIE_YETI)
+		{
+			return mApp.CanSpawnYetis() || ZombieHasSilhouette(ZombieType.ZOMBIE_YETI);
+		}
+		if (theZombieType <= ZombieType.ZOMBIE_BOSS)
+		{
+			if (mApp.HasFinishedAdventure())
+			{
+				return true;
+			}
+			int aLevel = mApp.mPlayerInfo.GetLevel();
+			int aStart = Zombie.GetZombieDefinition(theZombieType).mStartingLevel;
+			return aStart <= aLevel && (aStart != aLevel || !Board.IsZombieTypeSpawnedOnly(theZombieType) || gZombieDefeated[(int)theZombieType]);
+		}
+		if (theZombieType > ZombieType.ZOMBIE_BOSS)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	public bool ZombieHasDescription(ZombieType theZombieType)
 	{
-		ZombieDefinition zombieDefinition = Zombie.GetZombieDefinition(theZombieType);
-		int level = mApp.mPlayerInfo.GetLevel();
+		int aLevel = mApp.mPlayerInfo.GetLevel();
+		int aStart = Zombie.GetZombieDefinition(theZombieType).mStartingLevel;
 		if (theZombieType == ZombieType.ZOMBIE_YETI)
 		{
 			if (!mApp.CanSpawnYetis())
@@ -662,69 +939,169 @@ internal class AlmanacDialog : LawnDialog
 		{
 			return true;
 		}
-		if (zombieDefinition.mStartingLevel > level)
+		return aStart <= aLevel && (aStart != aLevel || gZombieDefeated[(int)theZombieType]);
+	}
+
+	public void GetZombiePosition(ZombieType theZombieType, out int x, out int y)
+	{
+		x = (int)theZombieType % cZombieRows * 85 + 22 + Constants.Board_Additional_Width;
+		y = (int)theZombieType / cZombieRows * cZombieHeight + cZombieHeight + cZombieYStartOffset - (int)mScrollPosition + Constants.Board_Background_Offset_Y;
+	}
+
+	public ZombieType ZombieHitTest(int x, int y)
+	{
+		if (mMouseVisible && mOpenPage == AlmanacPage.ALMANAC_PAGE_ZOMBIES)
 		{
-			return false;
-		}
-		if (zombieDefinition.mStartingLevel == level)
-		{
-			if (gZombieDefeated[(int)theZombieType])
+			for (int i = 0; i < GameConstants.NUM_ZOMBIES_IN_ALMANAC; i++)
 			{
-				return true;
+				ZombieType aZombieType = GetZombieType(i);
+				if (aZombieType != ZombieType.ZOMBIE_INVALID)
+				{
+					GetZombiePosition(aZombieType, out int aZombieX, out int aZombieY);
+					TRect aZombieRect = new TRect(aZombieX, aZombieY, 76, 76);
+					if (aZombieRect.Contains(x, y) && cZombieClipRect.Contains(x, y))
+					{
+						return aZombieType;
+					}
+				}
 			}
-			return false;
 		}
-		return true;
+		return ZombieType.ZOMBIE_INVALID;
 	}
 
-	public bool ZombieHasSilhouette(ZombieType theZombieType)
+	public override void MouseUp(int x, int y, int theClickCount)
 	{
-		if (theZombieType != ZombieType.ZOMBIE_YETI)
+		if (mDescriptionSliderDragging)
 		{
-			return false;
+			mDescriptionSliderDragging = false;
+			return;
 		}
-		if (mApp.CanSpawnYetis())
+		if (mPlantButton.IsMouseOver())
 		{
-			return false;
+			SetPage(AlmanacPage.ALMANAC_PAGE_PLANTS);
 		}
-		if (mApp.HasFinishedAdventure())
+		else if (mZombieButton.IsMouseOver())
 		{
-			return true;
+			SetPage(AlmanacPage.ALMANAC_PAGE_ZOMBIES);
 		}
-		ZombieDefinition zombieDefinition = Zombie.GetZombieDefinition(theZombieType);
-		int level = mApp.mPlayerInfo.GetLevel();
-		if (level > zombieDefinition.mStartingLevel)
+		else if (mCloseButton.IsMouseOver())
 		{
-			return true;
+			mApp.KillAlmanacDialog();
 		}
-		return false;
+		else if (mIndexButton.IsMouseOver())
+		{
+			SetPage(AlmanacPage.ALMANAC_PAGE_INDEX);
+		}
 	}
 
-	public void DrawPaper(Graphics g, TRect theRect, SexyColor theColor)
+	public override void MouseDown(int x, int y, int theClickCount)
 	{
-		g.SetColorizeImages(colorizeImages: true);
-		g.SetColor(theColor);
-		LawnCommon.DrawImageBox(g, theRect, AtlasResources.IMAGE_ALMANAC_PAPER);
-		g.SetColorizeImages(colorizeImages: false);
-	}
-
-	public void PlantSelected(SeedType theSeedType)
-	{
-		if (mSelectedSeed != theSeedType)
+		if (mDescriptionSliderRect.Contains(x, y))
 		{
-			mSelectedSeed = theSeedType;
+			mDescriptionYOffset = y - (mDescriptionOverfill ? mDescriptionScroll / mDescriptionMaxScroll * (mDescriptionRect.mHeight - ALMANAC_DESCRIPTION_MIN_HEIGHT) : 0f);
+			mDescriptionOffsetScroll = mDescriptionScroll;
+			mDescriptionSliderDragging = true;
+			return;
+		}
+		if (mPlantButton.IsMouseOver() || mCloseButton.IsMouseOver() || mIndexButton.IsMouseOver())
+		{
+			mApp.PlaySample(Resources.SOUND_TAP);
+		}
+		if (mZombieButton.IsMouseOver())
+		{
+			mApp.PlaySample(Resources.SOUND_GRAVEBUTTON);
+		}
+		SeedType aSeedType = SeedHitTest(x, y);
+		if (aSeedType != SeedType.SEED_NONE && aSeedType != mSelectedSeed)
+		{
+			mSelectedSeed = aSeedType;
 			SetupPlant();
 			mApp.PlaySample(Resources.SOUND_TAP);
 		}
-	}
-
-	public void ZombieSelected(ZombieType theZombieType)
-	{
-		if (mSelectedZombie != theZombieType)
+		ZombieType aZombieType = ZombieHitTest(x, y);
+		if (aZombieType != ZombieType.ZOMBIE_INVALID && aZombieType != mSelectedZombie && ZombieIsShown(aZombieType))
 		{
-			mSelectedZombie = theZombieType;
+			mSelectedZombie = aZombieType;
 			SetupZombie();
 			mApp.PlaySample(Resources.SOUND_TAP);
 		}
+	}
+
+	public override void MouseDrag(int x, int y)
+	{
+		if (mDescriptionSliderDragging)
+		{
+			if (mDescriptionOverfill)
+			{
+				mDescriptionScroll = (y - mDescriptionYOffset) / (mDescriptionRect.mHeight - ALMANAC_DESCRIPTION_MIN_HEIGHT) * mDescriptionMaxScroll;
+			}
+			else
+			{
+				mDescriptionScroll = y - (mDescriptionYOffset - mDescriptionOffsetScroll);
+			}
+			if (mDescriptionScroll < 0f)
+			{
+				mDescriptionScroll = 0f;
+			}
+			else if (mDescriptionScroll > mDescriptionMaxScroll)
+			{
+				mDescriptionScroll = mDescriptionMaxScroll;
+			}
+		}
+	}
+
+	public virtual void KeyChar(char theChar)
+	{
+	}
+
+	public void SliderVal(int theId, double theVal)
+	{
+		switch (theId)
+		{
+		case 0:
+			mScrollPosition = (float)theVal * mMaxScrollPosition;
+			break;
+		}
+	}
+
+	public override void MouseWheel(int theDelta)
+	{
+		if (mIsOverDescription && !mDescriptionSliderDragging)
+		{
+			mDescriptionScroll -= mDescriptionLineSpacing * theDelta;
+			if (mDescriptionScroll < 0f)
+			{
+				mDescriptionScroll = 0f;
+			}
+			else if (mDescriptionScroll > mDescriptionMaxScroll)
+			{
+				mDescriptionScroll = mDescriptionMaxScroll;
+			}
+		}
+		else
+		{
+			mScrollAmount -= mBaseScrollSpeed * theDelta;
+			mScrollAmount -= mScrollAmount * mScrollAccel;
+		}
+	}
+
+	public string TranslateAndSanitize(string str)
+	{
+		string ret = TodStringFile.TodStringTranslate(str);
+		for (int i = 0; i < cWeirdCharacters.Length; i++)
+		{
+			char weirdChar = cWeirdCharacters[i][0];
+			int pos = 0;
+			while ((pos = ret.IndexOf(weirdChar, pos)) != -1)
+			{
+				if (pos > 0)
+				{
+					ret = ret.Remove(pos - 1, 1);
+					pos--;
+				}
+				pos++;
+			}
+		}
+		return ret;
 	}
 }

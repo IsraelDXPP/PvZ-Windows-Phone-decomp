@@ -1,92 +1,65 @@
-using System.Collections.Generic;
+using System;
 using Sexy;
 using Sexy.TodLib;
 
 namespace Lawn;
 
-internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListener
+internal class AwardScreen : Widget, StoreListener, ButtonListener, SliderListener
 {
-	internal class AchievementScreenItem
-	{
-		public AchievementId mId;
+	private const int AwardScreen_Start = 100;
 
-		public int mStartAnimTime;
+	private const int AwardScreen_Menu = 101;
 
-		public int mEndAnimTime;
+	private const int AwardScreen_Slider = 102;
 
-		public int mDestY;
+	private const float mBaseScrollSpeed = 1f;
 
-		public int mStartY;
-
-		public int mY;
-	}
-
-	public NewLawnButton mCreditsButton;
+	private const float mScrollAccel = 0.1f;
 
 	public GameButton mStartButton;
 
 	public GameButton mMenuButton;
 
-	public GameButton mContinueButton;
-
-	public bool mShowStartButtonAfterAchievements;
-
-	public bool mShowMenuButtonAfterAchievements;
-
 	public LawnApp mApp;
 
 	public int mFadeInCounter;
 
+	public int mAchievementCounter;
+
 	public AwardType mAwardType;
 
-	public int mAchievementAnimTime;
+	public bool mShowAchievements;
 
-	public List<AchievementScreenItem> mAchievementItems = new List<AchievementScreenItem>();
+	public string mState = string.Empty;
 
-	public bool mShowingAchievements;
+	public bool mWasDrawn;
+
+	public float mScrollAmount;
+
+	public float mScrollPosition;
+
+	public float mMaxScrollPosition;
+
+	public Slider mSlider;
+
+	private static TRect AchievementClipRect()
+	{
+		return new TRect(0, 95 + Constants.Board_Background_Offset_Y, Constants.BOARD_WIDTH, 405);
+	}
 
 	public AwardScreen(LawnApp theApp, AwardType theAwardType, bool theShowAchievements)
 	{
-		theShowAchievements = false;
 		mApp = theApp;
 		mClip = false;
 		mFadeInCounter = 180;
+		mAchievementCounter = 360;
+		mScrollAmount = 0f;
+		mScrollPosition = 0f;
+		mMaxScrollPosition = 0f;
 		mAwardType = theAwardType;
-		mShowingAchievements = theShowAchievements;
-		mAchievementAnimTime = 0;
-		mApp.DelayLoadMainMenuResource(doLoad: false);
-		if (mShowingAchievements)
-		{
-			for (int i = 0; i < 18; i++)
-			{
-				if (mApp.mPlayerInfo.mEarnedAchievements[i] && !mApp.mPlayerInfo.mShownAchievements[i])
-				{
-					mApp.mPlayerInfo.mShownAchievements[i] = true;
-					AchievementScreenItem achievementScreenItem = new AchievementScreenItem();
-					achievementScreenItem.mId = (AchievementId)i;
-					achievementScreenItem.mStartAnimTime = 100 * mAchievementItems.Count + 50;
-					achievementScreenItem.mEndAnimTime = achievementScreenItem.mStartAnimTime + 100;
-					achievementScreenItem.mStartY = Constants.BOARD_HEIGHT;
-					achievementScreenItem.mY = achievementScreenItem.mStartY;
-					mAchievementItems.Add(achievementScreenItem);
-				}
-			}
-			if (mAchievementItems.Count == 0)
-			{
-				mShowingAchievements = false;
-			}
-			else
-			{
-				int num = 114 - mAchievementItems.Count * 76 / 2 + 20;
-				for (int j = 0; j < mAchievementItems.Count; j++)
-				{
-					mAchievementItems[j].mDestY = num;
-					num += 76;
-				}
-			}
-			mApp.WriteCurrentUserConfig();
-		}
-		int level = mApp.mPlayerInfo.GetLevel();
+		mShowAchievements = theShowAchievements;
+		LoadAchievements();
+		int aLevel = mApp.mPlayerInfo.mLevel;
 		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
 		{
 			mApp.DelayLoadBackgroundResource("DelayLoad_Background6");
@@ -101,92 +74,81 @@ internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListe
 		}
 		else if (mApp.IsAdventureMode())
 		{
-			switch (level)
+			if (aLevel == 10)
 			{
-			case 10:
 				mApp.DelayLoadBackgroundResource("DelayLoad_Background1");
 				mApp.DelayLoadZombieNotePaperResource("DelayLoad_ZombieNote");
 				mApp.DelayLoadZombieNoteResource("DelayLoad_ZombieNote1");
-				break;
-			case 20:
+			}
+			else if (aLevel == 20)
+			{
 				mApp.DelayLoadBackgroundResource("DelayLoad_Background2");
 				mApp.DelayLoadZombieNotePaperResource("DelayLoad_ZombieNote");
 				mApp.DelayLoadZombieNoteResource("DelayLoad_ZombieNote2");
-				break;
-			case 30:
+			}
+			else if (aLevel == 30)
+			{
 				mApp.DelayLoadBackgroundResource("DelayLoad_Background1");
 				mApp.DelayLoadZombieNotePaperResource("DelayLoad_ZombieNote");
 				mApp.DelayLoadZombieNoteResource("DelayLoad_ZombieNote3");
-				break;
-			case 40:
+			}
+			else if (aLevel == 40)
+			{
 				mApp.DelayLoadBackgroundResource("DelayLoad_Background2");
 				mApp.DelayLoadZombieNotePaperResource("DelayLoad_ZombieNote");
 				mApp.DelayLoadZombieNoteResource("DelayLoad_ZombieNote4");
-				break;
-			case 50:
+			}
+			else if (aLevel == 50)
+			{
 				mApp.DelayLoadBackgroundResource("DelayLoad_Background1");
 				mApp.DelayLoadZombieNotePaperResource("DelayLoad_ZombieNote");
 				mApp.DelayLoadZombieNoteResource("DelayLoad_ZombieFinalNote");
-				break;
 			}
 		}
-		mStartButton = new GameButton(100, this);
-		mStartButton.mButtonImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON;
+		mStartButton = new GameButton(AwardScreen_Start, this);
+		mStartButton.mButtonImage = Resources.IMAGE_SEEDCHOOSER_BUTTON;
 		mStartButton.mOverImage = null;
 		mStartButton.mDownImage = null;
-		mStartButton.mDisabledImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON_DISABLED;
-		mStartButton.mOverOverlayImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON_GLOW;
+		mStartButton.mDisabledImage = Resources.IMAGE_SEEDCHOOSER_BUTTON_DISABLED;
+		mStartButton.mOverOverlayImage = Resources.IMAGE_SEEDCHOOSER_BUTTON_GLOW;
 		mStartButton.SetFont(Resources.FONT_DWARVENTODCRAFT15);
-		ref SexyColor reference = ref mStartButton.mColors[0];
-		reference = new SexyColor(213, 159, 43);
-		ref SexyColor reference2 = ref mStartButton.mColors[1];
-		reference2 = new SexyColor(213, 159, 43);
-		mContinueButton = new GameButton(100, this);
-		mContinueButton.mButtonImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON;
-		mContinueButton.mOverImage = null;
-		mContinueButton.mDownImage = null;
-		mContinueButton.mDisabledImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON_DISABLED;
-		mContinueButton.mOverOverlayImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON_GLOW;
-		mContinueButton.SetFont(Resources.FONT_DWARVENTODCRAFT15);
-		ref SexyColor reference3 = ref mContinueButton.mColors[0];
-		reference3 = new SexyColor(213, 159, 43);
-		ref SexyColor reference4 = ref mContinueButton.mColors[1];
-		reference4 = new SexyColor(213, 159, 43);
-		mContinueButton.mTextOffsetY = -1;
-		mContinueButton.mParentWidget = this;
-		mContinueButton.mBtnNoDraw = true;
-		mContinueButton.mDisabled = true;
-		mMenuButton = new GameButton(101, this);
+		mStartButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL] = new SexyColor(213, 159, 43);
+		mStartButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL_HILITE] = new SexyColor(213, 159, 43);
+		mStartButton.Resize(324 + Constants.Board_Additional_Width, 500 + Constants.Board_Background_Offset_Y, 156, 42);
+		mStartButton.mTextOffsetY = -1;
+		mStartButton.mParentWidget = this;
+		mMenuButton = new GameButton(AwardScreen_Menu, this);
 		mMenuButton.SetLabel("[AWARD_MAIN_MENU_BUTTON]");
-		mMenuButton.mButtonImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON2;
-		mMenuButton.mOverImage = AtlasResources.IMAGE_SEEDCHOOSER_BUTTON2_GLOW;
+		mMenuButton.mButtonImage = Resources.IMAGE_SEEDCHOOSER_BUTTON2;
+		mMenuButton.mOverImage = Resources.IMAGE_SEEDCHOOSER_BUTTON2_GLOW;
 		mMenuButton.mDownImage = null;
 		mMenuButton.SetFont(Resources.FONT_BRIANNETOD12);
-		ref SexyColor reference5 = ref mMenuButton.mColors[0];
-		reference5 = new SexyColor(42, 42, 90);
-		ref SexyColor reference6 = ref mMenuButton.mColors[1];
-		reference6 = new SexyColor(42, 42, 90);
+		mMenuButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL] = new SexyColor(42, 42, 90);
+		mMenuButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL_HILITE] = new SexyColor(42, 42, 90);
+		mMenuButton.Resize(677 + 2 * Constants.Board_Additional_Width, 16, 111, 26);
+		mMenuButton.mTextOffsetY = 1;
 		mMenuButton.mParentWidget = this;
-		mMenuButton.mTextOffsetY = (int)Constants.InvertAndScale(2f);
-		if (mApp.IsFirstTimeAdventureMode() && level <= 3)
+		if (!mApp.HasFinishedAdventure() && aLevel <= 3)
 		{
 			mMenuButton.mBtnNoDraw = true;
 			mMenuButton.mDisabled = true;
 		}
-		mCreditsButton = null;
 		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
 		{
-			mCreditsButton = GameButton.MakeNewButton(100, this, "[ROLL_CREDITS]", Resources.FONT_HOUSEOFTERROR16, AtlasResources.IMAGE_CREDITS_PLAYBUTTON, null, null);
-			mCreditsButton.mTextDownOffsetX = 1;
-			mCreditsButton.mTextDownOffsetY = 1;
-			mCreditsButton.mColors[0] = new SexyColor(255, 255, 255);
-			mCreditsButton.mColors[1] = new SexyColor(213, 159, 43);
-			mCreditsButton.Resize(Constants.AwardScreen_CreditsButton.mX, Constants.AwardScreen_CreditsButton.mY, Constants.AwardScreen_CreditsButton.mWidth, Constants.AwardScreen_CreditsButton.mHeight);
-			mCreditsButton.mTextOffsetX = Constants.AwardScreen_CreditsButton_Offset.X;
-			mCreditsButton.mTextOffsetY = Constants.AwardScreen_CreditsButton_Offset.Y;
-			AddWidget(mCreditsButton);
-			mStartButton.mBtnNoDraw = true;
-			mStartButton.mDisabled = true;
+			mStartButton.SetLabel("[ROLL_CREDITS]");
+			mStartButton.mButtonImage = Resources.IMAGE_CREDITS_PLAYBUTTON;
+			mStartButton.mOverImage = null;
+			mStartButton.mDownImage = null;
+			mStartButton.mDisabledImage = null;
+			mStartButton.mOverOverlayImage = null;
+			mStartButton.SetFont(Resources.FONT_HOUSEOFTERROR16);
+			mStartButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL] = SexyColor.White;
+			mStartButton.mColors[(int)GameButton.ButtonColours.COLOR_LABEL_HILITE] = new SexyColor(213, 159, 43);
+			mStartButton.Resize(325, 505, 190, 73);
+			mStartButton.mTextOffsetX = 33;
+			mStartButton.mTextOffsetY = -2;
+			mStartButton.mButtonOffsetX = -2;
+			mStartButton.mButtonOffsetY = 8;
 		}
 		else if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
 		{
@@ -200,69 +162,47 @@ internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListe
 			mMenuButton.mBtnNoDraw = true;
 			mMenuButton.mDisabled = true;
 		}
-		else if (level == 1 && mApp.HasFinishedAdventure())
+		else if (aLevel == 1)
 		{
 			mStartButton.SetLabel("[CONTINUE_BUTTON]");
 			mMenuButton.mBtnNoDraw = true;
 			mMenuButton.mDisabled = true;
 		}
+		else if (aLevel == 15)
+		{
+			mStartButton.SetLabel("[VIEW_ALMANAC_BUTTON]");
+		}
+		else if (aLevel == 25 || aLevel == 35 || aLevel == 45)
+		{
+			mStartButton.SetLabel("[CONTINUE_BUTTON]");
+		}
 		else
 		{
-			switch (level)
-			{
-			case 15:
-				mStartButton.SetLabel("[VIEW_ALMANAC_BUTTON]");
-				break;
-			case 25:
-			case 35:
-			case 45:
-				mStartButton.SetLabel("[CONTINUE_BUTTON]");
-				break;
-			default:
-				mStartButton.SetLabel("[NEXT_LEVEL_BUTTON]");
-				break;
-			}
+			mStartButton.SetLabel("[NEXT_LEVEL_BUTTON]");
 		}
-		if (mApp.IsFirstTimeAdventureMode() && level == 25 && mApp.IsTrialStageLocked() && !mApp.mPlayerInfo.mHasSeenUpsell)
+		if (mApp.IsFirstTimeAdventureMode() && aLevel == 25 && mApp.IsTrialStageLocked() && !mApp.mPlayerInfo.mHasSeenUpsell)
 		{
 			mMenuButton.mBtnNoDraw = true;
 			mMenuButton.mDisabled = true;
 		}
-		if (mShowingAchievements)
+		else if (mApp.HasFinishedAdventure())
 		{
-			mShowStartButtonAfterAchievements = !mStartButton.mBtnNoDraw;
-			mShowMenuButtonAfterAchievements = !mMenuButton.mBtnNoDraw;
-			mStartButton.mBtnNoDraw = true;
-			mStartButton.mDisabled = true;
+			mStartButton.SetLabel("[CONTINUE_BUTTON]");
 			mMenuButton.mBtnNoDraw = true;
 			mMenuButton.mDisabled = true;
-			mContinueButton.SetLabel("[CONTINUE_BUTTON]");
 		}
-		if (IsPaperNote())
+		if (!mShowAchievements)
 		{
-			mApp.mMusic.StopAllMusic();
-			mStartButton.mY += 20;
-			mMenuButton.mY += 20;
-			mApp.PlayFoley(FoleyType.FOLEY_PAPER);
+			StartSounds();
 		}
-		else
-		{
-			mApp.mMusic.StopAllMusic();
-		}
-	}
-
-	public override void Resize(int theX, int theY, int theWidth, int theHeight)
-	{
-		base.Resize(theX, theY, theWidth, theHeight);
-		int width = mStartButton.mButtonImage.GetWidth();
-		int height = mStartButton.mButtonImage.GetHeight();
-		mStartButton.Resize(mWidth / 2 - width / 2, mHeight - height - (int)(Constants.S * (float)Constants.AwardScreen_ContinueButton_Offset), width, height);
-		mStartButton.mTextOffsetY = (int)Constants.InvertAndScale(1f);
-		mStartButton.mParentWidget = this;
-		width = mContinueButton.mButtonImage.GetWidth();
-		height = mContinueButton.mButtonImage.GetHeight();
-		mContinueButton.Resize(mWidth / 2 - width / 2, mHeight - height - (int)(Constants.S * (float)Constants.AwardScreen_ContinueButton_Offset), width, height);
-		mMenuButton.Resize(Constants.AwardScreen_MenuButton.X, Constants.AwardScreen_MenuButton.Y, AtlasResources.IMAGE_SEEDCHOOSER_BUTTON2.mWidth, AtlasResources.IMAGE_SEEDCHOOSER_BUTTON2.mHeight);
+		mSlider = new Slider(Resources.IMAGE_OPTIONS_SLIDERSLOT_PLANT, Resources.IMAGE_OPTIONS_SLIDERKNOB_PLANT, AwardScreen_Slider, this);
+		mSlider.SetValue(Math.Max(0.0, Math.Min(mMaxScrollPosition, mScrollPosition)));
+		mSlider.mHorizontal = false;
+		mSlider.Resize(180 + Constants.Board_Additional_Width, AchievementClipRect().mY, 20, AchievementClipRect().mHeight);
+		mSlider.mThumbOffsetX = -5;
+		mSlider.mNoDraw = true;
+		mWasDrawn = mMenuButton.mBtnNoDraw;
+		mApp.mDetails = "[DISCORD_AWARD_SCREEN]";
 	}
 
 	public override void Dispose()
@@ -272,7 +212,548 @@ internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListe
 		mApp.DelayLoadZombieNoteResource(string.Empty);
 		mStartButton.Dispose();
 		mMenuButton.Dispose();
+		mSlider.Dispose();
 		RemoveAllWidgets();
+		mApp.UpdateDiscordState();
+	}
+
+	public void LoadAchievements()
+	{
+		if (mShowAchievements)
+		{
+			for (int i = 0; i < Achievements.NUM_ACHIEVEMENTS; i++)
+			{
+				if (mApp.mPlayerInfo.mEarnedAchievements[i] && !mApp.mPlayerInfo.mShownAchievements[i] && mApp.mAchievements.ReturnShowInAwards(i))
+				{
+					mShowAchievements = true;
+					break;
+				}
+				else
+				{
+					mShowAchievements = false;
+				}
+			}
+			mApp.WriteCurrentUserConfig();
+		}
+	}
+
+	public bool IsPaperNote()
+	{
+		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE || mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
+		{
+			return true;
+		}
+		int aLevel = mApp.mPlayerInfo.mLevel;
+		return mApp.IsAdventureMode() && (aLevel == 10 || aLevel == 20 || aLevel == 30 || aLevel == 40 || aLevel == 50);
+	}
+
+	public void DrawBottom(Graphics g, string theTitle, string theAward, string theMessage)
+	{
+		g.DrawImage(Resources.IMAGE_AWARDSCREEN_BACK, 0, 0);
+		TodCommon.TodDrawString(g, theTitle, Constants.BOARD_WIDTH / 2, 58 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(213, 159, 43), DrawStringJustification.DS_ALIGN_CENTER);
+		TodCommon.TodDrawString(g, theAward, Constants.BOARD_WIDTH / 2, 326 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, SexyColor.White, DrawStringJustification.DS_ALIGN_CENTER);
+		g.SetFont(Resources.FONT_BRIANNETOD16);
+		g.SetColor(new SexyColor(40, 50, 90));
+		g.WriteWordWrapped(new TRect(285 + Constants.Board_Additional_Width, 360 + Constants.Board_Background_Offset_Y, 230, 90), TodStringFile.TodStringTranslate(theMessage), 0, 0, centerVertically: true);
+		mState = theAward;
+	}
+
+	public void DrawAwardSeed(Graphics g)
+	{
+		SeedType aSeedType = mApp.GetAwardSeedForLevel(mApp.mPlayerInfo.mLevel - 1);
+		string aAward = Plant.GetNameString(aSeedType, SeedType.SEED_NONE);
+		string aMessage;
+		if (mApp.IsTrialStageLocked() && (int)aSeedType >= (int)SeedType.SEED_SQUASH && aSeedType != SeedType.SEED_TANGLEKELP)
+		{
+			aMessage = "[AVAILABLE_IN_FULL_VERSION]";
+		}
+		else
+		{
+			aMessage = Plant.GetToolTip(aSeedType);
+		}
+		DrawBottom(g, "[NEW_PLANT]", aAward, aMessage);
+		g.mScaleX = 2f;
+		g.mScaleY = 2f;
+		g.mScaleOrigX = 350f;
+		g.mScaleOrigY = 129f;
+		SeedPacket.DrawSeedPacket(g, 350 + Constants.Board_Additional_Width, 129 + Constants.Board_Background_Offset_Y, aSeedType, SeedType.SEED_NONE, 0f, 255, theDrawCost: true, theUseCurrentCost: false);
+		g.mScaleX = 1f;
+		g.mScaleY = 1f;
+		g.mScaleOrigX = 0f;
+		g.mScaleOrigY = 0f;
+	}
+
+	public override void Draw(Graphics g)
+	{
+		g.SetLinearBlend(linear: true);
+		int aLevel = mApp.mPlayerInfo.mLevel;
+		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
+		{
+			g.SetColor(new SexyColor(125, 200, 255, 255));
+			g.SetColorizeImages(colorizeImages: true);
+			g.DrawImage(Resources.IMAGE_BACKGROUND6BOSS, -900, -400, 2800, 1200);
+			g.SetColorizeImages(colorizeImages: false);
+			g.SetColor(new SexyColor(0, 0, 0, 64));
+			g.FillRect(0, 525, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 75 + Constants.Board_Additional_Width, 60 + Constants.Board_Background_Offset_Y);
+			g.DrawImage(Resources.IMAGE_CREDITS_ZOMBIENOTE, 149 + Constants.Board_Additional_Width, 103 + Constants.Board_Background_Offset_Y, 475, 325);
+			mState = "[DISCORD_CREDITS_NOTE]";
+		}
+		else if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
+		{
+			g.DrawImage(Resources.IMAGE_BACKGROUND1, -700, -300, 2800, 1200);
+			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE_HELP, 131 + Constants.Board_Additional_Width, 132 + Constants.Board_Background_Offset_Y);
+			mState = "[DISCORD_HELP_NOTE]";
+		}
+		else
+		{
+			string aZombieNote = TodCommon.TodReplaceString("[DISCORD_ZOMBIE_NOTE]", "{LEVEL}", mApp.GetStageString(aLevel).Remove(0, 1));
+			if (!mApp.IsAdventureMode())
+			{
+				if (mApp.EarnedGoldTrophy())
+				{
+					DrawBottom(g, "[BEAT_GAME_MESSAGE1]", "[GOLD_SUNFLOWER_TROPHY]", "[BEAT_GAME_MESSAGE2]");
+					TodCommon.TodDrawImageCelCenterScaledF(g, Resources.IMAGE_SUNFLOWER_TROPHY, 325 + Constants.Board_Additional_Width, 65 + Constants.Board_Background_Offset_Y, 1, 0.6f, 0.6f);
+				}
+				else
+				{
+					string aMsgChar;
+					if (mApp.IsSurvivalMode())
+					{
+						int aNumTrophies = mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
+						if (aNumTrophies <= 7)
+						{
+							aMsgChar = "[YOU_UNLOCKED_A_SURVIVAL]";
+						}
+						else if (aNumTrophies == 10)
+						{
+							aMsgChar = "[YOU_UNLOCKED_ENDLESS_SURVIVAL]";
+						}
+						else
+						{
+							aMsgChar = "[EARN_MORE_TROPHIES_FOR_ENDLESS_SURVIVAL]";
+						}
+					}
+					else if (mApp.IsScaryPotterLevel())
+					{
+						aMsgChar = "[UNLOCKED_VASEBREAKER_LEVEL]";
+					}
+					else if (mApp.IsPuzzleMode())
+					{
+						aMsgChar = "[UNLOCKED_I_ZOMBIE_LEVEL]";
+					}
+					else
+					{
+						aMsgChar = mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_CHALLENGE) <= 17 ? "[CHALLENGE_UNLOCKED]" : "[GET_MORE_TROPHIES]";
+					}
+					DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", aMsgChar);
+					g.DrawImage(Resources.IMAGE_TROPHY_HI_RES, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_TROPHY_HI_RES.mWidth / 2, 137 + Constants.Board_Background_Offset_Y);
+				}
+			}
+			else if (aLevel == 5)
+			{
+				DrawBottom(g, "[GOT_SHOVEL]", "[SHOVEL]", "[SHOVEL_DESCRIPTION]");
+				g.DrawImage(Resources.IMAGE_SHOVEL_HI_RES, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_SHOVEL_HI_RES.mWidth / 2, 137 + Constants.Board_Background_Offset_Y);
+			}
+			else if (aLevel == 10)
+			{
+				g.DrawImage(Resources.IMAGE_BACKGROUND1, -700 + Constants.Board_Additional_Width, -300 + Constants.Board_Background_Offset_Y, 2800, 1200);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE1, 131 + Constants.Board_Additional_Width, 132 + Constants.Board_Background_Offset_Y);
+				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.BOARD_WIDTH / 2, 70 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
+				mState = aZombieNote;
+			}
+			else if (aLevel == 15)
+			{
+				DrawBottom(g, "[FOUND_SUBURBAN_ALMANAC]", "[SUBURBAN_ALMANAC]", "[SUBURBAN_ALMANAC_DESCRIPTION]");
+				g.DrawImage(Resources.IMAGE_ALMANAC, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_ALMANAC.mWidth / 2, 160 + Constants.Board_Background_Offset_Y);
+			}
+			else if (aLevel == 20)
+			{
+				g.DrawImage(Resources.IMAGE_BACKGROUND2, -700 + Constants.Board_Additional_Width, -300 + Constants.Board_Background_Offset_Y, 2800, 1200);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE2, 133 + Constants.Board_Additional_Width, 127 + Constants.Board_Background_Offset_Y);
+				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.BOARD_WIDTH / 2, 70 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
+				mState = aZombieNote;
+			}
+			else if (aLevel == 25)
+			{
+				DrawBottom(g, "[FOUND_KEYS]", "[KEYS]", "[KEYS_DESCRIPTION]");
+				g.DrawImage(Resources.IMAGE_CARKEYS, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_CARKEYS.mWidth / 2, 160 + Constants.Board_Background_Offset_Y);
+			}
+			else if (aLevel == 30)
+			{
+				g.DrawImage(Resources.IMAGE_BACKGROUND1, -700 + Constants.Board_Additional_Width, -300 + Constants.Board_Background_Offset_Y, 2800, 1200);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE3, 120 + Constants.Board_Additional_Width, 117 + Constants.Board_Background_Offset_Y);
+				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.BOARD_WIDTH / 2, 70 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
+				mState = aZombieNote;
+			}
+			else if (aLevel == 35)
+			{
+				DrawBottom(g, "[FOUND_TACO]", "[TACO]", "[TACO_DESCRIPTION]");
+				g.DrawImage(Resources.IMAGE_TACO, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_TACO.mWidth / 2, 160 + Constants.Board_Background_Offset_Y);
+			}
+			else if (aLevel == 40)
+			{
+				g.DrawImage(Resources.IMAGE_BACKGROUND2, -700 + Constants.Board_Additional_Width, -300 + Constants.Board_Background_Offset_Y, 2800, 1200);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE4, 102 + Constants.Board_Additional_Width, 117 + Constants.Board_Background_Offset_Y);
+				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.BOARD_WIDTH / 2, 70 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
+				mState = aZombieNote;
+			}
+			else if (aLevel == 45)
+			{
+				DrawBottom(g, "[FOUND_WATERING_CAN]", "[WATERING_CAN]", "[WATERING_CAN_DESCRIPTION]");
+				g.DrawImage(Resources.IMAGE_WATERINGCAN, Constants.BOARD_WIDTH / 2 - Resources.IMAGE_WATERINGCAN.mWidth / 2, 160 + Constants.Board_Background_Offset_Y);
+			}
+			else if (aLevel == 50)
+			{
+				g.DrawImage(Resources.IMAGE_BACKGROUND1, -700 + Constants.Board_Additional_Width, -300 + Constants.Board_Background_Offset_Y, 2800, 1200);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, 80 + Constants.Board_Additional_Width, 80 + Constants.Board_Background_Offset_Y);
+				g.DrawImage(Resources.IMAGE_ZOMBIE_FINAL_NOTE, 114 + Constants.Board_Additional_Width, 138 + Constants.Board_Background_Offset_Y);
+				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.BOARD_WIDTH / 2, 70 + Constants.Board_Background_Offset_Y, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
+				mState = aZombieNote;
+			}
+			else if (aLevel == 1 && mApp.HasFinishedAdventure())
+			{
+				DrawBottom(g, "[WIN_MESSAGE1]", "[SILVER_SUNFLOWER_TROPHY]", "[WIN_MESSAGE2]");
+				TodCommon.TodDrawImageCelCenterScaledF(g, Resources.IMAGE_SUNFLOWER_TROPHY, 325 + Constants.Board_Additional_Width, 65 + Constants.Board_Background_Offset_Y, 0, 0.6f, 0.6f);
+			}
+			else
+			{
+				DrawAwardSeed(g);
+			}
+		}
+		if (mShowAchievements)
+		{
+			g.DrawImage(Resources.IMAGE_CHALLENGE_BACKGROUND, 0, 0);
+			mStartButton.SetLabel("[CONTINUE_BUTTON]");
+			TodCommon.TodDrawString(g, "ACHIEVEMENTS", 400 + Constants.Board_Additional_Width, 58 + Constants.Board_Background_Offset_Y, Resources.FONT_HOUSEOFTERROR16, new SexyColor(220, 220, 220), DrawStringJustification.DS_ALIGN_CENTER);
+			mMenuButton.mBtnNoDraw = true;
+			g.SetClipRect(AchievementClipRect());
+			int aTotalShown = 0;
+			int aMaxScroll = 0;
+			for (int i = 0; i < Achievements.NUM_ACHIEVEMENTS; i++)
+			{
+				if (mApp.mPlayerInfo.mEarnedAchievements[i] && !mApp.mPlayerInfo.mShownAchievements[i] && mApp.mAchievements.ReturnShowInAwards(i))
+				{
+					aTotalShown++;
+					string aAchievementName = "[ACHIEVEMENT_" + mApp.mAchievements.ReturnAchievementName(i) + "_TITLE]";
+					string aAchievementDesc = "[ACHIEVEMENT_" + mApp.mAchievements.ReturnAchievementName(i) + "_DESCRIPTION]";
+					TRect aTextRect = new TRect(80, 30, 320, 230);
+					int aXPos = Constants.BOARD_WIDTH / 2 - aTextRect.mWidth / 2 - 35;
+					int aOffset = 75;
+					int aYPos = 20 + aTotalShown * aOffset - (int)mScrollPosition + Constants.Board_Background_Offset_Y;
+					aTextRect.mX += aXPos;
+					aTextRect.mY += aYPos - 2;
+					g.DrawImageCel(Resources.IMAGE_ACHIEVEMENTS_PORTRAITS, aXPos, aYPos, i);
+					TodCommon.TodDrawString(g, aAchievementName, aTextRect.mX, aYPos + 23, Resources.FONT_DWARVENTODCRAFT18, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_LEFT);
+					g.SetFont(Resources.FONT_BRIANNETOD12);
+					g.SetColor(SexyColor.White);
+					g.WriteWordWrapped(aTextRect, TodStringFile.TodStringTranslate(aAchievementDesc), 0, 1, centerVertically: false);
+					aMaxScroll += aOffset;
+				}
+			}
+			mMaxScrollPosition = Math.Max(0, aMaxScroll - AchievementClipRect().mHeight - 5);
+			g.ClearClipRect();
+			mSlider.SliderDraw(g);
+		}
+		else
+		{
+			if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
+			{
+				mStartButton.SetLabel("[MAIN_MENU_BUTTON]");
+			}
+			else if (!mApp.IsAdventureMode())
+			{
+				mStartButton.SetLabel("[MAIN_MENU_BUTTON]");
+			}
+			else if (aLevel == 1)
+			{
+				mStartButton.SetLabel("[CONTINUE_BUTTON]");
+			}
+			else if (aLevel == 15)
+			{
+				mStartButton.SetLabel("[VIEW_ALMANAC_BUTTON]");
+			}
+			else if (aLevel == 25 || aLevel == 35 || aLevel == 45)
+			{
+				mStartButton.SetLabel("[CONTINUE_BUTTON]");
+			}
+			else
+			{
+				mStartButton.SetLabel("[NEXT_LEVEL_BUTTON]");
+			}
+			if (mApp.HasFinishedAdventure())
+			{
+				mStartButton.SetLabel("[CONTINUE_BUTTON]");
+			}
+			mMenuButton.mBtnNoDraw = mWasDrawn;
+		}
+		mMenuButton.Draw(g);
+		mStartButton.Draw(g);
+		int aFadeInAlpha = TodCommon.TodAnimateCurve(180, 0, mFadeInCounter, 255, 0, TodCurves.CURVE_LINEAR);
+		g.SetColor(IsPaperNote() ? new SexyColor(0, 0, 0, aFadeInAlpha) : new SexyColor(255, 255, 255, aFadeInAlpha));
+		g.FillRect(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+	}
+
+	public override void Update()
+	{
+		base.Update();
+		mApp.UpdateDiscordState(mState);
+		if (mApp.GetDialogCount() > 0)
+		{
+			return;
+		}
+		mStartButton.Update();
+		mMenuButton.Update();
+		if (!(mSlider.mIsOver || mSlider.mDragging))
+		{
+			mApp.SetCursor(mStartButton.IsMouseOver() || mMenuButton.IsMouseOver() ? SexyAppBase.CURSOR_HAND : SexyAppBase.CURSOR_POINTER);
+		}
+		if (mFadeInCounter > 0)
+		{
+			mFadeInCounter -= 3;
+			if (mFadeInCounter < 0)
+			{
+				mFadeInCounter = 0;
+			}
+		}
+		if (mAchievementCounter > 0)
+		{
+			mAchievementCounter -= 3;
+			if (mAchievementCounter < 0)
+			{
+				mAchievementCounter = 0;
+			}
+		}
+		mScrollPosition = TodCommon.ClampFloat(mScrollPosition += mScrollAmount * (mBaseScrollSpeed + Math.Abs(mScrollAmount) * mScrollAccel), 0f, mMaxScrollPosition);
+		mScrollAmount *= 1f - mScrollAccel;
+		mSlider.SetValue(Math.Max(0.0, Math.Min(mMaxScrollPosition, mScrollPosition)) / mMaxScrollPosition);
+		mSlider.mVisible = mMaxScrollPosition != 0f && mShowAchievements;
+		MarkDirty();
+	}
+
+	public override void AddedToManager(WidgetManager theWidgetManager)
+	{
+		base.AddedToManager(theWidgetManager);
+		theWidgetManager.AddWidget(mSlider);
+	}
+
+	public override void RemovedFromManager(WidgetManager theWidgetManager)
+	{
+		base.RemovedFromManager(theWidgetManager);
+		theWidgetManager.RemoveWidget(mSlider);
+	}
+
+	public override void KeyChar(SexyChar theChar)
+	{
+		if (theChar.value_type == ' ' || theChar.value_type == '\r' || theChar.value_type == '\u001B')
+		{
+			StartButtonPressed();
+		}
+	}
+
+	public void ExitScreen()
+	{
+		if (mApp.mPlayingQuickplay)
+		{
+			mApp.KillGameSelector();
+			mApp.ShowGameSelector();
+		}
+		else if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowCreditScreen();
+		}
+		else if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowGameSelector();
+		}
+		else if (mApp.IsSurvivalMode())
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
+		}
+		else if (mApp.IsPuzzleMode())
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_PUZZLE);
+		}
+		else if (mApp.IsChallengeMode())
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
+		}
+		else
+		{
+			int aLevel = mApp.mPlayerInfo.mLevel;
+			if (aLevel == 1)
+			{
+				mApp.KillAwardScreen();
+				if (mApp.HasFinishedAdventure())
+				{
+					mApp.ShowAwardScreen(AwardType.AWARD_CREDITS_ZOMBIE_NOTE, theShowAchievements: false);
+				}
+				else
+				{
+					mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
+				}
+			}
+			else
+			{
+				if (aLevel == 15)
+				{
+					mApp.DoAlmanacDialog().WaitForResult();
+				}
+				else if (aLevel == 25)
+				{
+mApp.ShowStoreScreen(this);
+				}
+				else if (aLevel == 35)
+				{
+mApp.ShowStoreScreen(this);
+				}
+				else if (aLevel == 42)
+				{
+mApp.ShowStoreScreen(this);
+				}
+				else if (aLevel == 45)
+				{
+					mApp.KillAwardScreen();
+					mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
+					mApp.mZenGarden.SetupForZenTutorial();
+					return;
+				}
+				else
+				{
+					mApp.KillAwardScreen();
+					mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
+					return;
+				}
+			}
+		}
+	}
+
+	public void StartButtonPressed()
+	{
+		if (mApp.GetDialog(Dialogs.DIALOG_STORE) != null)
+		{
+			return;
+		}
+		if (mShowAchievements)
+		{
+			for (int i = 0; i < Achievements.NUM_ACHIEVEMENTS; i++)
+			{
+				if (mApp.mPlayerInfo.mEarnedAchievements[i] && !mApp.mPlayerInfo.mShownAchievements[i])
+				{
+					mApp.mPlayerInfo.mShownAchievements[i] = true;
+				}
+			}
+			mShowAchievements = false;
+			mFadeInCounter = 180;
+			if (mAwardType == AwardType.AWARD_ACHIEVEMENT_ONLY)
+			{
+				ExitScreen();
+			}
+			else
+			{
+				StartSounds();
+			}
+			return;
+		}
+		if (mAwardType == AwardType.AWARD_PRE_CREDITS_ZOMBIE_NOTE)
+		{
+			mApp.KillAwardScreen();
+			mApp.ShowAwardScreen(AwardType.AWARD_CREDITS_ZOMBIE_NOTE, theShowAchievements: false);
+			return;
+		}
+		if (mAwardType == AwardType.AWARD_ACHIEVEMENT_ONLY)
+		{
+			mApp.KillAwardScreen();
+			if (mApp.IsQuickPlayMode())
+			{
+				mApp.ShowGameSelectorQuickPlay(theDoFadeIn: false);
+			}
+			else
+			{
+				mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
+			}
+			return;
+		}
+		ExitScreen();
+	}
+
+	public override void MouseDown(int x, int y, int theClickCount)
+	{
+		if (theClickCount == 1 && (mStartButton.IsMouseOver() || mMenuButton.IsMouseOver()))
+		{
+			mApp.PlaySample(Resources.SOUND_TAP);
+		}
+	}
+
+	public override void MouseUp(int x, int y, int theClickCount)
+	{
+		if (theClickCount == 1)
+		{
+			if (mStartButton.IsMouseOver())
+			{
+				StartButtonPressed();
+			}
+			if (mMenuButton.IsMouseOver())
+			{
+				for (int i = 0; i < Achievements.NUM_ACHIEVEMENTS; i++)
+				{
+					if (mApp.mPlayerInfo.mEarnedAchievements[i] && !mApp.mPlayerInfo.mShownAchievements[i])
+					{
+						mApp.mPlayerInfo.mShownAchievements[i] = true;
+					}
+				}
+				mApp.KillAwardScreen();
+				mApp.ShowGameSelector();
+			}
+		}
+	}
+
+	public void SliderVal(int theId, double theVal)
+	{
+		if (!mShowAchievements)
+		{
+			return;
+		}
+		switch (theId)
+		{
+		case AwardScreen_Slider:
+			mScrollPosition = (float)(theVal * mMaxScrollPosition);
+			break;
+		}
+	}
+
+	public override void MouseWheel(int theDelta)
+	{
+		if (!mShowAchievements)
+		{
+			return;
+		}
+		mScrollAmount -= mBaseScrollSpeed * theDelta;
+		mScrollAmount -= mScrollAmount * mScrollAccel;
+	}
+
+	public void StartSounds()
+	{
+		if (IsPaperNote())
+		{
+			mApp.mMusic.StopAllMusic();
+			mStartButton.mY += 20;
+			mApp.PlayFoley(FoleyType.FOLEY_PAPER);
+		}
+		else
+		{
+			mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_ZEN_GARDEN);
+		}
 	}
 
 	public override bool BackButtonPress()
@@ -294,465 +775,6 @@ internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListe
 		return true;
 	}
 
-	public override void Update()
-	{
-		base.Update();
-		if (mShowingAchievements)
-		{
-			mAchievementAnimTime++;
-			for (int i = 0; i < mAchievementItems.Count; i++)
-			{
-				if (mAchievementAnimTime >= mAchievementItems[i].mStartAnimTime)
-				{
-					bool flag = mAchievementItems[i].mY == mAchievementItems[i].mDestY;
-					mAchievementItems[i].mY = TodCommon.TodAnimateCurve(mAchievementItems[i].mStartAnimTime, mAchievementItems[i].mEndAnimTime, mAchievementAnimTime, mAchievementItems[i].mStartY, mAchievementItems[i].mDestY, TodCurves.CURVE_EASE_IN_OUT);
-					if (!flag && mAchievementItems[i].mY == mAchievementItems[i].mDestY)
-					{
-						mApp.PlaySample(Resources.SOUND_ACHIEVEMENT);
-					}
-				}
-			}
-			if (mAchievementItems[mAchievementItems.Count - 1].mY == mAchievementItems[mAchievementItems.Count - 1].mDestY)
-			{
-				mContinueButton.mBtnNoDraw = false;
-				mContinueButton.mDisabled = false;
-			}
-		}
-		if (mApp.GetDialogCount() > 0)
-		{
-			return;
-		}
-		mStartButton.Update();
-		mMenuButton.Update();
-		mContinueButton.Update();
-		if (mFadeInCounter > 0)
-		{
-			mFadeInCounter -= 3;
-			if (mFadeInCounter < 0)
-			{
-				mFadeInCounter = 0;
-			}
-		}
-	}
-
-	public override void Draw(Graphics g)
-	{
-		if (mApp.GetDialog(Dialogs.DIALOG_STORE) != null)
-		{
-			return;
-		}
-		int level = mApp.mPlayerInfo.GetLevel();
-		g.SetLinearBlend(linear: true);
-		if (mShowingAchievements)
-		{
-			DrawAchievements(g);
-		}
-		else if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
-		{
-			g.SetColor(new SexyColor(125, 200, 255, 255));
-			g.SetColorizeImages(colorizeImages: true);
-			g.DrawImage(Resources.IMAGE_BACKGROUND6BOSS, Constants.AwardScreen_Note_Credits_Background.X, Constants.AwardScreen_Note_Credits_Background.Y, Constants.AwardScreen_Note_Credits_Background.Width, Constants.AwardScreen_Note_Credits_Background.Height);
-			g.SetColorizeImages(colorizeImages: false);
-			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_Credits_Paper.X, Constants.AwardScreen_Note_Credits_Paper.Y);
-			g.DrawImage(Resources.IMAGE_CREDITS_ZOMBIENOTE, Constants.AwardScreen_Note_Credits_Text.X, Constants.AwardScreen_Note_Credits_Text.Y, Constants.AwardScreen_Note_Credits_Text.Width, Constants.AwardScreen_Note_Credits_Text.Height);
-		}
-		else if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
-		{
-			g.DrawImage(Resources.IMAGE_BACKGROUND1, Constants.AwardScreen_Note_Help_Background.X, Constants.AwardScreen_Note_Help_Background.Y, Constants.AwardScreen_Note_Help_Background.Width, Constants.AwardScreen_Note_Help_Background.Height);
-			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_Help_Paper.X, Constants.AwardScreen_Note_Help_Paper.Y);
-			g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE_HELP, Constants.AwardScreen_Note_Help_Text.X, Constants.AwardScreen_Note_Help_Text.Y);
-		}
-		else if (mAwardType != AwardType.AWARD_ACHIEVEMENT_ONLY)
-		{
-			if (!mApp.IsAdventureMode())
-			{
-				if (mApp.EarnedGoldTrophy())
-				{
-					DrawBottom(g, "[BEAT_GAME_MESSAGE1]", "[GOLD_SUNFLOWER_TROPHY]", "[BEAT_GAME_MESSAGE2]");
-				}
-				else if (mApp.IsSurvivalMode())
-				{
-					int numTrophies = mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
-					if (numTrophies <= 7)
-					{
-						DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[YOU_UNLOCKED_A_SURVIVAL]");
-						g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-					}
-					else if (numTrophies == 10)
-					{
-						DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[YOU_UNLOCKED_ENDLESS_SURVIVAL]");
-						g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-					}
-					else
-					{
-						DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[EARN_MORE_TROPHIES_FOR_ENDLESS_SURVIVAL]");
-						g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-					}
-				}
-				else if (mApp.IsScaryPotterLevel())
-				{
-					DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[UNLOCKED_VASEBREAKER_LEVEL]");
-					g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-				}
-				else if (mApp.IsPuzzleMode())
-				{
-					DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[UNLOCKED_I_ZOMBIE_LEVEL]");
-					g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-				}
-				else
-				{
-					int numTrophies2 = mApp.GetNumTrophies(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
-					if (numTrophies2 <= 17)
-					{
-						DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[CHALLENGE_UNLOCKED]");
-						g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-					}
-					else
-					{
-						DrawBottom(g, "[GOT_TROPHY]", "[TROPHY]", "[GET_MORE_TROPHIES]");
-						g.DrawImage(AtlasResources.IMAGE_TROPHY_HI_RES, Constants.AwardScreen_Trophy.X - AtlasResources.IMAGE_TROPHY_HI_RES.mWidth / 2, Constants.AwardScreen_Trophy.Y);
-					}
-				}
-			}
-			else if (level == 5)
-			{
-				DrawBottom(g, "[GOT_SHOVEL]", "[SHOVEL]", "[SHOVEL_DESCRIPTION]");
-				g.DrawImage(AtlasResources.IMAGE_SHOVEL_HI_RES, Constants.AwardScreen_Shovel.X - AtlasResources.IMAGE_SHOVEL_HI_RES.mWidth / 2, Constants.AwardScreen_Shovel.Y);
-			}
-			else if (level == 10)
-			{
-				g.DrawImage(Resources.IMAGE_BACKGROUND1, Constants.AwardScreen_Note_1_Background.X, Constants.AwardScreen_Note_1_Background.Y, Constants.AwardScreen_Note_1_Background.Width, Constants.AwardScreen_Note_1_Background.Height);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_1_Paper.X, Constants.AwardScreen_Note_1_Paper.Y);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE1, Constants.AwardScreen_Note_1_Text.X, Constants.AwardScreen_Note_1_Text.Y);
-				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.AwardScreen_Note_Message.X, Constants.AwardScreen_Note_Message.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
-			}
-			else if (level == 15)
-			{
-				DrawBottom(g, "[FOUND_SUBURBAN_ALMANAC]", "[SUBURBAN_ALMANAC]", "[SUBURBAN_ALMANAC_DESCRIPTION]");
-				g.DrawImage(AtlasResources.IMAGE_ALMANAC, Constants.AwardScreen_Almanac.X - AtlasResources.IMAGE_ALMANAC.mWidth / 2, Constants.AwardScreen_Almanac.Y);
-			}
-			else if (level == 20)
-			{
-				g.DrawImage(Resources.IMAGE_BACKGROUND2, Constants.AwardScreen_Note_2_Background.X, Constants.AwardScreen_Note_2_Background.Y, Constants.AwardScreen_Note_2_Background.Width, Constants.AwardScreen_Note_2_Background.Height);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_2_Paper.X, Constants.AwardScreen_Note_2_Paper.Y);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE2, Constants.AwardScreen_Note_2_Text.X, Constants.AwardScreen_Note_2_Text.Y);
-				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.AwardScreen_Note_Message.X, Constants.AwardScreen_Note_Message.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
-			}
-			else if (level == 25)
-			{
-				DrawBottom(g, "[FOUND_KEYS]", "[KEYS]", "[KEYS_DESCRIPTION]");
-				g.DrawImage(AtlasResources.IMAGE_CARKEYS, Constants.AwardScreen_CarKeys.X - AtlasResources.IMAGE_CARKEYS.mWidth / 2, Constants.AwardScreen_CarKeys.Y);
-			}
-			else if (level == 30)
-			{
-				g.DrawImage(Resources.IMAGE_BACKGROUND1, Constants.AwardScreen_Note_3_Background.X, Constants.AwardScreen_Note_3_Background.Y, Constants.AwardScreen_Note_3_Background.Width, Constants.AwardScreen_Note_3_Background.Height);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_3_Paper.X, Constants.AwardScreen_Note_3_Paper.Y);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE3, Constants.AwardScreen_Note_3_Text.X, Constants.AwardScreen_Note_3_Text.Y);
-				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.AwardScreen_Note_Message.X, Constants.AwardScreen_Note_Message.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
-			}
-			else if (level == 35)
-			{
-				DrawBottom(g, "[FOUND_TACO]", "[TACO]", "[TACO_DESCRIPTION]");
-				g.DrawImage(AtlasResources.IMAGE_TACO, Constants.AwardScreen_Taco.X - AtlasResources.IMAGE_TACO.mWidth / 2, Constants.AwardScreen_Taco.Y);
-			}
-			else if (level == 40)
-			{
-				g.DrawImage(Resources.IMAGE_BACKGROUND2, Constants.AwardScreen_Note_4_Background.X, Constants.AwardScreen_Note_4_Background.Y, Constants.AwardScreen_Note_4_Background.Width, Constants.AwardScreen_Note_4_Background.Height);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_4_Paper.X, Constants.AwardScreen_Note_4_Paper.Y);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE4, Constants.AwardScreen_Note_4_Text.X, Constants.AwardScreen_Note_4_Text.Y);
-				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.AwardScreen_Note_Message.X, Constants.AwardScreen_Note_Message.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
-			}
-			else if (level == 45)
-			{
-				DrawBottom(g, "[FOUND_WATERING_CAN]", "[WATERING_CAN]", "[WATERING_CAN_DESCRIPTION]");
-				g.DrawImage(AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1, Constants.AwardScreen_WateringCan.X - AtlasResources.IMAGE_REANIM_ZENGARDEN_WATERINGCAN1.mWidth / 2, Constants.AwardScreen_WateringCan.Y);
-			}
-			else if (level == 50)
-			{
-				g.DrawImage(Resources.IMAGE_BACKGROUND1, Constants.AwardScreen_Note_Final_Background.X, Constants.AwardScreen_Note_Final_Background.Y, Constants.AwardScreen_Note_Final_Background.Width, Constants.AwardScreen_Note_Final_Background.Height);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_NOTE, Constants.AwardScreen_Note_Final_Paper.X, Constants.AwardScreen_Note_Final_Paper.Y);
-				g.DrawImage(Resources.IMAGE_ZOMBIE_FINAL_NOTE, Constants.AwardScreen_Note_Final_Text.X, Constants.AwardScreen_Note_Final_Text.Y);
-				TodCommon.TodDrawString(g, "[FOUND_NOTE]", Constants.AwardScreen_Note_Message.X, Constants.AwardScreen_Note_Message.Y, Resources.FONT_DWARVENTODCRAFT15, new SexyColor(255, 200, 0, 255), DrawStringJustification.DS_ALIGN_CENTER);
-			}
-			else if ((level == 1 && mApp.HasFinishedAdventure()) || mAwardType == AwardType.AWARD_PRE_CREDITS_ZOMBIE_NOTE)
-			{
-				DrawBottom(g, "[WIN_MESSAGE1]", "", "[WIN_MESSAGE2]");
-			}
-			else
-			{
-				DrawAwardSeed(g);
-			}
-		}
-		mStartButton.Draw(g);
-		mMenuButton.Draw(g);
-		mContinueButton.Draw(g);
-		DeferOverlay();
-	}
-
-	public override void DrawOverlay(Graphics g)
-	{
-		base.DrawOverlay(g);
-		int theAlpha = TodCommon.TodAnimateCurve(180, 0, mFadeInCounter, 255, 0, TodCurves.CURVE_LINEAR);
-		if (IsPaperNote())
-		{
-			g.SetColor(new SexyColor(0, 0, 0, theAlpha, premultiply: false));
-		}
-		else
-		{
-			g.SetColor(new SexyColor(255, 255, 255, theAlpha, premultiply: false));
-		}
-		g.SetColorizeImages(colorizeImages: true);
-		g.FillRect(0, 0, Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
-	}
-
-	public virtual void KeyChar(char theChar)
-	{
-		if (theChar == ' ' || theChar == '\r' || theChar == '\u001b')
-		{
-			StartButtonPressed();
-		}
-		if (theChar == '0')
-		{
-			mApp.mPlayerInfo.AddCoins(50000);
-			mApp.PlaySample(Resources.SOUND_BUTTONCLICK);
-		}
-		if (theChar == '$')
-		{
-			mApp.mPlayerInfo.AddCoins(100);
-			mApp.PlaySample(Resources.SOUND_BUTTONCLICK);
-		}
-	}
-
-	public override void MouseUp(int x, int y, int theClickCount)
-	{
-		if (theClickCount == 1)
-		{
-			if (mStartButton.IsMouseOver())
-			{
-				StartButtonPressed();
-			}
-			if (mContinueButton.IsMouseOver())
-			{
-				AchievementsContinuePressed();
-			}
-			if (mMenuButton.IsMouseOver())
-			{
-				mApp.KillAwardScreen();
-				mApp.ShowGameSelector();
-			}
-		}
-	}
-
-	public override void MouseDown(int x, int y, int theClickCount)
-	{
-		if (theClickCount == 1)
-		{
-			mStartButton.Update();
-			mMenuButton.Update();
-			mContinueButton.Update();
-			if (mStartButton.IsMouseOver())
-			{
-				mApp.PlaySample(Resources.SOUND_TAP);
-			}
-			if (mMenuButton.IsMouseOver())
-			{
-				mApp.PlaySample(Resources.SOUND_TAP);
-			}
-			if (mContinueButton.IsMouseOver())
-			{
-				mApp.PlaySample(Resources.SOUND_TAP);
-			}
-		}
-	}
-
-	public void DrawAwardSeed(Graphics g)
-	{
-		int level = mApp.mPlayerInfo.GetLevel();
-		SeedType awardSeedForLevel = mApp.GetAwardSeedForLevel(level - 1);
-		string nameString = Plant.GetNameString(awardSeedForLevel, SeedType.SEED_NONE);
-		string empty = string.Empty;
-		empty = ((!mApp.IsTrialStageLocked() || awardSeedForLevel < SeedType.SEED_SQUASH || awardSeedForLevel == SeedType.SEED_TANGLEKELP) ? Plant.GetToolTip(awardSeedForLevel) : "[AVAILABLE_IN_FULL_VERSION]");
-		DrawBottom(g, "[NEW_PLANT]", nameString, empty);
-		int x = Constants.AwardScreen_Seed_Pos.X;
-		int y = Constants.AwardScreen_Seed_Pos.Y;
-		SeedPacket.DrawSmallSeedPacket(g, x, y, awardSeedForLevel, SeedType.SEED_NONE, 0f, 255, theDrawCost: true, theUseCurrentCost: false, theDrawBackground: true, theDrawCostBackground: true);
-	}
-
-	public void DrawAchievements(Graphics g)
-	{
-		LawnCommon.DrawImageBox(g, new TRect(0, 0, mWidth, mHeight), AtlasResources.IMAGE_ALMANAC_ROUNDED_OUTLINE);
-		for (int i = 0; i < mAchievementItems.Count; i++)
-		{
-			AchievementItem achievementItem = Achievements.GetAchievementItem(mAchievementItems[i].mId);
-			if (achievementItem == null)
-			{
-				continue;
-			}
-			if (achievementItem.AchievementImage != null)
-			{
-				g.DrawImage(achievementItem.AchievementImage, Constants.AwardScreen_AchievementImage_Pos.X, mAchievementItems[i].mY + Constants.AwardScreen_AchievementImage_Pos.Y);
-			}
-			g.SetFont(Resources.FONT_DWARVENTODCRAFT15);
-			g.SetColor(new SexyColor(224, 187, 98));
-			string theString = TodCommon.TodReplaceString("[ACHIEVEMENT_EARNED]", "{ACHIEVEMENT}", mApp.GetAchievementName(mAchievementItems[i].mId));
-			g.DrawString(theString, Constants.AwardScreen_AchievementName_Pos.X, mAchievementItems[i].mY + Constants.AwardScreen_AchievementName_Pos.Y);
-			g.SetFont(Resources.FONT_DWARVENTODCRAFT12);
-			g.SetColor(new SexyColor(255, 255, 255));
-			TRect theRect = new TRect(Constants.AwardScreen_AchievementDescription_Rect.X, mAchievementItems[i].mY + Constants.AwardScreen_AchievementDescription_Rect.Y, Constants.AwardScreen_AchievementDescription_Rect.Width, Constants.AwardScreen_AchievementDescription_Rect.Height);
-			g.WriteWordWrapped(theRect, mApp.GetAchievementDescription(mAchievementItems[i].mId), 0, -1, centerVertically: true);
-		}
-	}
-
-	public void DrawBottom(Graphics g, string theTitle, string theAward, string theMessage)
-	{
-		LawnCommon.DrawImageBox(g, new TRect(0, 0, mWidth, mHeight), AtlasResources.IMAGE_ALMANAC_ROUNDED_OUTLINE);
-		LawnCommon.DrawImageBox(g, Constants.AwardScreen_ClayTablet, AtlasResources.IMAGE_ALMANAC_CLAY_TABLET);
-		TodCommon.TodDrawString(g, theTitle, Constants.AwardScreen_TitlePos.X, Constants.AwardScreen_TitlePos.Y, Resources.FONT_DWARVENTODCRAFT18, Constants.GreenFontColour, Constants.BOARD_WIDTH - 60, DrawStringJustification.DS_ALIGN_CENTER);
-		TRect tRect = default(TRect);
-		if (!theAward.empty())
-		{
-			g.DrawImage(AtlasResources.IMAGE_ALMANAC_GROUNDDAY, Constants.AwardScreen_GroundDay_Pos.X, Constants.AwardScreen_GroundDay_Pos.Y);
-			LawnCommon.DrawImageBox(g, Constants.AwardScreen_BrownRect, AtlasResources.IMAGE_ALMANAC_BROWN_RECT, theDrawCenter: false);
-			TodCommon.TodDrawString(g, theAward, Constants.AwardScreen_BottomMessage_Pos.X, Constants.AwardScreen_BottomMessage_Pos.Y, Resources.FONT_DWARVENTODCRAFT18, Constants.YellowFontColour, DrawStringJustification.DS_ALIGN_CENTER);
-			tRect = Constants.AwardScreen_BottomText_Rect_Text;
-		}
-		else
-		{
-			tRect = Constants.AwardScreen_BottomText_Rect_NoText;
-		}
-		g.SetColorizeImages(colorizeImages: true);
-		g.SetColor(new SexyColor(253, 186, 117));
-		LawnCommon.DrawImageBox(g, tRect, AtlasResources.IMAGE_ALMANAC_PAPER);
-		g.SetColorizeImages(colorizeImages: false);
-		tRect.Inflate((int)Constants.InvertAndScale(-6f), (int)Constants.InvertAndScale(-6f));
-		TodStringFile.TodDrawStringWrapped(g, theMessage, tRect, Resources.FONT_BRIANNETOD16, new SexyColor(40, 50, 90), DrawStringJustification.DS_ALIGN_CENTER_VERTICAL_MIDDLE, widowSupression: true);
-	}
-
-	public void StartButtonPressed()
-	{
-		if (mApp.GetDialog(4) != null)
-		{
-			return;
-		}
-		if (mAwardType == AwardType.AWARD_PRE_CREDITS_ZOMBIE_NOTE)
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowAwardScreen(AwardType.AWARD_CREDITS_ZOMBIE_NOTE, theShowAchievements: false);
-			return;
-		}
-		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE)
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowCreditScreen();
-			return;
-		}
-		if (mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowGameSelector();
-			return;
-		}
-		if (mApp.IsSurvivalMode())
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_SURVIVAL);
-			return;
-		}
-		if (mApp.IsPuzzleMode())
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_PUZZLE);
-			return;
-		}
-		if (mApp.IsChallengeMode())
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowChallengeScreen(ChallengePage.CHALLENGE_PAGE_CHALLENGE);
-			return;
-		}
-		switch (mApp.mPlayerInfo.GetLevel())
-		{
-		case 15:
-			mApp.DoAlmanacDialog(SeedType.SEED_NONE, ZombieType.ZOMBIE_INVALID, this);
-			break;
-		case 25:
-		{
-			StoreScreen storeScreen3 = mApp.ShowStoreScreen(this);
-			storeScreen3.SetupForIntro(301);
-			break;
-		}
-		case 35:
-		{
-			StoreScreen storeScreen2 = mApp.ShowStoreScreen(this);
-			storeScreen2.SetupForIntro(601);
-			break;
-		}
-		case 42:
-		{
-			StoreScreen storeScreen = mApp.ShowStoreScreen(this);
-			storeScreen.SetupForIntro(3100);
-			break;
-		}
-		case 45:
-			mApp.KillAwardScreen();
-			mApp.WriteCurrentUserConfig();
-			mApp.PreNewGame(GameMode.GAMEMODE_CHALLENGE_ZEN_GARDEN, theLookForSavedGame: false);
-			mApp.mZenGarden.SetupForZenTutorial();
-			break;
-		default:
-			mApp.KillAwardScreen();
-			mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
-			break;
-		}
-	}
-
-	public void AchievementsContinuePressed()
-	{
-		if (mAwardType == AwardType.AWARD_ACHIEVEMENT_ONLY)
-		{
-			mApp.KillAwardScreen();
-			if (mApp.IsQuickPlayMode())
-			{
-				mApp.ShowGameSelectorQuickPlay(theDoFadeIn: false);
-			}
-			else
-			{
-				mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
-			}
-			return;
-		}
-		mStartButton.mBtnNoDraw = !mShowStartButtonAfterAchievements;
-		mStartButton.mDisabled = !mShowStartButtonAfterAchievements;
-		mMenuButton.mBtnNoDraw = !mShowMenuButtonAfterAchievements;
-		mMenuButton.mDisabled = !mShowMenuButtonAfterAchievements;
-		mContinueButton.mDisabled = true;
-		mContinueButton.mBtnNoDraw = true;
-		mShowingAchievements = false;
-		int level = mApp.mPlayerInfo.GetLevel();
-		if (level == 1 && mApp.HasFinishedAdventure())
-		{
-			mApp.KillAwardScreen();
-			mApp.ShowAwardScreen(AwardType.AWARD_CREDITS_ZOMBIE_NOTE, theShowAchievements: false);
-		}
-	}
-
-	public bool IsPaperNote()
-	{
-		if (mAwardType == AwardType.AWARD_CREDITS_ZOMBIE_NOTE || mAwardType == AwardType.AWARD_HELP_ZOMBIE_NOTE)
-		{
-			return true;
-		}
-		if (mApp.IsAdventureMode())
-		{
-			int level = mApp.mPlayerInfo.GetLevel();
-			if (level == 10 || level == 20 || level == 30 || level == 40 || level == 50)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public virtual void ButtonPress(int theId)
 	{
 		mApp.PlaySample(Resources.SOUND_TAP);
@@ -761,12 +783,6 @@ internal class AwardScreen : Widget, AlmanacListener, StoreListener, ButtonListe
 	public virtual void ButtonDepress(int theId)
 	{
 		StartButtonPressed();
-	}
-
-	public void BackFromAlmanac()
-	{
-		mApp.KillAwardScreen();
-		mApp.PreNewGame(GameMode.GAMEMODE_ADVENTURE, theLookForSavedGame: false);
 	}
 
 	public void BackFromStore()

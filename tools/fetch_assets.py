@@ -180,8 +180,7 @@ def main():
     finally:
         if os.path.exists(tmp_zip):
             os.remove(tmp_zip)
-    convert_music(args.dest)
-    normalize_reanim_case(args.dest)
+    normalize_asset_case(args.dest)
     print("assets ready")
 
 

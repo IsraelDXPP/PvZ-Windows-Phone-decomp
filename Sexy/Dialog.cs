@@ -250,7 +250,7 @@ internal class Dialog : Widget, ButtonListener
 			num += mHeaderFont.GetLineSpacing();
 			flag = true;
 		}
-		return num + AtlasResources.IMAGE_DIALOG_BOTTOMMIDDLE.GetHeight();
+		return num + Resources.IMAGE_DIALOG_BOTTOMMIDDLE.GetHeight();
 	}
 
 	public override void Draw(Graphics g)

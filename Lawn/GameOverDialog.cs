@@ -20,7 +20,7 @@ internal class GameOverDialog : LawnDialog
 		Resize((Constants.BOARD_WIDTH - mWidth) / 2, (Constants.BOARD_HEIGHT - mHeight) / 2, mWidth, mHeight);
 		mClip = false;
 		mMenuButton = GameButton.MakeButton(1000, this, "[MAIN_MENU_BUTTON]");
-		mMenuButton.Resize(Constants.UIMenuButtonPosition.X - mX + Constants.Board_Offset_AspectRatio_Correction, Constants.UIMenuButtonPosition.Y - mY, Constants.UIMenuButtonWidth, AtlasResources.IMAGE_BUTTON_LEFT.mHeight);
+		mMenuButton.Resize(Constants.UIMenuButtonPosition.X - mX + Constants.Board_Offset_AspectRatio_Correction, Constants.UIMenuButtonPosition.Y - mY, Constants.UIMenuButtonWidth, Resources.IMAGE_BUTTON_LEFT.mHeight);
 		GlobalStaticVars.gLawnApp.mBoard.mShowShovel = false;
 		GlobalStaticVars.gLawnApp.mBoard.mMenuButton.mBtnNoDraw = true;
 	}

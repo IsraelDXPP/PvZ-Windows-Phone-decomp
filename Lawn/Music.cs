@@ -166,6 +166,24 @@ internal class Music
 		}
 	}
 
+	public void MusicCreditScreenInit()
+	{
+		LoadSong(MusicTune.MUSIC_TUNE_CREDITS_ZOMBIES_ON_YOUR_LAWN, "ZombiesOnYourLawn");
+	}
+
+	public void PlayFromOffset(MusicTune theMusicTune, int theByteOffset, float theFadeOutDuration)
+	{
+		if (mMusicDisabled)
+		{
+			return;
+		}
+		mCurMusicTune = theMusicTune;
+		// XnaMediaPlayer cannot seek to a raw byte offset inside a stream, so the
+		// credits track restarts from the beginning instead of the sample the
+		// original BASS backend would have jumped to.
+		mMusicInterface.PlayMusic((int)theMusicTune, 0, theFadeOutDuration, 0.5f, loop: true);
+	}
+
 	public void FadeOut(int aFadeOutDuration)
 	{
 		if (mCurMusicTune != MusicTune.MUSIC_TUNE_NONE)

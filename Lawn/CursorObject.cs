@@ -151,11 +151,11 @@ internal class CursorObject : GameObject
 		{
 			if (!mBoard.mIgnoreMouseUp && !((float)mX * Constants.IS < (float)Constants.LAWN_XMIN) && !((float)mY * Constants.IS < (float)Constants.LAWN_YMIN))
 			{
-				int num = AtlasResources.IMAGE_SHOVEL_HI_RES.mWidth;
-				int num2 = AtlasResources.IMAGE_SHOVEL_HI_RES.mHeight;
+				int num = Resources.IMAGE_SHOVEL_HI_RES.mWidth;
+				int num2 = Resources.IMAGE_SHOVEL_HI_RES.mHeight;
 				g.SetColor(SexyColor.White);
 				int num3 = (int)TodCommon.TodAnimateCurveFloat(0, 39, mBoard.mEffectCounter % 40, 0f, num / 2, TodCurves.CURVE_BOUNCE_SLOW_MIDDLE);
-				g.DrawImage(AtlasResources.IMAGE_SHOVEL_HI_RES, num3, -num2 - num3, num, num2);
+				g.DrawImage(Resources.IMAGE_SHOVEL_HI_RES, num3, -num2 - num3, num, num2);
 			}
 		}
 		else if (mCursorType == CursorType.CURSOR_TYPE_HAMMER)
@@ -167,19 +167,19 @@ internal class CursorObject : GameObject
 		{
 			if (!((float)mX * Constants.IS < (float)Constants.LAWN_XMIN) && !((float)mY * Constants.IS < (float)Constants.LAWN_YMIN))
 			{
-				int num4 = AtlasResources.IMAGE_COBCANNON_TARGET.mWidth;
-				int num5 = AtlasResources.IMAGE_COBCANNON_TARGET.mHeight;
+				int num4 = Resources.IMAGE_COBCANNON_TARGET.mWidth;
+				int num5 = Resources.IMAGE_COBCANNON_TARGET.mHeight;
 				g.SetColorizeImages(colorizeImages: true);
 				g.SetColor(new SexyColor(255, 255, 255, 127));
-				g.DrawImage(AtlasResources.IMAGE_COBCANNON_TARGET, -num4 / 2, -num5 / 2, num4, num5);
+				g.DrawImage(Resources.IMAGE_COBCANNON_TARGET, -num4 / 2, -num5 / 2, num4, num5);
 				g.SetColorizeImages(colorizeImages: false);
 			}
 		}
 		else if (mCursorType == CursorType.CURSOR_TYPE_WATERING_CAN && mApp.mPlayerInfo.mPurchases[13] > 0 && new TRect(Constants.ZEN_XMIN, Constants.ZEN_YMIN, Constants.ZEN_XMAX - Constants.ZEN_XMIN, Constants.ZEN_YMAX - Constants.ZEN_YMIN).Contains(mApp.mBoard.mLastToolX, mApp.mBoard.mLastToolY))
 		{
-			int num6 = AtlasResources.IMAGE_ZEN_GOLDTOOLRETICLE.mWidth;
-			int num7 = AtlasResources.IMAGE_ZEN_GOLDTOOLRETICLE.mHeight;
-			g.DrawImage(AtlasResources.IMAGE_ZEN_GOLDTOOLRETICLE, -num6 / 2, -num7 / 2, num6, num7);
+			int num6 = Resources.IMAGE_ZEN_GOLDTOOLRETICLE.mWidth;
+			int num7 = Resources.IMAGE_ZEN_GOLDTOOLRETICLE.mHeight;
+			g.DrawImage(Resources.IMAGE_ZEN_GOLDTOOLRETICLE, -num6 / 2, -num7 / 2, num6, num7);
 		}
 	}
 

@@ -11,25 +11,28 @@ internal static class Achievements
 	static Achievements()
 	{
 		gAchievementList = new List<AchievementItem>();
-		ACHIEVEMENT_KEYS = new string[18];
-		ACHIEVEMENT_KEYS[0] = "Home Lawn Security";
-		ACHIEVEMENT_KEYS[1] = "Master of Mosticulture";
+		ACHIEVEMENT_KEYS = new string[21];
+		ACHIEVEMENT_KEYS[0] = "Home Security";
+		ACHIEVEMENT_KEYS[1] = "Nobel Peas Prize";
 		ACHIEVEMENT_KEYS[2] = "Better Off Dead";
 		ACHIEVEMENT_KEYS[3] = "China Shop";
-		ACHIEVEMENT_KEYS[4] = "Beyond the Grave";
-		ACHIEVEMENT_KEYS[5] = "Crash of the Titan";
-		ACHIEVEMENT_KEYS[6] = "Soil Your Plants";
-		ACHIEVEMENT_KEYS[7] = "Explodonator";
-		ACHIEVEMENT_KEYS[8] = "Close Shave";
-		ACHIEVEMENT_KEYS[9] = "Shopaholic";
-		ACHIEVEMENT_KEYS[10] = "Nom Nom Nom";
-		ACHIEVEMENT_KEYS[11] = "No Fungus Among Us";
-		ACHIEVEMENT_KEYS[12] = "Dont Pea in the Pool";
-		ACHIEVEMENT_KEYS[13] = "Grounded";
+		ACHIEVEMENT_KEYS[4] = "Spudow";
+		ACHIEVEMENT_KEYS[5] = "Explodonator";
+		ACHIEVEMENT_KEYS[6] = "Morticulturalist";
+		ACHIEVEMENT_KEYS[7] = "Dont Pea in the Pool";
+		ACHIEVEMENT_KEYS[8] = "Roll Some Heads";
+		ACHIEVEMENT_KEYS[9] = "Grounded";
+		ACHIEVEMENT_KEYS[10] = "Zombologist";
+		ACHIEVEMENT_KEYS[11] = "Penny Pincher";
+		ACHIEVEMENT_KEYS[12] = "Sunny Days";
+		ACHIEVEMENT_KEYS[13] = "Popcorn Party";
 		ACHIEVEMENT_KEYS[14] = "Good Morning";
-		ACHIEVEMENT_KEYS[15] = "Popcorn Party";
-		ACHIEVEMENT_KEYS[16] = "Roll Some Heads";
-		ACHIEVEMENT_KEYS[17] = "Disco is Undead";
+		ACHIEVEMENT_KEYS[15] = "No Fungus Among Us";
+		ACHIEVEMENT_KEYS[16] = "Beyond the Grave";
+		ACHIEVEMENT_KEYS[17] = "Immortal";
+		ACHIEVEMENT_KEYS[18] = "Towering Wisdom";
+		ACHIEVEMENT_KEYS[19] = "Mustache Mode";
+		ACHIEVEMENT_KEYS[20] = "Disco is Undead";
 	}
 
 	public static AchievementItem GetAchievementItem(AchievementId index)

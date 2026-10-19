@@ -1,182 +1,148 @@
-using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Sexy;
 
-namespace Sexy.TodLib;
-
-internal class FilterEffect
+namespace Sexy.TodLib
 {
-	public static List<Dictionary<Image, Image>> gFilterMap = new List<Dictionary<Image, Image>>();
-
-	public static void FilterEffectInitForApp()
+	public enum FilterEffect
 	{
+		FILTER_EFFECT_WASHED_OUT,
+		FILTER_EFFECT_LESS_WASHED_OUT,
+		FILTER_EFFECT_WHITE,
+		NUM_FILTER_EFFECTS
 	}
 
-	public static void FilterEffectDisposeForApp()
+	internal static class FilterEffectHelper
 	{
-	}
+		private static Dictionary<Image, Image>[] gFilterMap;
 
-	public static Image FilterEffectGetImage(Image theImage, FilterEffectType theFilterEffect)
-	{
-		return theImage;
-	}
-
-	private static Image FilterEffectCreateImage(Image theImage, FilterEffectType theFilterEffect)
-	{
-		MemoryImage memoryImage = new MemoryImage();
-		memoryImage.mWidth = theImage.mWidth;
-		memoryImage.mWidth = theImage.mHeight;
-		Graphics graphics = Graphics.GetNew(memoryImage);
-		graphics.DrawImage(theImage, 0, 0);
-		switch (theFilterEffect)
+		private static void RGB_to_HSL(float r, float g, float b, out float h, out float s, out float l)
 		{
-		case FilterEffectType.FILTER_EFFECT_WASHED_OUT:
-			FilterEffectDoWashedOut(memoryImage);
-			break;
-		case FilterEffectType.FILTER_EFFECT_LESS_WASHED_OUT:
-			FilterEffectDoLessWashedOut(memoryImage);
-			break;
-		case FilterEffectType.FILTER_EFFECT_WHITE:
-			FilterEffectDoWhite(memoryImage);
-			break;
-		}
-		memoryImage.mNumCols = theImage.mNumCols;
-		memoryImage.mNumRows = theImage.mNumRows;
-		graphics.PrepareForReuse();
-		return memoryImage;
-	}
-
-	private static void FilterEffectDoWashedOut(MemoryImage theImage)
-	{
-		FilterEffectDoLumSat(theImage, 1.8f, 0.2f);
-	}
-
-	private static void FilterEffectDoLessWashedOut(MemoryImage theImage)
-	{
-		FilterEffectDoLumSat(theImage, 1.2f, 0.3f);
-	}
-
-	private static void FilterEffectDoWhite(MemoryImage theImage)
-	{
-		int[] array = new int[theImage.mWidth * theImage.mHeight];
-		theImage.Texture.GetData(array);
-		for (int i = 0; i < theImage.mHeight; i++)
-		{
-			for (int j = 0; j < theImage.mWidth; j++)
+			float maxval = r > g ? r : g;
+			maxval = maxval > b ? maxval : b;
+			float minval = r < g ? r : g;
+			minval = minval < b ? minval : b;
+			l = (minval + maxval) / 2f;
+			h = 0f;
+			s = 0f;
+			if (l <= 0f)
 			{
-				array[j + i * theImage.mWidth] |= 16777215;
+				return;
 			}
-		}
-		theImage.Texture.SetData(array);
-	}
-
-	private static void FilterEffectDoLumSat(MemoryImage theImage, float aLum, float aSat)
-	{
-		int[] array = new int[theImage.mWidth * theImage.mHeight];
-		theImage.Texture.GetData(array);
-		for (int i = 0; i < theImage.mHeight; i++)
-		{
-			for (int j = 0; j < theImage.mWidth; j++)
+			float delta = maxval - minval;
+			s = delta;
+			if (s <= 0f)
 			{
-				int num = array[j + i * theImage.mWidth];
-				char c = (char)(num & 0xFF);
-				char c2 = (char)((num >> 8) & 0xFF);
-				char c3 = (char)((num >> 16) & 0xFF);
-				char c4 = (char)(num >> 24);
-				float r = (float)(int)c / 255f;
-				float g = (float)(int)c2 / 255f;
-				float b = (float)(int)c3 / 255f;
-				RGB_to_HSL(r, g, b, out var h, out var s, out var l);
-				s *= aSat;
-				l *= aLum;
-				HSL_to_RGB(h, s, l, out r, out g, out b);
-				int num2 = TodCommon.ClampInt((int)(r * 255f), 0, 255);
-				int num3 = TodCommon.ClampInt((int)(g * 255f), 0, 255);
-				int num4 = TodCommon.ClampInt((int)(b * 255f), 0, 255);
-				array[j + i * theImage.mWidth] = (int)(((uint)c4 << 24) | (uint)(num4 << 16) | (uint)(num3 << 8)) | num2;
+				return;
 			}
-		}
-		theImage.Texture.SetData(array);
-	}
-
-	private static void RGB_to_HSL(float r, float g, float b, out float h, out float s, out float l)
-	{
-		float val = Math.Max(r, g);
-		val = Math.Max(val, b);
-		float val2 = Math.Min(r, g);
-		val2 = Math.Min(val2, b);
-		h = (l = (s = 0f));
-		float num;
-		if (!((l = (val2 + val) / 2f) <= 0f) && (s = (num = val - val2)) > 0f)
-		{
-			s /= ((l <= 0.5f) ? (val + val2) : (2f - val - val2));
-			float num2 = (val - r) / num;
-			float num3 = (val - g) / num;
-			float num4 = (val - b) / num;
-			if (r == val)
+			s /= ((l <= 0.5f) ? (minval + maxval) : (2f - minval - maxval));
+			float r2 = (maxval - r) / delta;
+			float g2 = (maxval - g) / delta;
+			float b2 = (maxval - b) / delta;
+			if (maxval == r)
 			{
-				h = ((g == val2) ? (5f + num4) : (1f - num3));
+				h = ((g == minval) ? (5f + b2) : (1f - g2));
 			}
-			else if (g == val)
+			else if (maxval == g)
 			{
-				h = ((b == val2) ? (1f + num2) : (3f - num4));
+				h = ((b == minval) ? (1f + r2) : (3f - b2));
 			}
 			else
 			{
-				h = ((r == val2) ? (3f + num3) : (5f - num2));
+				h = ((r == minval) ? (3f + g2) : (5f - r2));
 			}
 			h /= 6f;
 		}
-	}
 
-	private static void HSL_to_RGB(float h, float sl, float l, out float r, out float g, out float b)
-	{
-		r = (g = (b = 0f));
-		float num = ((l <= 0.5f) ? (l * (1f + sl)) : (l + sl - l * sl));
-		if (num <= 0f)
+		private static void HSL_to_RGB(float h, float sl, float l, out float r, out float g, out float b)
 		{
-			r = (g = (b = 0f));
-			return;
+			float v = (l <= 0.5f) ? (l * (1f + sl)) : (l + sl - l * sl);
+			if (v <= 0f)
+			{
+				r = 0f;
+				g = 0f;
+				b = 0f;
+				return;
+			}
+			float y = 2f * l - v;
+			float sv = (v - y) / v;
+			h *= 6f;
+			int sextant = TodCommon.ClampInt((int)h, 0, 5);
+			float vsf = v * sv * (h - sextant);
+			float x = y + vsf;
+			float z = v - vsf;
+			switch (sextant)
+			{
+			case 0: r = v; g = x; b = y; break;
+			case 1: r = z; g = v; b = y; break;
+			case 2: r = y; g = v; b = x; break;
+			case 3: r = y; g = z; b = v; break;
+			case 4: r = x; g = y; b = v; break;
+			default: r = v; g = y; b = z; break;
+			}
 		}
-		float num2 = l + l - num;
-		float num3 = (num - num2) / num;
-		h *= 6f;
-		int num4 = TodCommon.ClampInt((int)h, 0, 5);
-		float num5 = h - (float)num4;
-		float num6 = num * num3 * num5;
-		float num7 = num2 + num6;
-		float num8 = num - num6;
-		switch (num4)
+
+		private static void DoLumSat(Color[] px, float theLum, float theSat)
 		{
-		case 0:
-			r = num;
-			g = num7;
-			b = num2;
-			break;
-		case 1:
-			r = num8;
-			g = num;
-			b = num2;
-			break;
-		case 2:
-			r = num2;
-			g = num;
-			b = num7;
-			break;
-		case 3:
-			r = num2;
-			g = num8;
-			b = num;
-			break;
-		case 4:
-			r = num7;
-			g = num2;
-			b = num;
-			break;
-		case 5:
-			r = num;
-			g = num2;
-			b = num8;
-			break;
+			for (int i = 0; i < px.Length; i++)
+			{
+				Color c = px[i];
+				float r = c.R / 255f;
+				float g = c.G / 255f;
+				float b = c.B / 255f;
+				float h, s, l;
+				RGB_to_HSL(r, g, b, out h, out s, out l);
+				s *= theSat;
+				l *= theLum;
+				HSL_to_RGB(h, s, l, out r, out g, out b);
+				px[i] = new Color((byte)TodCommon.ClampInt((int)(r * 255f), 0, 255), (byte)TodCommon.ClampInt((int)(g * 255f), 0, 255), (byte)TodCommon.ClampInt((int)(b * 255f), 0, 255), c.A);
+			}
+		}
+
+		public static Image FilterEffectGetImage(Image theImage, FilterEffect theFilterEffect)
+		{
+			if (gFilterMap == null)
+			{
+				gFilterMap = new Dictionary<Image, Image>[(int)FilterEffect.NUM_FILTER_EFFECTS];
+				for (int i = 0; i < gFilterMap.Length; i++)
+				{
+					gFilterMap[i] = new Dictionary<Image, Image>();
+				}
+			}
+			Dictionary<Image, Image> map = gFilterMap[(int)theFilterEffect];
+			Image cached;
+			if (map.TryGetValue(theImage, out cached))
+			{
+				return cached;
+			}
+			Texture2D src = theImage.Texture;
+			Color[] px = new Color[src.Width * src.Height];
+			src.GetData(px);
+			if (theFilterEffect == FilterEffect.FILTER_EFFECT_WASHED_OUT)
+			{
+				DoLumSat(px, 1.8f, 0.2f);
+			}
+			else if (theFilterEffect == FilterEffect.FILTER_EFFECT_LESS_WASHED_OUT)
+			{
+				DoLumSat(px, 1.2f, 0.3f);
+			}
+			else
+			{
+				for (int i = 0; i < px.Length; i++)
+				{
+					Color c = px[i];
+					px[i] = new Color((byte)255, (byte)255, (byte)255, c.A);
+				}
+			}
+			GraphicsDevice gd = GlobalStaticVars.g.GraphicsDevice;
+			Texture2D tex = new Texture2D(gd, src.Width, src.Height);
+			tex.SetData(px);
+			Image img = new Image(tex, 0, 0, tex.Width, tex.Height);
+			img.mNumRows = theImage.mNumRows;
+			img.mNumCols = theImage.mNumCols;
+			map[theImage] = img;
+			return img;
 		}
 	}
 }

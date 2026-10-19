@@ -820,7 +820,7 @@ internal class Plant : GameObject
 					g.SetColorizeImages(colorizeImages: true);
 					g.SetColor(new Color(150, 255, 150, 255));
 				}
-				TodCommon.TodDrawImageCelF(g, AtlasResources.IMAGE_CACHED_MARIGOLD, Constants.ZenGarden_Marigold_Sprout_Offset.X, Constants.ZenGarden_Marigold_Sprout_Offset.Y, 0, 0);
+				TodCommon.TodDrawImageCelF(g, Resources.IMAGE_CACHED_MARIGOLD, Constants.ZenGarden_Marigold_Sprout_Offset.X, Constants.ZenGarden_Marigold_Sprout_Offset.Y, 0, 0);
 				if (mGloveGrabbed)
 				{
 					g.SetColorizeImages(colorizeImages: false);
@@ -2804,7 +2804,7 @@ internal class Plant : GameObject
 		}
 		EndBlink();
 		Reanimation reanimation = mApp.ReanimationTryToGet(mBodyReanimID);
-		if (reanimation != null && !reanimation.mDead && (mSeedType != SeedType.SEED_TALLNUT || reanimation.GetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle) != AtlasResources.IMAGE_REANIM_TALLNUT_CRACKED2) && (mSeedType != SeedType.SEED_GARLIC || reanimation.GetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face) != AtlasResources.IMAGE_REANIM_GARLIC_BODY3))
+		if (reanimation != null && !reanimation.mDead && (mSeedType != SeedType.SEED_TALLNUT || reanimation.GetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_idle) != Resources.IMAGE_REANIM_TALLNUT_CRACKED2) && (mSeedType != SeedType.SEED_GARLIC || reanimation.GetImageOverride(GlobalMembersReanimIds.ReanimTrackId_anim_face) != Resources.IMAGE_REANIM_GARLIC_BODY3))
 		{
 			if (mSeedType == SeedType.SEED_WALLNUT || mSeedType == SeedType.SEED_TALLNUT || mSeedType == SeedType.SEED_EXPLODE_O_NUT || mSeedType == SeedType.SEED_GIANT_WALLNUT)
 			{
@@ -3026,96 +3026,96 @@ internal class Plant : GameObject
 				float num3 = 1f;
 				if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_PAIL_1)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET1;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_BUCKET1;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_PAIL_2)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET2;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_BUCKET2;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_PAIL_3)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET3;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_BUCKET3;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_FOOTBALL_HELMET_1)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_FOOTBALL_HELMET_2)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET2;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET2;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_FOOTBALL_HELMET_3)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET3;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET3;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_DOOR_1)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_DOOR_2)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR2;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR2;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_DOOR_3)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR3;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR3;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType >= MagnetItemType.MAGNET_ITEM_POGO_1 && magnetItem.mItemType <= MagnetItemType.MAGNET_ITEM_POGO_3)
 				{
 					theCelCol = (int)(magnetItem.mItemType - 10);
-					theImageStrip = AtlasResources.IMAGE_ZOMBIEPOGO;
+					theImageStrip = Resources.IMAGE_ZOMBIEPOGO;
 					num3 = 0.8f;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_LADDER_1)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_1;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_LADDER_1;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_LADDER_2)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE1;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE1;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_LADDER_3)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE2;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE2;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_LADDER_PLACED)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_5;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_LADDER_5;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_JACK_IN_THE_BOX)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_PICK_AXE)
 				{
 					num3 = 0.8f;
-					theImageStrip = AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE;
+					theImageStrip = Resources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_SILVER_COIN)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_COIN_SILVER_DOLLAR;
+					theImageStrip = Resources.IMAGE_REANIM_COIN_SILVER_DOLLAR;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_GOLD_COIN)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_COIN_GOLD_DOLLAR;
+					theImageStrip = Resources.IMAGE_REANIM_COIN_GOLD_DOLLAR;
 				}
 				else if (magnetItem.mItemType == MagnetItemType.MAGNET_ITEM_DIAMOND)
 				{
-					theImageStrip = AtlasResources.IMAGE_REANIM_DIAMOND;
+					theImageStrip = Resources.IMAGE_REANIM_DIAMOND;
 				}
 				else
 				{
@@ -3269,8 +3269,8 @@ internal class Plant : GameObject
 		string theTrackName;
 		if (mSeedType == SeedType.SEED_WALLNUT)
 		{
-			image = AtlasResources.IMAGE_REANIM_WALLNUT_CRACKED1;
-			image2 = AtlasResources.IMAGE_REANIM_WALLNUT_CRACKED2;
+			image = Resources.IMAGE_REANIM_WALLNUT_CRACKED1;
+			image2 = Resources.IMAGE_REANIM_WALLNUT_CRACKED2;
 			theTrackName = GlobalMembersReanimIds.ReanimTrackId_anim_face;
 		}
 		else
@@ -3279,8 +3279,8 @@ internal class Plant : GameObject
 			{
 				return;
 			}
-			image = AtlasResources.IMAGE_REANIM_TALLNUT_CRACKED1;
-			image2 = AtlasResources.IMAGE_REANIM_TALLNUT_CRACKED2;
+			image = Resources.IMAGE_REANIM_TALLNUT_CRACKED1;
+			image2 = Resources.IMAGE_REANIM_TALLNUT_CRACKED2;
 			theTrackName = GlobalMembersReanimIds.ReanimTrackId_anim_idle;
 		}
 		int num = mX + 40;
@@ -3725,11 +3725,11 @@ internal class Plant : GameObject
 		}
 		if (num == 0)
 		{
-			TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW, (theOffsetX + num2) * Constants.S, (theOffsetY + num3) * Constants.S, num4, num4);
+			TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_PLANTSHADOW, (theOffsetX + num2) * Constants.S, (theOffsetY + num3) * Constants.S, num4, num4);
 		}
 		else
 		{
-			TodCommon.TodDrawImageCenterScaledF(g, AtlasResources.IMAGE_PLANTSHADOW2, (theOffsetX + num2) * Constants.S, (theOffsetY + num3) * Constants.S, num4, num4);
+			TodCommon.TodDrawImageCenterScaledF(g, Resources.IMAGE_PLANTSHADOW2, (theOffsetX + num2) * Constants.S, (theOffsetY + num3) * Constants.S, num4, num4);
 		}
 	}
 
@@ -3871,8 +3871,8 @@ internal class Plant : GameObject
 			theZombie.GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_anim_bucket, ref freeMagnetItem.mPosX, ref freeMagnetItem.mPosY);
 			theZombie.ReanimShowPrefix("anim_bucket", -1);
 			theZombie.ReanimShowPrefix("anim_hair", 0);
-			freeMagnetItem.mPosX -= AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET1.mWidth / 2;
-			freeMagnetItem.mPosY -= AtlasResources.IMAGE_REANIM_ZOMBIE_BUCKET1.mHeight / 2;
+			freeMagnetItem.mPosX -= Resources.IMAGE_REANIM_ZOMBIE_BUCKET1.mWidth / 2;
+			freeMagnetItem.mPosY -= Resources.IMAGE_REANIM_ZOMBIE_BUCKET1.mHeight / 2;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 25f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f) + 20f;
 			freeMagnetItem.mItemType = (MagnetItemType)(1 + helmDamageIndex);
@@ -3903,8 +3903,8 @@ internal class Plant : GameObject
 				theZombie.StartWalkAnim(0);
 			}
 			theZombie.GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_anim_screendoor, ref freeMagnetItem.mPosX, ref freeMagnetItem.mPosY);
-			freeMagnetItem.mPosX -= AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1.mWidth / 2;
-			freeMagnetItem.mPosY -= AtlasResources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1.mHeight / 2;
+			freeMagnetItem.mPosX -= Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1.mWidth / 2;
+			freeMagnetItem.mPosY -= Resources.IMAGE_REANIM_ZOMBIE_SCREENDOOR1.mHeight / 2;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 30f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f);
 			freeMagnetItem.mItemType = (MagnetItemType)(7 + shieldDamageIndex);
@@ -3915,8 +3915,8 @@ internal class Plant : GameObject
 			theZombie.DetachShield();
 			freeMagnetItem.mPosX = theZombie.mPosX + 31f;
 			freeMagnetItem.mPosY = theZombie.mPosY + 20f;
-			freeMagnetItem.mPosX -= AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_5.GetCelWidth() / 2;
-			freeMagnetItem.mPosY -= AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_5.GetCelHeight() / 2;
+			freeMagnetItem.mPosX -= Resources.IMAGE_REANIM_ZOMBIE_LADDER_5.GetCelWidth() / 2;
+			freeMagnetItem.mPosY -= Resources.IMAGE_REANIM_ZOMBIE_LADDER_5.GetCelHeight() / 2;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 30f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f);
 			freeMagnetItem.mItemType = (MagnetItemType)(14 + shieldDamageIndex2);
@@ -3927,8 +3927,8 @@ internal class Plant : GameObject
 			ZombieDrawPosition theDrawPos = default(ZombieDrawPosition);
 			theZombie.GetDrawPos(ref theDrawPos);
 			theZombie.GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_pogo_stick, ref freeMagnetItem.mPosX, ref freeMagnetItem.mPosY);
-			freeMagnetItem.mPosX += (float)(-AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE1.mWidth / 2) + 40f;
-			freeMagnetItem.mPosY += (float)(-AtlasResources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE1.mHeight / 2) + 84f;
+			freeMagnetItem.mPosX += (float)(-Resources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE1.mWidth / 2) + 40f;
+			freeMagnetItem.mPosY += (float)(-Resources.IMAGE_REANIM_ZOMBIE_POGO_STICKDAMAGE1.mHeight / 2) + 84f;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 44f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f) + 10f;
 			if (theZombie.mHasArm)
@@ -3948,8 +3948,8 @@ internal class Plant : GameObject
 			theZombie.ReanimShowTrack(ref GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_box, -1);
 			theZombie.ReanimShowTrack(ref GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_handle, -1);
 			theZombie.GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_jackbox_box, ref freeMagnetItem.mPosX, ref freeMagnetItem.mPosY);
-			freeMagnetItem.mPosX -= AtlasResources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX.mWidth / 2;
-			freeMagnetItem.mPosY -= AtlasResources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX.mHeight / 2;
+			freeMagnetItem.mPosX -= Resources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX.mWidth / 2;
+			freeMagnetItem.mPosY -= Resources.IMAGE_REANIM_ZOMBIE_JACKBOX_BOX.mHeight / 2;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 20f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f) + 15f;
 			freeMagnetItem.mItemType = MagnetItemType.MAGNET_ITEM_JACK_IN_THE_BOX;
@@ -3958,8 +3958,8 @@ internal class Plant : GameObject
 		{
 			theZombie.DiggerLoseAxe();
 			theZombie.GetTrackPosition(ref GlobalMembersReanimIds.ReanimTrackId_zombie_digger_pickaxe, ref freeMagnetItem.mPosX, ref freeMagnetItem.mPosY);
-			freeMagnetItem.mPosX -= AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE.mWidth / 2;
-			freeMagnetItem.mPosY -= AtlasResources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE.mHeight / 2;
+			freeMagnetItem.mPosX -= Resources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE.mWidth / 2;
+			freeMagnetItem.mPosY -= Resources.IMAGE_REANIM_ZOMBIE_DIGGER_PICKAXE.mHeight / 2;
 			freeMagnetItem.mDestOffsetX = TodCommon.RandRangeFloat(-10f, 10f) + 45f;
 			freeMagnetItem.mDestOffsetY = TodCommon.RandRangeFloat(-10f, 10f) + 15f;
 			freeMagnetItem.mItemType = MagnetItemType.MAGNET_ITEM_PICK_AXE;
@@ -4140,16 +4140,16 @@ internal class Plant : GameObject
 		Image imageOverride = reanimation.GetImageOverride(reanimTrackId_pumpkin_front);
 		if (mPlantHealth < mPlantMaxHealth / 3)
 		{
-			if (imageOverride != AtlasResources.IMAGE_REANIM_PUMPKIN_DAMAGE3)
+			if (imageOverride != Resources.IMAGE_REANIM_PUMPKIN_DAMAGE3)
 			{
-				reanimation.SetImageOverride(reanimTrackId_pumpkin_front, AtlasResources.IMAGE_REANIM_PUMPKIN_DAMAGE3);
+				reanimation.SetImageOverride(reanimTrackId_pumpkin_front, Resources.IMAGE_REANIM_PUMPKIN_DAMAGE3);
 			}
 		}
 		else if (mPlantHealth < mPlantMaxHealth * 2 / 3)
 		{
-			if (imageOverride != AtlasResources.IMAGE_REANIM_PUMPKIN_DAMAGE1)
+			if (imageOverride != Resources.IMAGE_REANIM_PUMPKIN_DAMAGE1)
 			{
-				reanimation.SetImageOverride(reanimTrackId_pumpkin_front, AtlasResources.IMAGE_REANIM_PUMPKIN_DAMAGE1);
+				reanimation.SetImageOverride(reanimTrackId_pumpkin_front, Resources.IMAGE_REANIM_PUMPKIN_DAMAGE1);
 			}
 		}
 		else
@@ -4839,17 +4839,17 @@ internal class Plant : GameObject
 		Image imageOverride = reanimation.GetImageOverride(reanimTrackId_anim_face);
 		if (mPlantHealth < mPlantMaxHealth / 3)
 		{
-			if (imageOverride != AtlasResources.IMAGE_REANIM_GARLIC_BODY3)
+			if (imageOverride != Resources.IMAGE_REANIM_GARLIC_BODY3)
 			{
-				reanimation.SetImageOverride(reanimTrackId_anim_face, AtlasResources.IMAGE_REANIM_GARLIC_BODY3);
+				reanimation.SetImageOverride(reanimTrackId_anim_face, Resources.IMAGE_REANIM_GARLIC_BODY3);
 				reanimation.AssignRenderGroupToPrefix("Garlic_stem", -1);
 			}
 		}
 		else if (mPlantHealth < mPlantMaxHealth * 2 / 3)
 		{
-			if (imageOverride != AtlasResources.IMAGE_REANIM_GARLIC_BODY2)
+			if (imageOverride != Resources.IMAGE_REANIM_GARLIC_BODY2)
 			{
-				reanimation.SetImageOverride(reanimTrackId_anim_face, AtlasResources.IMAGE_REANIM_GARLIC_BODY2);
+				reanimation.SetImageOverride(reanimTrackId_anim_face, Resources.IMAGE_REANIM_GARLIC_BODY2);
 			}
 		}
 		else

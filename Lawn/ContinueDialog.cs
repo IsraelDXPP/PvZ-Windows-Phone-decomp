@@ -44,7 +44,7 @@ internal class ContinueDialog : LawnDialog
 	public override void Resize(int theX, int theY, int theWidth, int theHeight)
 	{
 		base.Resize(theX, theY, theWidth, theHeight);
-		int num = AtlasResources.IMAGE_BUTTON_LEFT.mWidth + AtlasResources.IMAGE_BUTTON_MIDDLE.mWidth * 4 + AtlasResources.IMAGE_BUTTON_RIGHT.mWidth;
+		int num = Resources.IMAGE_BUTTON_LEFT.mWidth + Resources.IMAGE_BUTTON_MIDDLE.mWidth * 4 + Resources.IMAGE_BUTTON_RIGHT.mWidth;
 		int num2 = mLawnYesButton.mHeight;
 		int theY2 = mLawnYesButton.mY - num2 - 2;
 		int num3 = mLawnYesButton.mX - 20;

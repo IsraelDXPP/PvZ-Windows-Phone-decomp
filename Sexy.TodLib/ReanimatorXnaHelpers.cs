@@ -17,7 +17,7 @@ internal class ReanimatorXnaHelpers
 
 	public static float SECONDS_PER_UPDATE = 0.033333f;
 
-	public static ReanimatorDefinition[] gReanimatorDefArray = new ReanimatorDefinition[119];
+	public static ReanimatorDefinition[] gReanimatorDefArray = new ReanimatorDefinition[139];
 
 	public static ReanimationParams[] gReanimationParamArray = null;
 

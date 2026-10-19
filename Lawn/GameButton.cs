@@ -213,7 +213,7 @@ internal class GameButton
 		bool flag2 = mIsOver && !mDisabled;
 		if (mDrawStoneButton)
 		{
-			DrawStoneButton(g, mX, mY, mWidth, mHeight, flag, flag2, mLabel, mFont, mFontScale);
+			DrawStoneButton(g, mX, mY, mWidth, mHeight, flag, flag2, mLabel);
 			return;
 		}
 		g.mTransX += mX;
@@ -455,42 +455,52 @@ internal class GameButton
 		return newLawnButton;
 	}
 
-	public static void DrawStoneButton(Graphics g, int x, int y, int theWidth, int theHeight, bool isDown, bool isHighLighted, string theLabel)
+	public static void DrawStoneButton(Graphics g, int x, int y, int theWidth, int theHeight, bool isDown, bool isHighLighted, string theLabel, int theBrightness = 255)
 	{
-		DrawStoneButton(g, x, y, theWidth, theHeight, isDown, isHighLighted, theLabel, Resources.FONT_DWARVENTODCRAFT15, 1f);
-	}
-
-	public static void DrawStoneButton(Graphics g, int x, int y, int theWidth, int theHeight, bool isDown, bool isHighLighted, string theLabel, Font theFont, float fontScale)
-	{
-		int num = x;
-		int num2 = y;
-		int num3 = x;
-		Image image = AtlasResources.IMAGE_BUTTON_LEFT;
-		Image theImage = AtlasResources.IMAGE_BUTTON_MIDDLE;
-		Image image2 = AtlasResources.IMAGE_BUTTON_RIGHT;
+		Image aLeftImage = Resources.IMAGE_BUTTON_LEFT;
+		Image aMiddleImage = Resources.IMAGE_BUTTON_MIDDLE;
+		Image aRightImage = Resources.IMAGE_BUTTON_RIGHT;
+		int aFontX = x;
+		int aFontY = y;
+		int aImageX = x;
 		if (isDown)
 		{
-			image = AtlasResources.IMAGE_BUTTON_DOWN_LEFT;
-			theImage = AtlasResources.IMAGE_BUTTON_DOWN_MIDDLE;
-			image2 = AtlasResources.IMAGE_BUTTON_DOWN_RIGHT;
-			num++;
-			num2++;
-			num3++;
+			aLeftImage = Resources.IMAGE_BUTTON_DOWN_LEFT;
+			aMiddleImage = Resources.IMAGE_BUTTON_DOWN_MIDDLE;
+			aRightImage = Resources.IMAGE_BUTTON_DOWN_RIGHT;
+			aFontX++;
+			aFontY++;
+			aImageX++;
 		}
-		int num4 = theWidth - image.mWidth - image2.mWidth;
-		g.DrawImage(image, num3, y);
-		num3 += image.mWidth;
-		LawnCommon.TileImageHorizontally(g, theImage, num3, y, num4);
-		num3 += num4;
-		g.DrawImage(image2, num3, y);
-		g.SetFont(theFont);
-		g.SetScale(fontScale);
-		g.SetColor(new SexyColor(21, 175, 0));
-		num += (theWidth - theFont.StringWidth(theLabel)) / 2 + 1;
-		num2 += (theHeight + theFont.GetAscent()) / 2;
-		g.DrawString(theLabel, num, num2);
-		g.SetColor(SexyColor.White);
-		g.SetScale(1f);
+		int aLeftWidth = aLeftImage.mWidth;
+		int aRightWidth = aRightImage.mWidth;
+		int aMiddleWidth = aMiddleImage.mWidth;
+		SexyColor aOldColor = g.mColor;
+		g.SetColorizeImages(colorizeImages: true);
+		g.SetColor(new SexyColor(theBrightness, theBrightness, theBrightness));
+		g.DrawImage(aLeftImage, aImageX, y);
+		aImageX += aLeftWidth;
+		int aRepeat = (theWidth - aLeftWidth - aRightWidth) / aMiddleWidth;
+		for (int i = 0; i < aRepeat; ++i)
+		{
+			g.DrawImage(aMiddleImage, aImageX, y);
+			aImageX += aMiddleWidth;
+		}
+		int aRemainingWidth = theWidth - aLeftWidth - aRightWidth - aRepeat * aMiddleWidth;
+		if (aRemainingWidth > 0)
+		{
+			g.DrawImage(aMiddleImage, aImageX, y, aRemainingWidth, aMiddleImage.mHeight);
+			aImageX += aRemainingWidth;
+		}
+		g.DrawImage(aRightImage, aImageX, y);
+		g.SetFont(isHighLighted ? Resources.FONT_DWARVENTODCRAFT18BRIGHTGREENINSET : Resources.FONT_DWARVENTODCRAFT18GREENINSET);
+		int aLabelWidth = Resources.FONT_DWARVENTODCRAFT18GREENINSET.StringWidth(theLabel);
+		int aLabelAscent = Resources.FONT_DWARVENTODCRAFT18GREENINSET.GetAscent();
+		aFontX += (theWidth - aLabelWidth) / 2 + 1;
+		aFontY += (theHeight - aLabelAscent / 6 - 1 + aLabelAscent) / 2 - 4;
+		g.DrawString(theLabel, aFontX, aFontY);
+		g.SetColor(aOldColor);
+		g.SetColorizeImages(colorizeImages: false);
 	}
 
 	public static LawnStoneButton MakeButton(int theId, ButtonListener theListener, string theText)

@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+using Sexy.TodLib;
 
 namespace Sexy;
 
@@ -14,24 +14,32 @@ internal class Checkbox : Widget
 
 	public Image mCheckedImage;
 
-	public TRect mCheckedRect = default(TRect);
+	public TRect mCheckedRect;
 
-	public TRect mUncheckedRect = default(TRect);
+	public TRect mUncheckedRect;
 
-	public Color mOutlineColor = default(Color);
+	public SexyColor mOutlineColor;
 
-	public Color mBkgColor = default(Color);
+	public SexyColor mBkgColor;
 
-	public Color mCheckColor = default(Color);
+	public SexyColor mCheckColor;
 
-	public virtual void SetChecked(bool isChecked)
+	public Checkbox(Image theUncheckedImage, Image theCheckedImage, int theId, CheckboxListener theCheckboxListener)
 	{
-		SetChecked(isChecked, tellListener: true);
+		mUncheckedImage = theUncheckedImage;
+		mCheckedImage = theCheckedImage;
+		mId = theId;
+		mListener = theCheckboxListener;
+		mChecked = false;
+		mOutlineColor = SexyColor.White;
+		mBkgColor = new SexyColor(80, 80, 80);
+		mCheckColor = new SexyColor(255, 255, 0);
+		mDoFinger = true;
 	}
 
-	public virtual void SetChecked(bool @checked, bool tellListener)
+	public virtual void SetChecked(bool isChecked, bool tellListener = true)
 	{
-		mChecked = @checked;
+		mChecked = isChecked;
 		if (tellListener && mListener != null)
 		{
 			mListener.CheckboxChecked(mId, mChecked);
@@ -42,22 +50,6 @@ internal class Checkbox : Widget
 	public virtual bool IsChecked()
 	{
 		return mChecked;
-	}
-
-	public override void MouseDown(int x, int y, int theClickCount)
-	{
-		base.MouseDown(x, y, theClickCount);
-	}
-
-	public override void MouseDown(int x, int y, int theBtnNum, int theClickCount)
-	{
-		base.MouseDown(x, y, theBtnNum, theClickCount);
-		mChecked = !mChecked;
-		if (mListener != null)
-		{
-			mListener.CheckboxChecked(mId, mChecked);
-		}
-		MarkDirty();
 	}
 
 	public override void Draw(Graphics g)
@@ -78,38 +70,36 @@ internal class Checkbox : Widget
 		{
 			if (mChecked)
 			{
-				g.DrawImage(mUncheckedImage, 0, 0, new TRect(mCheckedRect));
+				g.DrawImage(mUncheckedImage, 0, 0, mCheckedRect);
 			}
 			else
 			{
-				g.DrawImage(mUncheckedImage, 0, 0, new TRect(mUncheckedRect));
+				g.DrawImage(mUncheckedImage, 0, 0, mUncheckedRect);
 			}
 		}
 		else if (mUncheckedImage == null && mCheckedImage == null)
 		{
-			g.SetColor(new SexyColor(mOutlineColor));
+			g.SetColor(mOutlineColor);
 			g.FillRect(0, 0, mWidth, mHeight);
-			g.SetColor(new SexyColor(mBkgColor));
+			g.SetColor(mBkgColor);
 			g.FillRect(1, 1, mWidth - 2, mHeight - 2);
 			if (mChecked)
 			{
-				g.SetColor(new SexyColor(mCheckColor));
+				g.SetColor(mCheckColor);
 				g.DrawLine(1, 1, mWidth - 2, mHeight - 2);
 				g.DrawLine(mWidth - 1, 1, 1, mHeight - 2);
 			}
 		}
 	}
 
-	public Checkbox(Image theUncheckedImage, Image theCheckedImage, int theId, CheckboxListener theCheckboxListener)
+	public override void MouseDown(int x, int y, int theBtnNum, int theClickCount)
 	{
-		mUncheckedImage = theUncheckedImage;
-		mCheckedImage = theCheckedImage;
-		mId = theId;
-		mListener = theCheckboxListener;
-		mChecked = false;
-		mOutlineColor = new SexyColor(Color.White);
-		mBkgColor = new SexyColor(new Color(80, 80, 80));
-		mCheckColor = new SexyColor(new Color(255, 255, 0));
-		mDoFinger = true;
+		base.MouseDown(x, y, theBtnNum, theClickCount);
+		mChecked = !mChecked;
+		if (mListener != null)
+		{
+			mListener.CheckboxChecked(mId, mChecked);
+		}
+		MarkDirty();
 	}
 }

@@ -196,7 +196,7 @@ internal class GridItem
 	{
 		int num = mBoard.GridToPixelX(mGridX, mGridY);
 		int num2 = mBoard.GridToPixelY(mGridX, mGridY);
-		TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_REANIM_ZOMBIE_LADDER_5, ((float)num + 25f) * Constants.S, ((float)num2 - 4f) * Constants.S, 0.8f, 0.8f);
+		TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_REANIM_ZOMBIE_LADDER_5, ((float)num + 25f) * Constants.S, ((float)num2 - 4f) * Constants.S, 0.8f, 0.8f);
 	}
 
 	public void DrawCrater(Graphics g)
@@ -210,11 +210,11 @@ internal class GridItem
 			g.SetColorizeImages(colorizeImages: true);
 		}
 		bool flag = mGridItemCounter < 9000;
-		Image theImageStrip = AtlasResources.IMAGE_CRATER;
+		Image theImageStrip = Resources.IMAGE_CRATER;
 		int theCelCol = 0;
 		if (mBoard.IsPoolSquare(mGridX, mGridY))
 		{
-			theImageStrip = ((!mBoard.StageIsNight()) ? AtlasResources.IMAGE_CRATER_WATER_DAY : AtlasResources.IMAGE_CRATER_WATER_NIGHT);
+			theImageStrip = ((!mBoard.StageIsNight()) ? Resources.IMAGE_CRATER_WATER_DAY : Resources.IMAGE_CRATER_WATER_NIGHT);
 			if (flag)
 			{
 				theCelCol = 1;
@@ -228,13 +228,13 @@ internal class GridItem
 		{
 			if (mGridX < 5)
 			{
-				theImageStrip = AtlasResources.IMAGE_CRATER_ROOF_LEFT;
+				theImageStrip = Resources.IMAGE_CRATER_ROOF_LEFT;
 				num += 16f;
 				num2 += -16f;
 			}
 			else
 			{
-				theImageStrip = AtlasResources.IMAGE_CRATER_ROOF_CENTER;
+				theImageStrip = Resources.IMAGE_CRATER_ROOF_CENTER;
 				num += 18f;
 				num2 += -9f;
 			}
@@ -248,12 +248,12 @@ internal class GridItem
 			theCelCol = 1;
 			if (flag)
 			{
-				theImageStrip = AtlasResources.IMAGE_CRATER_FADING;
+				theImageStrip = Resources.IMAGE_CRATER_FADING;
 			}
 		}
 		else if (flag)
 		{
-			theImageStrip = AtlasResources.IMAGE_CRATER_FADING;
+			theImageStrip = Resources.IMAGE_CRATER_FADING;
 		}
 		num = TodCommon.PixelAligned(num);
 		num2 = TodCommon.PixelAligned(num2);
@@ -269,8 +269,8 @@ internal class GridItem
 			int num = mBoard.mGridCelLook[mGridX, mGridY];
 			int num2 = mBoard.mGridCelOffset[mGridX, mGridY, 0];
 			int num3 = mBoard.mGridCelOffset[mGridX, mGridY, 1];
-			int num4 = (int)((float)AtlasResources.IMAGE_TOMBSTONES.GetCelWidth() * Constants.IS);
-			int num5 = (int)((float)AtlasResources.IMAGE_TOMBSTONES.GetCelHeight() * Constants.IS);
+			int num4 = (int)((float)Resources.IMAGE_TOMBSTONES.GetCelWidth() * Constants.IS);
+			int num5 = (int)((float)Resources.IMAGE_TOMBSTONES.GetCelHeight() * Constants.IS);
 			int num6 = num % 5;
 			int num7 = 0;
 			num7 = ((mGridY == 0) ? 1 : ((mGridItemState != GridItemState.GRIDITEM_STATE_GRAVESTONE_SPECIAL) ? (2 + num % 2) : 0));
@@ -286,11 +286,11 @@ internal class GridItem
 			TRect theSrcRect = new TRect((int)((float)(num4 * num6) * Constants.S), (int)((float)(num5 * num7 + num11) * Constants.S), (int)((float)num4 * Constants.S), (int)((float)(num8 - num9 - num11) * Constants.S));
 			int num12 = mBoard.GridToPixelX(mGridX, mGridY) - 4 + num2;
 			int num13 = mBoard.GridToPixelY(mGridX, mGridY) + num5 + num3;
-			g.DrawImage(AtlasResources.IMAGE_TOMBSTONES, (int)((float)num12 * Constants.S), (int)((double)((float)(num13 - num8 + num11) * Constants.S) + 0.5), theSrcRect);
+			g.DrawImage(Resources.IMAGE_TOMBSTONES, (int)((float)num12 * Constants.S), (int)((double)((float)(num13 - num8 + num11) * Constants.S) + 0.5), theSrcRect);
 			int num14 = (int)((float)num10 * Constants.S);
 			if (num14 >= (int)Constants.InvertAndScale(34f))
 			{
-				g.DrawImage(theSrcRect: new TRect(AtlasResources.IMAGE_TOMBSTONE_MOUNDS.GetCelWidth() * num6, AtlasResources.IMAGE_TOMBSTONE_MOUNDS.GetCelHeight() * num7, AtlasResources.IMAGE_TOMBSTONE_MOUNDS.GetCelWidth(), (int)((float)num10 * Constants.S) - (int)Constants.InvertAndScale(34f)), theImage: AtlasResources.IMAGE_TOMBSTONE_MOUNDS, theX: (int)((float)num12 * Constants.S), theY: (int)((float)(num13 - num10) * Constants.S) + (int)Constants.InvertAndScale(34f));
+				g.DrawImage(theSrcRect: new TRect(Resources.IMAGE_TOMBSTONE_MOUNDS.GetCelWidth() * num6, Resources.IMAGE_TOMBSTONE_MOUNDS.GetCelHeight() * num7, Resources.IMAGE_TOMBSTONE_MOUNDS.GetCelWidth(), (int)((float)num10 * Constants.S) - (int)Constants.InvertAndScale(34f)), theImage: Resources.IMAGE_TOMBSTONE_MOUNDS, theX: (int)((float)num12 * Constants.S), theY: (int)((float)(num13 - num10) * Constants.S) + (int)Constants.InvertAndScale(34f));
 			}
 		}
 	}
@@ -337,7 +337,7 @@ internal class GridItem
 			DrawLadder(g);
 			break;
 		case GridItemType.GRIDITEM_BRAIN:
-			g.DrawImageF(AtlasResources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
+			g.DrawImageF(Resources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
 			break;
 		case GridItemType.GRIDITEM_IZOMBIE_BRAIN:
 			DrawIZombieBrain(g);
@@ -369,8 +369,8 @@ internal class GridItem
 		GridItemType gridItemType = mGridItemType;
 		if (gridItemType == GridItemType.GRIDITEM_STINKY && mBoard.mCursorObject.mCursorType == CursorType.CURSOR_TYPE_CHOCOLATE && !mApp.mZenGarden.IsStinkyHighOnChocolate())
 		{
-			g.DrawImage(AtlasResources.IMAGE_PLANTSPEECHBUBBLE, (float)Constants.ZenGarden_StinkySpeechBubble_Pos.X + Constants.S * mPosX, (float)Constants.ZenGarden_StinkySpeechBubble_Pos.Y + Constants.S * mPosY);
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_CHOCOLATE, (float)Constants.ZenGarden_Chocolate_Pos.X + mPosX * Constants.S, (float)Constants.ZenGarden_Chocolate_Pos.Y + mPosY * Constants.S, 0.44f, 0.44f);
+			g.DrawImage(Resources.IMAGE_PLANTSPEECHBUBBLE, (float)Constants.ZenGarden_StinkySpeechBubble_Pos.X + Constants.S * mPosX, (float)Constants.ZenGarden_StinkySpeechBubble_Pos.Y + Constants.S * mPosY);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_CHOCOLATE, (float)Constants.ZenGarden_Chocolate_Pos.X + mPosX * Constants.S, (float)Constants.ZenGarden_Chocolate_Pos.Y + mPosY * Constants.S, 0.44f, 0.44f);
 		}
 	}
 
@@ -689,7 +689,7 @@ internal class GridItem
 	{
 		if (mGridItemState == GridItemState.GRIDITEM_STATE_BRAIN_SQUISHED)
 		{
-			TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_BRAIN, mPosX * Constants.S, (mPosY + 20f) * Constants.S, 1f, 0.25f);
+			TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_BRAIN, mPosX * Constants.S, (mPosY + 20f) * Constants.S, 1f, 0.25f);
 			return;
 		}
 		if (mBoard.mAdvice.mDuration > 0 && mBoard.mHelpIndex == AdviceType.ADVICE_I_ZOMBIE_EAT_ALL_BRAINS)
@@ -698,14 +698,14 @@ internal class GridItem
 			g.SetColorizeImages(colorizeImages: true);
 			g.SetColor(flashingColor);
 		}
-		g.DrawImageF(AtlasResources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
+		g.DrawImageF(Resources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
 		if (mTransparentCounter > 0)
 		{
 			g.SetDrawMode(Graphics.DrawMode.DRAWMODE_ADDITIVE);
 			g.SetColorizeImages(colorizeImages: true);
 			int theAlpha = TodCommon.ClampInt(mTransparentCounter * 3, 0, 255);
 			g.SetColor(new SexyColor(255, 255, 255, theAlpha));
-			g.DrawImageF(AtlasResources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
+			g.DrawImageF(Resources.IMAGE_BRAIN, mPosX * Constants.S, mPosY * Constants.S);
 			g.SetDrawMode(Graphics.DrawMode.DRAWMODE_NORMAL);
 			g.SetColorizeImages(colorizeImages: false);
 		}

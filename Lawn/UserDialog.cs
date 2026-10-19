@@ -52,7 +52,7 @@ internal class UserDialog : LawnDialog, ListListener, EditListener
 		}
 		mTallBottom = true;
 		int num = Math.Max(Resources.FONT_DWARVENTODCRAFT15.StringWidth("MMMMMMMMMMMM"), Resources.FONT_DWARVENTODCRAFT15.StringWidth(TodStringFile.TodStringTranslate("[CREATE_NEW_USER]")));
-		CalcSize((int)Constants.InvertAndScale(70f), (int)Constants.InvertAndScale(140f), AtlasResources.IMAGE_DIALOG_TOPLEFT.mWidth + num + AtlasResources.IMAGE_DIALOG_TOPRIGHT.mWidth);
+		CalcSize((int)Constants.InvertAndScale(70f), (int)Constants.InvertAndScale(140f), Resources.IMAGE_DIALOG_TOPLEFT.mWidth + num + Resources.IMAGE_DIALOG_TOPRIGHT.mWidth);
 	}
 
 	public override void Dispose()

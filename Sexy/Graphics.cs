@@ -1309,6 +1309,11 @@ internal class Graphics : GraphicsState
 		DrawTrianglesTex(theVertices, theNumTriangles, mColorizeImages ? base.mColor : Color.White, mDrawMode, theTexture, mTransX, mTransY, mLinearBlend);
 	}
 
+	public void DrawTrianglesTex(SamplerState st, Image theTexture, TriVertex[,] theVertices, int theNumTriangles)
+	{
+		DrawTrianglesTex(st, theVertices, theNumTriangles, mColorizeImages ? base.mColor : Color.White, mDrawMode, theTexture, mTransX, mTransY, mLinearBlend);
+	}
+
 	public void DrawTrianglesTex(Image theTexture, TriVertex[,] theVertices, int theNumTriangles, Color? theColor, DrawMode theDrawMode)
 	{
 		DrawTrianglesTex(theVertices, theNumTriangles, theColor, theDrawMode, theTexture, mTransX, mTransY, mLinearBlend);
@@ -1357,7 +1362,7 @@ internal class Graphics : GraphicsState
 		{
 			GraphicsDevice.SamplerStates[0] = st;
 		}
-		primitiveBatch.Begin(PrimitiveType.TriangleList, mTransX, mTransY, transform, theTexture, NormalSamplerState);
+		primitiveBatch.Begin(PrimitiveType.TriangleList, mTransX, mTransY, transform, theTexture, st ?? NormalSamplerState);
 		primitiveBatch.AddTriVertices(theVertices, theNumTriangles, theColor);
 		primitiveBatch.End();
 		if (flag)

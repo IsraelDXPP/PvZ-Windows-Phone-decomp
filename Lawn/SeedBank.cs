@@ -155,7 +155,7 @@ internal class SeedBank : GameObject
 			}
 			int num2 = Constants.UISunBankPositionX - Constants.Board_Offset_AspectRatio_Correction;
 			int num3 = mX;
-			g.DrawImage(AtlasResources.IMAGE_DAN_SUNBANK, num2, num3);
+			g.DrawImage(Resources.IMAGE_DAN_SUNBANK, num2, num3);
 			TodCommon.TodDrawString(g, theText, num2 + Constants.UISunBankTextOffset.X, num3 + Constants.UISunBankTextOffset.Y, Resources.FONT_CONTINUUMBOLD14OUTLINE, theColor, DrawStringJustification.DS_ALIGN_CENTER);
 		}
 	}

@@ -1305,7 +1305,7 @@ internal class CutScene
 		}
 		if ((mApp.mCrazyDaveMessageIndex == 1503 || mApp.mCrazyDaveMessageIndex == 1553) && !theJustSkipping)
 		{
-			int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+			int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 			int num = mApp.mPlayerInfo.mPurchases[21] + 6;
 			string theDialogLines = TodCommon.TodReplaceNumberString("[UPGRADE_DIALOG_BODY]", "{SLOTS}", num + 1);
 			string moneyString = LawnApp.GetMoneyString(itemCost);
@@ -1330,7 +1330,7 @@ internal class CutScene
 
 	public bool CanGetPacketUpgrade()
 	{
-		int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+		int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 		if (mApp.mPlayerInfo.mPurchases[21] == 0 && mApp.mPlayerInfo.mCoins >= itemCost && mApp.mPlayerInfo.mDidntPurchasePacketUpgrade < 2)
 		{
 			return true;
@@ -1586,7 +1586,7 @@ internal class CutScene
 
 	public bool CanGetSecondPacketUpgrade()
 	{
-		int itemCost = StoreScreen.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
+		int itemCost = StoreCosts.GetItemCost(StoreItem.STORE_ITEM_PACKET_UPGRADE);
 		if (mApp.mPlayerInfo.mPurchases[21] == 1 && mApp.mPlayerInfo.mCoins >= itemCost && mApp.mPlayerInfo.mDidntPurchasePacketUpgrade < 2)
 		{
 			return true;

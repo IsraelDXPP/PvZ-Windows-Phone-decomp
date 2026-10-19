@@ -17,7 +17,7 @@ internal class SexyParticleReader : ContentTypeReader<TodParticleDefinition>
 		{
 			TodEmitterDefinition todEmitterDefinition = todParticleDefinition.mEmitterDefs[j];
 			string theStringId = input.ReadString();
-			todEmitterDefinition.mImage = AtlasResources.GetImageInAtlasById(AtlasResources.GetAtlasIdByStringId(theStringId));
+			todEmitterDefinition.mImage = Resources.GetImageByStringId(theStringId);
 			todEmitterDefinition.mImageCol = input.ReadInt32();
 			todEmitterDefinition.mImageRow = input.ReadInt32();
 			todEmitterDefinition.mImageFrames = input.ReadInt32();

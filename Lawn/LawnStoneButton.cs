@@ -33,7 +33,7 @@ internal class LawnStoneButton : DialogButton
 		{
 			bool flag = mIsDown && mIsOver && !mDisabled;
 			flag ^= mInverted;
-			GameButton.DrawStoneButton(g, 0, 0, mWidth, mHeight, flag, mIsOver, mLabel, mFont, mFontScale);
+			GameButton.		DrawStoneButton(g, 0, 0, mWidth, mHeight, flag, mIsOver, mLabel);
 		}
 	}
 

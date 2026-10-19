@@ -22,6 +22,12 @@ internal class Slider : Widget
 
 	public int mRelY;
 
+	public bool mHorizontal = true;
+
+	public int mThumbOffsetX;
+
+	public bool mNoDraw;
+
 	public Slider(int theId, SliderListener theListener, Image trackMinImage, Image trackMaxImage, Image thumbImage)
 	{
 		mId = theId;
@@ -72,6 +78,24 @@ internal class Slider : Widget
 
 	public override void Draw(Graphics g)
 	{
+		if (mNoDraw)
+		{
+			return;
+		}
+		SliderDraw(g);
+	}
+
+	public void SliderDraw(Graphics g)
+	{
+		if (mNoDraw)
+		{
+			if (!mVisible)
+			{
+				return;
+			}
+			g.mTransX += mX;
+			g.mTransY += mY;
+		}
 		if (mTrackMinImage != null && mTrackMaxImage != null)
 		{
 			int width = mThumbImage.GetWidth();
@@ -88,23 +112,46 @@ internal class Slider : Widget
 		}
 		if (mTrackImage != null)
 		{
-			int num3 = mTrackImage.GetWidth() / 3;
-			int height2 = mTrackImage.GetHeight();
-			int theY = (mHeight - height2) / 2;
-			g.DrawImage(mTrackImage, 0, theY, new TRect(0, 0, num3, height2));
-			Graphics graphics = Graphics.GetNew(g);
-			graphics.ClipRect(num3, theY, mWidth - num3 * 2, height2);
-			for (int i = 0; i < (mWidth - num3 * 2 + num3 - 1) / num3; i++)
+			int cw = mHorizontal ? mTrackImage.GetWidth() / 3 : mTrackImage.GetWidth();
+			int ch = mHorizontal ? mTrackImage.GetHeight() : mTrackImage.GetHeight() / 3;
+			if (mHorizontal)
 			{
-				graphics.DrawImage(mTrackImage, num3 + i * num3, theY, new TRect(num3, 0, num3, height2));
+				int num3 = cw;
+				int height2 = ch;
+				int theY = (mHeight - height2) / 2;
+				g.DrawImage(mTrackImage, 0, theY, new TRect(0, 0, num3, height2));
+				Graphics graphics = Graphics.GetNew(g);
+				graphics.ClipRect(num3, theY, mWidth - num3 * 2, height2);
+				for (int i = 0; i < (mWidth - num3 * 2 + num3 - 1) / num3; i++)
+				{
+					graphics.DrawImage(mTrackImage, num3 + i * num3, theY, new TRect(num3, 0, num3, height2));
+				}
+				g.DrawImage(mTrackImage, mWidth - num3, theY, new TRect(num3 * 2, 0, num3, height2));
+				graphics.PrepareForReuse();
 			}
-			g.DrawImage(mTrackImage, mWidth - num3, theY, new TRect(num3 * 2, 0, num3, height2));
-			graphics.PrepareForReuse();
+			else
+			{
+				g.DrawImage(mTrackImage, 0, 0, new TRect(0, 0, cw, ch));
+				Graphics graphics = Graphics.GetNew(g);
+				graphics.ClipRect(0, ch, cw, mHeight - ch * 2);
+				for (int i = 0; i < (mHeight - ch * 2 + ch - 1) / ch; i++)
+				{
+					graphics.DrawImage(mTrackImage, 0, ch + i * ch, new TRect(0, ch, cw, ch));
+				}
+				g.DrawImage(mTrackImage, 0, mHeight - ch, new TRect(0, ch * 2, cw, ch));
+				graphics.PrepareForReuse();
+			}
 		}
-		if (mThumbImage != null)
+		g.ClearClipRect();
+		if (mHorizontal && mThumbImage != null)
 		{
-			g.DrawImage(mThumbImage, (int)(mVal * (double)((float)(mWidth - mThumbImage.GetWidth()) + Constants.InvertAndScale(1f))), (mHeight - mThumbImage.GetHeight()) / 2);
+			g.DrawImage(mThumbImage, (int)(mVal * (double)(mWidth - mThumbImage.GetWidth())) + mThumbOffsetX, (mHeight - mThumbImage.GetHeight()) / 2);
 		}
+		else if (!mHorizontal && mThumbImage != null)
+		{
+			g.DrawImage(mThumbImage, (mWidth - mThumbImage.GetWidth()) / 2 + mThumbOffsetX, (int)(mVal * (double)(mHeight - mThumbImage.GetHeight())));
+		}
+		g.Translate(-mX, -mY);
 	}
 
 	public void DrawStretchableImage(Graphics g, Image image, TRect destRect)
@@ -121,18 +168,68 @@ internal class Slider : Widget
 		g.DrawImage(image, destRect.mX + destRect.mWidth - theSrcRect3.mWidth, theY, theSrcRect3);
 	}
 
-	public override void MouseDown(int x, int y, int theMagicCode)
+	public override void MouseMove(int x, int y)
 	{
-		int num = (int)(mVal * (double)(mWidth - mThumbImage.GetWidth()));
-		if (x >= num && x < num + mThumbImage.GetWidth())
+		base.MouseMove(x, y);
+		if (mHorizontal)
 		{
-			mDragging = true;
-			mRelX = x - num;
+			int aThumbX = (int)(mVal * (double)(mWidth - mThumbImage.GetWidth())) + mThumbOffsetX;
+			if (x >= aThumbX && x < aThumbX + mThumbImage.GetWidth())
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_DRAGGING);
+			}
+			else
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_POINTER);
+			}
 		}
 		else
 		{
-			double value = (double)x / (double)mWidth;
-			SetValue(value);
+			int aThumbY = (int)(mVal * (double)(mHeight - mThumbImage.GetHeight()));
+			int aThumbCenterX = (mWidth - mThumbImage.GetWidth()) / 2 + mThumbOffsetX;
+			if (x >= aThumbCenterX && x < aThumbCenterX + mThumbImage.GetWidth() && y >= aThumbY && y < aThumbY + mThumbImage.GetHeight())
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_DRAGGING);
+			}
+			else
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_POINTER);
+			}
+		}
+	}
+
+	public override void MouseDown(int x, int y, int theMagicCode)
+	{
+		if (mHorizontal)
+		{
+			int num = (int)(mVal * (double)(mWidth - mThumbImage.GetWidth())) + mThumbOffsetX;
+			if (x >= num && x < num + mThumbImage.GetWidth())
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_DRAGGING);
+				mDragging = true;
+				mRelX = x - num;
+			}
+			else
+			{
+				double value = (double)x / (double)mWidth;
+				SetValue(value);
+			}
+		}
+		else
+		{
+			int aThumbY = (int)(mVal * (double)(mHeight - mThumbImage.GetHeight()));
+			int aThumbCenterX = (mWidth - mThumbImage.GetWidth()) / 2 + mThumbOffsetX;
+			if (x >= aThumbCenterX && x < aThumbCenterX + mThumbImage.GetWidth() && y >= aThumbY && y < aThumbY + mThumbImage.GetHeight())
+			{
+				GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_DRAGGING);
+				mDragging = true;
+				mRelY = y - aThumbY;
+			}
+			else
+			{
+				double value2 = (double)y / (double)mHeight;
+				SetValue(value2);
+			}
 		}
 	}
 
@@ -141,7 +238,14 @@ internal class Slider : Widget
 		if (mDragging)
 		{
 			double num = mVal;
-			mVal = (double)(x - mRelX) / (double)(mWidth - mThumbImage.GetWidth());
+			if (mHorizontal)
+			{
+				mVal = (double)(x - mRelX) / (double)(mWidth - mThumbImage.GetWidth());
+			}
+			else
+			{
+				mVal = (double)(y - mRelY) / (double)(mHeight - mThumbImage.GetHeight());
+			}
 			if (mVal < 0.0)
 			{
 				mVal = 0.0;
@@ -161,10 +265,15 @@ internal class Slider : Widget
 	public override void MouseUp(int x, int y, int theMagicCode)
 	{
 		mDragging = false;
+		GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_POINTER);
 		mListener.SliderVal(mId, mVal);
 	}
 
 	public override void MouseLeave()
 	{
+		if (!mDragging)
+		{
+			GlobalStaticVars.gSexyAppBase.SetCursor(SexyAppBase.CURSOR_POINTER);
+		}
 	}
 }

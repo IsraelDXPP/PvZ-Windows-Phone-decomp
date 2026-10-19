@@ -971,7 +971,7 @@ internal class ZenGarden : StoreListener
 			Plant topPlantAt = mBoard.GetTopPlantAt(specialGridPlacement.mGridX, specialGridPlacement.mGridY, PlantPriority.TOPPLANT_ZEN_TOOL_ORDER);
 			if (topPlantAt == null)
 			{
-				TodCommon.TodDrawImageCelScaled(g, AtlasResources.IMAGE_PLANTSHADOW, (int)(Constants.S * (float)(specialGridPlacement.mPixelX - Constants.ZenGarden_Aquarium_ShadowOffset.X)), (int)(Constants.S * (float)(specialGridPlacement.mPixelY + Constants.ZenGarden_Aquarium_ShadowOffset.Y)), 0, 0, 1.7f, 1.7f);
+				TodCommon.TodDrawImageCelScaled(g, Resources.IMAGE_PLANTSHADOW, (int)(Constants.S * (float)(specialGridPlacement.mPixelX - Constants.ZenGarden_Aquarium_ShadowOffset.X)), (int)(Constants.S * (float)(specialGridPlacement.mPixelY + Constants.ZenGarden_Aquarium_ShadowOffset.Y)), 0, 0, 1.7f, 1.7f);
 			}
 		}
 	}
@@ -1273,20 +1273,20 @@ internal class ZenGarden : StoreListener
 		PottedPlantNeed plantsNeed = mApp.mZenGarden.GetPlantsNeed(thePottedPlant);
 		if (plantsNeed != PottedPlantNeed.PLANTNEED_NONE)
 		{
-			g.DrawImage(AtlasResources.IMAGE_PLANTSPEECHBUBBLE, Constants.ZenGarden_PlantSpeechBubble_Pos.X, Constants.ZenGarden_PlantSpeechBubble_Pos.Y);
+			g.DrawImage(Resources.IMAGE_PLANTSPEECHBUBBLE, Constants.ZenGarden_PlantSpeechBubble_Pos.X, Constants.ZenGarden_PlantSpeechBubble_Pos.Y);
 			switch (plantsNeed)
 			{
 			case PottedPlantNeed.PLANTNEED_FERTILIZER:
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_REANIM_ZENGARDEN_FERTILIZER_BAG3, Constants.ZenGarden_Fertiliser_Pos.X, Constants.ZenGarden_Fertiliser_Pos.Y, 0.5f, 0.5f);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_REANIM_ZENGARDEN_FERTILIZER_BAG3, Constants.ZenGarden_Fertiliser_Pos.X, Constants.ZenGarden_Fertiliser_Pos.Y, 0.5f, 0.5f);
 				break;
 			case PottedPlantNeed.PLANTNEED_BUGSPRAY:
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_REANIM_ZENGARDEN_BUGSPRAY_BOTTLE, Constants.ZenGarden_BugSpray_Pos.X, Constants.ZenGarden_BugSpray_Pos.Y, 0.5f, 0.5f);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_REANIM_ZENGARDEN_BUGSPRAY_BOTTLE, Constants.ZenGarden_BugSpray_Pos.X, Constants.ZenGarden_BugSpray_Pos.Y, 0.5f, 0.5f);
 				break;
 			case PottedPlantNeed.PLANTNEED_PHONOGRAPH:
-				TodCommon.TodDrawImageScaledF(g, AtlasResources.IMAGE_PHONOGRAPH, Constants.ZenGarden_Phonograph_Pos.X, Constants.ZenGarden_Phonograph_Pos.Y, 0.5f, 0.5f);
+				TodCommon.TodDrawImageScaledF(g, Resources.IMAGE_PHONOGRAPH, Constants.ZenGarden_Phonograph_Pos.X, Constants.ZenGarden_Phonograph_Pos.Y, 0.5f, 0.5f);
 				break;
 			case PottedPlantNeed.PLANTNEED_WATER:
-				g.DrawImage(AtlasResources.IMAGE_WATERDROP, Constants.ZenGarden_WaterDrop_Pos.X, Constants.ZenGarden_WaterDrop_Pos.Y);
+				g.DrawImage(Resources.IMAGE_WATERDROP, Constants.ZenGarden_WaterDrop_Pos.X, Constants.ZenGarden_WaterDrop_Pos.Y);
 				break;
 			}
 		}
@@ -1455,7 +1455,7 @@ internal class ZenGarden : StoreListener
 			Reanimation reanimation = mApp.ReanimationGet(topPlantAt.mBodyReanimID);
 			if (thePlant.mState == PlantState.STATE_ZEN_GARDEN_WATERED || thePlant.mState == PlantState.STATE_ZEN_GARDEN_NEEDY || thePlant.mState == PlantState.STATE_ZEN_GARDEN_HAPPY)
 			{
-				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_pot_top, AtlasResources.IMAGE_REANIM_POT_TOP_DARK);
+				reanimation.SetImageOverride(GlobalMembersReanimIds.ReanimTrackId_pot_top, Resources.IMAGE_REANIM_POT_TOP_DARK);
 			}
 			else
 			{
@@ -1792,20 +1792,6 @@ internal class ZenGarden : StoreListener
 			reanimation.SetPosition(theStinky.mPosX * Constants.S, theStinky.mPosY * Constants.S);
 		}
 		theStinky.mRenderOrder = Board.MakeRenderOrder(RenderLayer.RENDER_LAYER_PLANT, 0, (int)theStinky.mPosY - 30);
-	}
-
-	public void OpenStore()
-	{
-		LeaveGarden();
-		StoreScreen storeScreen = mApp.ShowStoreScreen(this);
-		storeScreen.SetupBackButtonForZenGarden();
-		if (mBoard.mTutorialState == TutorialState.TUTORIAL_ZEN_GARDEN_VISIT_STORE)
-		{
-			storeScreen.SetupForIntro(2600);
-			mApp.mPlayerInfo.mPurchases[14] = 1005;
-		}
-		storeScreen.mBackButton.SetLabel("[STORE_BACK_TO_GAME]");
-		storeScreen.mPage = StorePage.STORE_PAGE_ZEN1;
 	}
 
 	public GridItem GetStinky()
@@ -2486,22 +2472,10 @@ internal class ZenGarden : StoreListener
 
 	public void BackFromStore()
 	{
-		StoreScreen storeScreen = (StoreScreen)mApp.GetDialog(4);
-		bool mGoToTreeNow = storeScreen.mGoToTreeNow;
-		mApp.KillDialog(Dialogs.DIALOG_STORE);
-		if (mGoToTreeNow)
-		{
-			mApp.KillBoard();
-			mApp.PreNewGame(GameMode.GAMEMODE_TREE_OF_WISDOM, theLookForSavedGame: false);
-			return;
-		}
-		mApp.mMusic.MakeSureMusicIsPlaying(MusicTune.MUSIC_TUNE_ZEN_GARDEN);
-		if (mBoard.mTutorialState == TutorialState.TUTORIAL_ZEN_GARDEN_VISIT_STORE)
-		{
-			mBoard.DisplayAdvice("[ADVICE_ZEN_GARDEN_FERTILIZE]", MessageStyle.MESSAGE_STYLE_ZEN_GARDEN_LONG, AdviceType.ADVICE_NONE);
-			mBoard.mTutorialState = TutorialState.TUTORIAL_ZEN_GARDEN_FERTILIZE_PLANTS;
-			mApp.mPlayerInfo.mZenTutorialMessage = 26;
-		}
-		AddStinky();
+	}
+
+	public void OpenStore()
+	{
+		LeaveGarden();
 	}
 }

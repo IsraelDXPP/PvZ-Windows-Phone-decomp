@@ -31,6 +31,13 @@ internal class NewLawnButton : DialogButton
 		SetColor(5, SexyColor.White);
 	}
 
+	public void SetButtonOffset(int theX, int theY)
+	{
+		mButtonOffsetX = theX;
+		mButtonOffsetY = theY;
+		MarkDirty();
+	}
+
 	public override void Draw(Graphics g)
 	{
 		if (mBtnNoDraw)
