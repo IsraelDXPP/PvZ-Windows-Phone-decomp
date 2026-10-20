@@ -44,6 +44,12 @@ jobs:
           if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
             choco install ffmpeg -y --no-progress
           }
+      - name: Install ffmpeg if missing
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            choco install ffmpeg -y --no-progress
+          }
       - name: Fetch assets
         run: python tools/fetch_assets.py --dest .
       - name: Build
